@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F9FAFB;
+  /* Off-White as default background */
+  --foreground: #1F2A37;
+  /* Charcoal Blue as default text */
+
+  /* User Palette */
+  --color-charcoal-blue: #1F2A37;
+  --color-steel-gray: #4B5563;
+  --color-muted-teal: #0F766E;
+  --color-signal-orange: #C2410C;
+  --color-off-white: #F9FAFB;
+  --color-soft-slate: #E5E7EB;
 }
 
 @theme inline {
@@ -10,17 +20,47 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Custom Colors */
+  --color-charcoal-blue: var(--color-charcoal-blue);
+  --color-steel-gray: var(--color-steel-gray);
+  --color-muted-teal: var(--color-muted-teal);
+  --color-signal-orange: var(--color-signal-orange);
+  --color-off-white: var(--color-off-white);
+  --color-soft-slate: var(--color-soft-slate);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Optional: We can define dark mode equivalents if needed, but user gave specific hex codes. 
+       Usually these specific colors are for a specific look. 
+       The user said "Tone: clean, confident, modern...". 
+       I will stick to the provided palette as the base.
+       If they want dark mode, they usually provide a dark palette or we map these.
+       For now, I'll override the default dark mode vars to stick to the design or keep them safe.
+       Actually, let's just comment out the default dark mode override or adjust it to be compatible.
+       The user gave specific hex codes for "Neutral / Background" to be Off-White/Soft Slate.
+       Using a white-ish background in dark mode would be blinding.
+       However, the user prompt implies a light theme ("Off-White" background).
+       I will assume Light Mode is the primary target or force it for now given the specific colors.
+    */
+    --background: #F9FAFB;
+    --foreground: #1F2A37;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Utilities */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
