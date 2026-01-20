@@ -15,17 +15,7 @@ export default async function EventDetailPage({
     }
 
     return (
-        <div className="min-h-screen bg-off-white font-sans text-steel-gray selection:bg-muted-teal selection:text-white">
-            {/* Navigation Placeholder (Assuming a Layout handles this, but adding a simple top bar for standalone completeness if needed) */}
-            <nav className="border-b border-soft-slate bg-white px-6 py-4">
-                <div className="mx-auto flex max-w-7xl items-center justify-between">
-                    <div className="text-xl font-bold tracking-tight text-charcoal-blue">EventOps</div>
-                    <div className="flex gap-4">
-                        <button className="text-sm font-medium text-steel-gray hover:text-charcoal-blue">Log In</button>
-                        <button className="rounded-md bg-charcoal-blue px-4 py-2 text-sm font-medium text-white transition hover:bg-opacity-90">Sign Up</button>
-                    </div>
-                </div>
-            </nav>
+        <div className="min-h-screen bg-off-white font-sans text-steel-gray selection:bg-muted-teal selection:text-white pt-16">
 
             <main className="mx-auto max-w-7xl px-6 py-8">
                 {/* Breadcrumb / Back Navigation */}
@@ -65,8 +55,7 @@ export default async function EventDetailPage({
                             </span>
                         </div>
 
-                        {/* Sticky Tab Navigation */}
-                        <div className="sticky top-0 z-10 -mx-6 mb-8 border-b border-soft-slate bg-off-white/95 px-6 backdrop-blur-md lg:rounded-t-lg">
+                        <div className="sticky top-[73px] z-10 -mx-6 mb-8 border-b border-soft-slate bg-off-white/95 px-6 backdrop-blur-md lg:rounded-t-lg">
                             <nav className="-mb-px flex space-x-8 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 <a href="#overview" className="border-b-2 border-muted-teal py-4 text-sm font-bold text-muted-teal whitespace-nowrap">
                                     Overview
@@ -85,7 +74,7 @@ export default async function EventDetailPage({
 
                         <div className="space-y-16">
                             {/* Overview Section */}
-                            <section id="overview" className="scroll-mt-24 prose prose-lg prose-slate max-w-none text-steel-gray">
+                            <section id="overview" className="scroll-mt-36 prose prose-lg prose-slate max-w-none text-steel-gray">
                                 <h3 className="text-2xl font-bold text-charcoal-blue">About this Event</h3>
                                 <p className="mt-4 leading-relaxed whitespace-pre-line">
                                     {event.description}
@@ -93,7 +82,7 @@ export default async function EventDetailPage({
                             </section>
 
                             {/* Agenda Section */}
-                            <section id="agenda" className="scroll-mt-24">
+                            <section id="agenda" className="scroll-mt-36">
                                 <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Agenda Highlights</h3>
                                 <div className="space-y-4">
                                     <div className="rounded-xl border border-soft-slate bg-white p-5 transition hover:border-muted-teal/30">
@@ -135,7 +124,7 @@ export default async function EventDetailPage({
                             </section>
 
                             {/* Speakers Section */}
-                            <section id="speakers" className="scroll-mt-24">
+                            <section id="speakers" className="scroll-mt-36">
                                 <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Featured Speakers</h3>
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     {[1, 2, 3, 4].map((i) => (
@@ -154,7 +143,7 @@ export default async function EventDetailPage({
                             </section>
 
                             {/* Venue Section */}
-                            <section id="venue" className="scroll-mt-24">
+                            <section id="venue" className="scroll-mt-36">
                                 <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Venue & Travel</h3>
                                 <div className="rounded-xl border border-soft-slate bg-white p-6">
                                     <div className="mb-4 aspect-video w-full rounded-lg bg-soft-slate/50">
@@ -168,7 +157,7 @@ export default async function EventDetailPage({
                     </div>
 
                     {/* Sidebar Column */}
-                    <div className="sticky top-6 space-y-8 self-start">
+                    <div className="sticky top-28 space-y-8 self-start">
                         {/* Registration Card */}
                         <div className="rounded-2xl border border-soft-slate bg-white p-8 shadow-sm">
                             <div className="mb-6 flex items-baseline justify-between">

@@ -29,18 +29,7 @@ export default async function EventsListPage({
     });
 
     return (
-        <div className="min-h-screen bg-off-white font-sans text-steel-gray">
-            {/* Top Navigation (Placeholder for consistency) */}
-            <nav className="sticky top-0 z-10 border-b border-soft-slate bg-white/80 px-6 py-4 backdrop-blur-md">
-                <div className="mx-auto flex max-w-400 items-center justify-between">
-                    <div className="text-xl font-bold tracking-tight text-charcoal-blue">EventOps</div>
-                    <div className="flex gap-4">
-                        <button className="text-sm font-medium text-steel-gray hover:text-charcoal-blue">Log In</button>
-                        <button className="rounded-md bg-charcoal-blue px-4 py-2 text-sm font-medium text-white transition hover:bg-opacity-90">Sign Up</button>
-                    </div>
-                </div>
-            </nav>
-
+        <div className="min-h-screen bg-off-white font-sans text-steel-gray pt-16">
             <main className="mx-auto max-w-400 px-6 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold tracking-tight text-charcoal-blue">Explore Events</h1>

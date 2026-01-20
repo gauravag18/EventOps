@@ -1,4 +1,4 @@
-import React from 'react';
+import CursorHighlight from '@/components/CursorHighlight';
 const EVENTS = [
   {
     id: 1,
@@ -35,25 +35,8 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-linear-to-b from-white to-gray-50 font-sans text-gray-700">
       {/* Navbar*/}
-      <nav className="fixed top-0 z-50 w-full border-b border-gray-200/50 bg-white/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <span className="text-2xl font-bold tracking-tight text-gray-900">EventOps</span>
-          <div className="flex items-center gap-8">
-            <a href="/events" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
-              Browse Events
-            </a>
-            <a href="/login" className="text-sm font-medium text-gray-700 transition hover:text-gray-900">
-              Log In
-            </a>
-            <a
-              href="/signup"
-              className="rounded-lg bg-blue-900 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-blue-800"
-            >
-              Get Started
-            </a>
-          </div>
-        </div>
-      </nav>
+      <CursorHighlight />
+
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-32 pb-20 md:pt-40 md:pb-32">
