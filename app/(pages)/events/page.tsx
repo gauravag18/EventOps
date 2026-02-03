@@ -147,7 +147,7 @@ export default async function EventsListPage({
                                             <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
                                         </svg>
                                     </a>
-                                    <a href="#" aria-current="page" className="relative z-10 inline-flex items-center bg-muted-teal px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-muted-teal">1</a>
+                                    <a href="#" aria-current="page" className="relative z-10 inline-flex items-center bg-muted-teal px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-muted-teal">1</a>
                                     <a href="#" className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-charcoal-blue ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">2</a>
                                     <a href="#" className="relative inline-flex items-center rounded-r-md px-2 py-2 text-steel-gray ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">
                                         <span className="sr-only">Next</span>

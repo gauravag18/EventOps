@@ -156,7 +156,7 @@ export default function AttendeeDashboard() {
 
                                         {isActive && (
                                             <Link
-                                                href={`/ticket/${ticket.id}`}
+                                                href={`/attendee/ticket/${ticket.id}`}
                                                 className="self-start border-2 border-charcoal-blue bg-charcoal-blue px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-charcoal-blue"
                                             >
                                                 View Ticket

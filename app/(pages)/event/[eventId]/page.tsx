@@ -55,7 +55,7 @@ export default async function EventDetailPage({
                             </span>
                         </div>
 
-                        <div className="sticky top-[73px] z-10 -mx-6 mb-8 border-b-2 border-soft-slate bg-off-white/95 px-6 backdrop-blur-md">
+                        <div className="sticky top-18.25 z-10 -mx-6 mb-8 border-b-2 border-soft-slate bg-off-white/95 px-6 backdrop-blur-md">
                             <nav className="-mb-px flex space-x-8 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 <a href="#overview" className="border-b-4 border-muted-teal py-4 text-sm font-bold uppercase tracking-wider text-muted-teal whitespace-nowrap">
                                     Overview
