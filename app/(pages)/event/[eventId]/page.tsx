@@ -20,7 +20,7 @@ export default async function EventDetailPage({
             <main className="mx-auto max-w-7xl px-6 py-8">
                 {/* Breadcrumb / Back Navigation */}
                 <div className="mb-4">
-                    <a href="/events" className="group inline-flex items-center text-sm font-medium text-muted-teal hover:underline">
+                    <a href="/events" className="group inline-flex items-center text-sm font-bold uppercase tracking-wider text-muted-teal hover:text-charcoal-blue">
                         <svg className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
@@ -32,9 +32,9 @@ export default async function EventDetailPage({
                     {/* Main Content Column */}
                     <div className="lg:col-span-2">
                         {/* Hero Image Placeholder */}
-                        <div className="mb-8 aspect-video w-full overflow-hidden rounded-2xl bg-soft-slate shadow-sm">
+                        <div className="mb-8 aspect-video w-full overflow-hidden border-2 border-gray-200 bg-soft-slate shadow-sm">
                             {/* In a real app, <img src={event.image} /> */}
-                            <div className="flex h-full w-full items-center justify-center text-steel-gray opacity-50">
+                            <div className="flex h-full w-full items-center justify-center font-bold uppercase tracking-widest text-steel-gray opacity-50">
                                 Event Cover Image
                             </div>
                         </div>
@@ -55,18 +55,18 @@ export default async function EventDetailPage({
                             </span>
                         </div>
 
-                        <div className="sticky top-[73px] z-10 -mx-6 mb-8 border-b border-soft-slate bg-off-white/95 px-6 backdrop-blur-md lg:rounded-t-lg">
+                        <div className="sticky top-[73px] z-10 -mx-6 mb-8 border-b-2 border-soft-slate bg-off-white/95 px-6 backdrop-blur-md">
                             <nav className="-mb-px flex space-x-8 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <a href="#overview" className="border-b-2 border-muted-teal py-4 text-sm font-bold text-muted-teal whitespace-nowrap">
+                                <a href="#overview" className="border-b-4 border-muted-teal py-4 text-sm font-bold uppercase tracking-wider text-muted-teal whitespace-nowrap">
                                     Overview
                                 </a>
-                                <a href="#agenda" className="border-b-2 border-transparent py-4 text-sm font-medium text-steel-gray hover:border-soft-slate hover:text-charcoal-blue whitespace-nowrap">
+                                <a href="#agenda" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
                                     Agenda
                                 </a>
-                                <a href="#speakers" className="border-b-2 border-transparent py-4 text-sm font-medium text-steel-gray hover:border-soft-slate hover:text-charcoal-blue whitespace-nowrap">
+                                <a href="#speakers" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
                                     Speakers
                                 </a>
-                                <a href="#venue" className="border-b-2 border-transparent py-4 text-sm font-medium text-steel-gray hover:border-soft-slate hover:text-charcoal-blue whitespace-nowrap">
+                                <a href="#venue" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
                                     Venue & Policies
                                 </a>
                             </nav>
@@ -85,37 +85,37 @@ export default async function EventDetailPage({
                             <section id="agenda" className="scroll-mt-36">
                                 <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Agenda Highlights</h3>
                                 <div className="space-y-4">
-                                    <div className="rounded-xl border border-soft-slate bg-white p-5 transition hover:border-muted-teal/30">
+                                    <div className="border border-soft-slate bg-white p-5 transition hover:border-muted-teal">
                                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                             <div className="flex items-center gap-4">
-                                                <div className="rounded-lg bg-soft-slate/30 px-3 py-2 text-center">
+                                                <div className="border border-soft-slate bg-soft-slate/10 px-3 py-2 text-center">
                                                     <span className="block text-xs font-bold uppercase text-steel-gray">Oct</span>
                                                     <span className="block text-xl font-bold text-charcoal-blue">15</span>
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-lg font-bold text-charcoal-blue">Opening Keynote</h4>
-                                                    <p className="text-sm text-steel-gray">09:00 AM – 10:30 AM</p>
+                                                    <h4 className="text-lg font-bold uppercase tracking-tight text-charcoal-blue">Opening Keynote</h4>
+                                                    <p className="text-sm font-medium text-steel-gray">09:00 AM – 10:30 AM</p>
                                                 </div>
                                             </div>
-                                            <span className="inline-flex items-center rounded-full bg-charcoal-blue/10 px-2.5 py-0.5 text-xs font-medium text-charcoal-blue">
+                                            <span className="inline-flex items-center border border-charcoal-blue/20 bg-charcoal-blue/5 px-2.5 py-0.5 text-xs font-bold uppercase text-charcoal-blue">
                                                 Main Stage
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div className="rounded-xl border border-soft-slate bg-white p-5 transition hover:border-muted-teal/30">
+                                    <div className="border border-soft-slate bg-white p-5 transition hover:border-muted-teal">
                                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                             <div className="flex items-center gap-4">
-                                                <div className="rounded-lg bg-soft-slate/30 px-3 py-2 text-center">
+                                                <div className="border border-soft-slate bg-soft-slate/10 px-3 py-2 text-center">
                                                     <span className="block text-xs font-bold uppercase text-steel-gray">Oct</span>
                                                     <span className="block text-xl font-bold text-charcoal-blue">15</span>
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-lg font-bold text-charcoal-blue">Scalable Architecture Workshop</h4>
-                                                    <p className="text-sm text-steel-gray">11:30 AM – 01:00 PM</p>
+                                                    <h4 className="text-lg font-bold uppercase tracking-tight text-charcoal-blue">Scalable Architecture Workshop</h4>
+                                                    <p className="text-sm font-medium text-steel-gray">11:30 AM – 01:00 PM</p>
                                                 </div>
                                             </div>
-                                            <span className="inline-flex items-center rounded-full bg-muted-teal/10 px-2.5 py-0.5 text-xs font-medium text-muted-teal">
+                                            <span className="inline-flex items-center border border-muted-teal/20 bg-muted-teal/5 px-2.5 py-0.5 text-xs font-bold uppercase text-muted-teal">
                                                 Room A
                                             </span>
                                         </div>
@@ -128,14 +128,14 @@ export default async function EventDetailPage({
                                 <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Featured Speakers</h3>
                                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     {[1, 2, 3, 4].map((i) => (
-                                        <div key={i} className="flex items-center gap-4 rounded-xl border border-soft-slate bg-white p-4 shadow-sm">
-                                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-soft-slate">
+                                        <div key={i} className="flex items-center gap-4 border border-soft-slate bg-white p-4 shadow-sm">
+                                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-soft-slate border-2 border-gray-200">
                                                 {/* Placeholder Avatar */}
                                                 <svg className="h-full w-full text-soft-slate" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                                             </div>
                                             <div>
-                                                <div className="font-bold text-charcoal-blue">Sarah Jenkins</div>
-                                                <div className="text-sm text-steel-gray">CTO, TechGrowth</div>
+                                                <div className="font-bold text-charcoal-blue uppercase tracking-tight">Sarah Jenkins</div>
+                                                <div className="text-sm font-medium text-steel-gray">CTO, TechGrowth</div>
                                             </div>
                                         </div>
                                     ))}
@@ -159,13 +159,13 @@ export default async function EventDetailPage({
                     {/* Sidebar Column */}
                     <div className="sticky top-28 space-y-8 self-start">
                         {/* Registration Card */}
-                        <div className="rounded-2xl border border-soft-slate bg-white p-8 shadow-sm">
-                            <div className="mb-6 flex items-baseline justify-between">
+                        <div className="border-2 border-soft-slate bg-white p-8 shadow-sm">
+                            <div className="mb-6 flex items-baseline justify-between border-b-2 border-gray-100 pb-4">
                                 <span className="text-3xl font-bold text-charcoal-blue">{event.price}</span>
-                                <span className="text-sm font-medium text-steel-gray">per attendee</span>
+                                <span className="text-sm font-bold uppercase tracking-wider text-steel-gray">per attendee</span>
                             </div>
 
-                            <button className="flex w-full items-center justify-center rounded-lg bg-charcoal-blue px-6 py-4 text-center text-lg font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg focus:ring-2 focus:ring-muted-teal focus:ring-offset-2">
+                            <button className="flex w-full items-center justify-center border-2 border-charcoal-blue bg-charcoal-blue px-6 py-4 text-center text-lg font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-white hover:text-charcoal-blue">
                                 Register Now
                             </button>
 
@@ -216,7 +216,7 @@ export default async function EventDetailPage({
                         </div>
 
                         {/* Safety / Info Card */}
-                        <div className="rounded-2xl border border-soft-slate bg-slate-50 p-6">
+                        <div className="border border-soft-slate bg-slate-50 p-6">
                             <h4 className="mb-2 font-semibold text-charcoal-blue">Event Policies</h4>
                             <ul className="space-y-2 text-sm text-steel-gray">
                                 <li className="flex items-center">

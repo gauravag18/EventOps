@@ -63,15 +63,15 @@ export default function LandingPage() {
               <div className="flex flex-wrap items-center gap-4">
                 <a
                   href="/events"
-                  className="rounded-xl bg-teal-600 px-8 py-4 text-lg font-semibold text-white shadow-xl transition hover:bg-teal-700"
+                  className="relative overflow-hidden border-2 border-gray-900 bg-transparent px-8 py-4 font-sans text-lg font-bold uppercase tracking-wider text-gray-900 transition-all hover:bg-gray-900 hover:text-white"
                 >
-                  Browse Events
+                  <span className="relative z-10">Browse Events</span>
                 </a>
                 <a
                   href="/create-event"
-                  className="rounded-xl border-2 border-gray-900 px-8 py-4 text-lg font-semibold text-gray-900 transition hover:bg-gray-900 hover:text-white"
+                  className="relative overflow-hidden border-2 border-teal-600 bg-teal-600 px-8 py-4 font-sans text-lg font-bold uppercase tracking-wider text-white transition-all hover:bg-transparent hover:text-teal-600"
                 >
-                  Create Your Event
+                  <span className="relative z-10">Create Event</span>
                 </a>
               </div>
 
@@ -96,34 +96,34 @@ export default function LandingPage() {
             <div className="relative hidden lg:block">
 
               {/* Brand label */}
-              <span className="mb-4 inline-block rounded-full border border-gray-200 px-4 py-1 text-sm font-bold text-gray-900">
+              <span className="mb-4 inline-block border-2 border-gray-900 px-4 py-1 text-sm font-bold uppercase tracking-wider text-gray-900 bg-white">
                 EventOps
               </span>
 
 
-              <div className="relative rounded-3xl border border-gray-200 bg-white shadow-2xl">
+              <div className="relative border-2 border-gray-900 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                 {/* Fake dashboard header */}
-                <div className="flex items-center gap-2 border-b border-gray-100 p-4">
-                  <span className="h-3 w-3 rounded-full bg-red-400" />
-                  <span className="h-3 w-3 rounded-full bg-yellow-400" />
-                  <span className="h-3 w-3 rounded-full bg-green-400" />
+                <div className="flex items-center gap-2 border-b-2 border-gray-100 p-4 bg-gray-50">
+                  <div className="h-3 w-3 border border-gray-900 bg-gray-900" />
+                  <div className="h-3 w-3 border border-gray-900 bg-transparent" />
+                  <div className="h-3 w-3 border border-gray-900 bg-transparent" />
                 </div>
 
                 {/* Fake dashboard body */}
                 <div className="space-y-4 p-6">
-                  <div className="h-4 w-3/4 rounded bg-gray-200" />
-                  <div className="h-24 rounded-xl bg-linear-to-br from-teal-100 to-teal-200" />
+                  <div className="h-4 w-3/4 border border-gray-200 bg-gray-100" />
+                  <div className="h-24 border-2 border-teal-500/20 bg-teal-50" />
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="h-20 rounded-xl bg-gray-100" />
-                    <div className="h-20 rounded-xl bg-gray-100" />
+                    <div className="h-20 border border-gray-200 bg-gray-50" />
+                    <div className="h-20 border border-gray-200 bg-gray-50" />
                   </div>
                 </div>
               </div>
 
               {/* Floating stat card */}
-              <div className="absolute -bottom-10 -left-10 rounded-2xl bg-gray-900 px-6 py-4 text-white shadow-xl">
-                <div className="text-xs opacity-80">Live Attendees</div>
-                <div className="text-2xl font-bold">1,248</div>
+              <div className="absolute -bottom-10 -left-10 border-2 border-gray-900 bg-gray-900 px-6 py-4 text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]">
+                <div className="text-xs font-bold uppercase tracking-wider opacity-80">Live Attendees</div>
+                <div className="text-2xl font-bold font-mono">1,248</div>
               </div>
             </div>
 
@@ -163,10 +163,11 @@ export default function LandingPage() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm transition hover:bg-white/10"
+                className="group relative overflow-hidden border-l-4 border-teal-500 bg-white/5 p-8 transition-all hover:border-teal-400 hover:bg-white/10"
               >
-                <h3 className="mb-4 text-2xl font-bold">{feature.title}</h3>
-                <p className="text-gray-300">{feature.description}</p>
+                <div className="absolute top-0 right-0 h-4 w-4 border-t border-r border-white/20" />
+                <h3 className="mb-4 font-sans text-2xl font-bold tracking-tight uppercase text-teal-400">{feature.title}</h3>
+                <p className="text-gray-300 font-sans border-l border-white/10 pl-4">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -189,7 +190,7 @@ export default function LandingPage() {
             {featuredEvents.map((event, index) => (
               <div
                 key={event.id}
-                className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:border-teal-600/50 hover:shadow-2xl hover:shadow-teal-600/10"
+                className="group relative border-2 border-gray-200 bg-white transition-all duration-300 hover:border-gray-900 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="relative aspect-video overflow-hidden bg-linear-to-br from-gray-100 to-gray-200">
@@ -206,7 +207,7 @@ export default function LandingPage() {
 
                 <div className="p-6">
                   <div className="mb-3 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+                    <span className="inline-flex items-center gap-1.5 border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-teal-900">
                       {event.category}
                     </span>
                     <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -235,7 +236,7 @@ export default function LandingPage() {
                     </div>
                     <a
                       href={`/event/${event.id}`}
-                      className="inline-flex items-center gap-1 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
+                      className="inline-flex items-center gap-1 border-2 border-gray-900 bg-gray-900 px-4 py-2 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-white hover:text-gray-900"
                     >
                       View Details
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -251,10 +252,10 @@ export default function LandingPage() {
           <div className="mt-16 text-center">
             <a
               href="/events"
-              className="group inline-flex items-center gap-2 text-lg font-semibold text-teal-700 hover:text-teal-800"
+              className="group inline-flex items-center gap-2 border-b-2 border-teal-600 pb-1 font-sans text-lg font-bold text-teal-700 uppercase tracking-widest transition-all hover:bg-teal-50 hover:px-4"
             >
-              Explore All Events
-              <svg className="h-6 w-6 transition group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              Explore All Operations
+              <svg className="h-5 w-5 transition-transform group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </a>
@@ -263,11 +264,11 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white py-12">
+      <footer className="border-t-2 border-gray-200 bg-white py-12">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <span className="text-xl font-bold text-gray-900">EventOps</span>
-            <p className="text-sm text-gray-600">
+            <span className="text-xl font-extrabold uppercase tracking-tighter text-gray-900">EventOps</span>
+            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">
               © 2026 EventOps. All rights reserved.
             </p>
           </div>

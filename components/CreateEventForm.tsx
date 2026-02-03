@@ -53,7 +53,7 @@ export default function CreateEventForm() {
     return (
         <div className="flex flex-col h-screen pt-20 overflow-hidden bg-gray-50">
             {/* Progress Line - Fixed to top of content area */}
-            <div className="w-full bg-gray-200 h-1.5 shrink-0">
+            <div className="w-full bg-gray-200 h-1 shrink-0">
                 <div
                     className="h-full bg-blue-900 transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
@@ -86,19 +86,19 @@ export default function CreateEventForm() {
                             {STEPS.map((s) => (
                                 <div
                                     key={s.number}
-                                    className={`flex items-center p-3 rounded-lg transition-all ${s.number === step
-                                        ? 'bg-blue-50 border border-blue-100'
+                                    className={`flex items-center p-3 border-l-4 transition-all ${s.number === step
+                                        ? 'bg-blue-50 border-blue-900'
                                         : s.number < step
-                                            ? 'text-green-600'
-                                            : 'text-gray-400'
+                                            ? 'text-green-600 border-green-600'
+                                            : 'text-gray-400 border-transparent'
                                         }`}
                                 >
                                     <div className="flex items-center gap-4">
                                         {/* Icon/Number */}
                                         <div className={`
-                                            w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors
+                                            w-8 h-8 flex items-center justify-center text-sm font-bold border-2 transition-colors
                                             ${s.number === step ? 'border-blue-900 bg-blue-900 text-white' :
-                                                s.number < step ? 'border-green-500 bg-green-500 text-white' :
+                                                s.number < step ? 'border-green-600 bg-green-600 text-white' :
                                                     'border-gray-200 text-gray-400'}
                                         `}>
                                             {s.number < step ? '✓' : s.number}
@@ -111,14 +111,14 @@ export default function CreateEventForm() {
                                         </div>
                                     </div>
                                     {s.number === step && (
-                                        <div className="ml-auto w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                        <div className="ml-auto w-2 h-2 bg-blue-900 animate-pulse" />
                                     )}
                                 </div>
                             ))}
                         </div>
 
                         {/* Formatting Tip Box */}
-                        <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 mt-auto">
+                        <div className="bg-gray-50 p-5 border-2 border-gray-100 mt-auto">
                             <div className="flex gap-3">
                                 <span className="text-xl">💡</span>
                                 <p className="text-sm text-gray-600 leading-relaxed font-medium">
@@ -138,9 +138,9 @@ export default function CreateEventForm() {
                     {/* Mobile Header */}
                     <div className="lg:hidden p-6 border-b border-gray-200 bg-white">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded">Step {step} of 4</span>
+                            <span className="text-xs font-bold bg-blue-100 text-blue-800 px-2 py-1 uppercase tracking-wide">Step {step} of 4</span>
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">{currentStepInfo.title}</h2>
+                        <h2 className="text-xl font-bold text-gray-900 uppercase tracking-tight">{currentStepInfo.title}</h2>
                     </div>
 
                     {/* SCROLLABLE FORM AREA */}
@@ -151,7 +151,7 @@ export default function CreateEventForm() {
                                 {/* STEP 1: BASICS */}
                                 {step === 1 && (
                                     <>
-                                        <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                                        <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-gray-200 space-y-6">
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-bold text-gray-900">Event Title</label>
                                                 <input
@@ -160,7 +160,7 @@ export default function CreateEventForm() {
                                                     value={formData.title}
                                                     onChange={handleChange}
                                                     placeholder="e.g. Global Developer Summit 2026"
-                                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-gray-300 font-medium"
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all placeholder:text-gray-300 font-medium bg-white"
                                                     required
                                                 />
                                             </div>
@@ -172,22 +172,22 @@ export default function CreateEventForm() {
                                                     value={formData.tagline}
                                                     onChange={handleChange}
                                                     placeholder="Short & sweet description"
-                                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-gray-300"
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all placeholder:text-gray-300 bg-white"
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                                        <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-gray-200 space-y-4">
                                             <label className="block text-sm font-bold text-gray-900">Category</label>
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                                 {CATEGORIES.filter(c => c !== "All Events").map(c => (
                                                     <div
                                                         key={c}
                                                         onClick={() => setFormData(prev => ({ ...prev, category: c }))}
-                                                        className={`cursor-pointer px-4 py-3 rounded-lg border text-sm font-semibold transition-all text-center
+                                                        className={`cursor-pointer px-4 py-3 border-2 text-sm font-bold uppercase tracking-wider transition-all text-center
                                                             ${formData.category === c
-                                                                ? 'border-blue-900 bg-blue-50 text-blue-900 shadow-sm'
-                                                                : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
+                                                                ? 'border-blue-900 bg-blue-900 text-white shadow-sm'
+                                                                : 'border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-900'
                                                             }`}
                                                     >
                                                         {c}
@@ -200,7 +200,7 @@ export default function CreateEventForm() {
 
                                 {/* STEP 2: TIME & PLACE */}
                                 {step === 2 && (
-                                    <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                                    <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-gray-200 space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-bold text-gray-900">Date</label>
@@ -209,7 +209,7 @@ export default function CreateEventForm() {
                                                     name="date"
                                                     value={formData.date}
                                                     onChange={handleChange}
-                                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all bg-white"
                                                     required
                                                 />
                                             </div>
@@ -221,7 +221,7 @@ export default function CreateEventForm() {
                                                     value={formData.time}
                                                     onChange={handleChange}
                                                     placeholder="09:00 AM"
-                                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all bg-white"
                                                     required
                                                 />
                                             </div>
@@ -235,7 +235,7 @@ export default function CreateEventForm() {
                                                     value={formData.location}
                                                     onChange={handleChange}
                                                     placeholder="Venue name or address"
-                                                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all placeholder:text-gray-300"
+                                                    className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all placeholder:text-gray-300 bg-white"
                                                     required
                                                 />
                                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">📍</span>
@@ -246,7 +246,7 @@ export default function CreateEventForm() {
 
                                 {/* STEP 3: DETAILS */}
                                 {step === 3 && (
-                                    <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                                    <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-gray-200 space-y-6">
                                         <div className="space-y-2">
                                             <label className="block text-sm font-bold text-gray-900">Description</label>
                                             <textarea
@@ -255,7 +255,7 @@ export default function CreateEventForm() {
                                                 onChange={handleChange}
                                                 rows={8}
                                                 placeholder="Tell attendees what makes this event unmissable..."
-                                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all resize-none placeholder:text-gray-300"
+                                                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all resize-none placeholder:text-gray-300 bg-white"
                                                 required
                                             />
                                         </div>
@@ -267,7 +267,7 @@ export default function CreateEventForm() {
                                                 value={formData.image}
                                                 onChange={handleChange}
                                                 placeholder="https://..."
-                                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all bg-white"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -277,7 +277,7 @@ export default function CreateEventForm() {
                                                 name="capacity"
                                                 value={formData.capacity}
                                                 onChange={handleChange}
-                                                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
+                                                className="w-full px-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all bg-white"
                                             />
                                         </div>
                                     </div>
@@ -286,7 +286,7 @@ export default function CreateEventForm() {
                                 {/* STEP 4: TICKETS */}
                                 {step === 4 && (
                                     <>
-                                        <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+                                        <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-gray-200 space-y-6">
                                             <div className="flex items-center justify-between">
                                                 <div>
                                                     <span className="block font-bold text-gray-900 text-lg">Free Event</span>
@@ -294,9 +294,9 @@ export default function CreateEventForm() {
                                                 </div>
                                                 <div
                                                     onClick={() => handleToggle('isFree')}
-                                                    className={`w-14 h-8 rounded-full flex items-center p-1 cursor-pointer transition-colors ${formData.isFree ? 'bg-blue-900' : 'bg-gray-300'}`}
+                                                    className={`w-14 h-8 flex items-center p-1 cursor-pointer transition-colors border-2 ${formData.isFree ? 'bg-blue-900 border-blue-900' : 'bg-transparent border-gray-300'}`}
                                                 >
-                                                    <div className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform ${formData.isFree ? 'translate-x-6' : 'translate-x-0'}`} />
+                                                    <div className={`bg-gray-900 w-5 h-5 shadow-sm transform transition-transform ${formData.isFree ? 'translate-x-6 bg-white' : 'translate-x-0'}`} />
                                                 </div>
                                             </div>
 
@@ -311,21 +311,21 @@ export default function CreateEventForm() {
                                                             value={formData.price}
                                                             onChange={handleChange}
                                                             placeholder="0.00"
-                                                            className="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-200 focus:border-blue-900 focus:ring-4 focus:ring-blue-50 outline-none transition-all bg-white font-bold text-xl"
+                                                            className="w-full pl-8 pr-4 py-3 border-2 border-gray-200 focus:border-blue-900 focus:ring-0 outline-none transition-all bg-white font-bold text-xl"
                                                         />
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
 
-                                        <div className="bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-gray-100">
+                                        <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-gray-200">
                                             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6">Event Preview</h3>
                                             <div className="flex gap-5 items-start">
-                                                <div className="w-24 h-24 bg-gray-100 rounded-xl shrink-0 overflow-hidden relative border border-gray-200">
+                                                <div className="w-24 h-24 bg-gray-100 shrink-0 overflow-hidden relative border-2 border-gray-200">
                                                     {formData.image && formData.image !== '/placeholder-1.jpg' ? (
                                                         <img src={formData.image} alt="Cover" className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-400 font-medium">No Image</div>
+                                                        <div className="absolute inset-0 flex items-center justify-center text-xs font-bold uppercase text-gray-400">No Image</div>
                                                     )}
                                                 </div>
                                                 <div>
@@ -338,7 +338,7 @@ export default function CreateEventForm() {
                                                             <span>📍</span> {formData.location || 'No location set'}
                                                         </p>
                                                     </div>
-                                                    <div className="mt-3 inline-flex px-3 py-1 bg-blue-50 text-blue-800 text-xs font-bold rounded-full border border-blue-100">
+                                                    <div className="mt-3 inline-flex px-3 py-1 bg-blue-50 text-blue-900 text-xs font-bold uppercase tracking-wider border-2 border-blue-100">
                                                         {formData.isFree ? 'Free Ticket' : `$${formData.price || '0.00'}`}
                                                     </div>
                                                 </div>
@@ -356,7 +356,7 @@ export default function CreateEventForm() {
                             <button
                                 type="button"
                                 onClick={step > 1 ? prevStep : undefined}
-                                className={`text-gray-500 font-semibold hover:text-gray-900 px-4 py-2 rounded-lg transition-colors ${step === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+                                className={`text-gray-500 font-bold uppercase tracking-wider hover:text-gray-900 px-4 py-2 transition-colors ${step === 1 ? 'opacity-0 pointer-events-none' : ''}`}
                             >
                                 Back
                             </button>
@@ -365,7 +365,7 @@ export default function CreateEventForm() {
                                 <button
                                     type="button"
                                     onClick={nextStep}
-                                    className="bg-gray-900 hover:bg-black text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-gray-900/10 hover:shadow-xl"
+                                    className="bg-gray-900 hover:bg-black text-white px-8 py-3 font-bold uppercase tracking-wider transition-all border-2 border-gray-900 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.5)]"
                                 >
                                     Continue
                                 </button>
@@ -373,7 +373,7 @@ export default function CreateEventForm() {
                                 <button
                                     type="button"
                                     onClick={handleSubmit}
-                                    className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-orange-600/20 hover:shadow-xl hover:bg-orange-600"
+                                    className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 font-bold uppercase tracking-wider transition-all border-2 border-orange-600 hover:shadow-[4px_4px_0px_0px_rgba(194,65,12,0.5)]"
                                 >
                                     Publish Event
                                 </button>

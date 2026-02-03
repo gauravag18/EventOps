@@ -39,17 +39,17 @@ export default function EventFilters() {
     };
 
     return (
-        <div className="sticky top-24 space-y-8 rounded-xl border border-soft-slate bg-white p-6 shadow-sm">
+        <div className="sticky top-24 space-y-8 border-2 border-gray-200 bg-white p-6 shadow-sm">
             {/* Search */}
             <div>
                 <h3 className="mb-4 font-bold text-charcoal-blue">Search</h3>
                 <div className="relative">
                     <input
                         type="text"
-                        placeholder="Search events..."
+                        placeholder="SEARCH EVENTS..."
                         defaultValue={currentSearch}
                         onChange={(e) => updateFilter('q', e.target.value)}
-                        className="w-full rounded-lg border border-soft-slate bg-off-white px-4 py-2 text-sm text-charcoal-blue placeholder-steel-gray/50 focus:border-muted-teal focus:outline-none focus:ring-1 focus:ring-muted-teal disabled:opacity-50"
+                        className="w-full border-2 border-gray-200 bg-off-white px-4 py-2 text-sm font-bold uppercase tracking-wide text-charcoal-blue placeholder-steel-gray/50 focus:border-charcoal-blue focus:outline-none focus:ring-0 disabled:opacity-50"
                         disabled={isPending}
                     />
                     <svg className="absolute top-2.5 right-3 h-4 w-4 text-steel-gray/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,15 +63,15 @@ export default function EventFilters() {
                 <h3 className="mb-4 font-bold text-charcoal-blue">Categories</h3>
                 <div className="space-y-2">
                     {CATEGORIES.map((cat) => (
-                        <label key={cat} className="flex items-center space-x-3 cursor-pointer group">
+                        <label key={cat} className="flex items-center space-x-3 cursor-pointer group hover:bg-gray-50 p-1 -ml-1 transition-colors">
                             <input
                                 type="radio"
                                 name="category"
                                 checked={currentCategory === cat}
                                 onChange={() => updateFilter('category', cat)}
-                                className="h-4 w-4 border-soft-slate text-muted-teal focus:ring-muted-teal"
+                                className="h-4 w-4 border-2 border-gray-400 text-charcoal-blue focus:ring-0 rounded-none checked:bg-charcoal-blue hover:border-gray-900 transition-colors"
                             />
-                            <span className={`text-sm group-hover:text-charcoal-blue ${currentCategory === cat ? 'font-bold text-charcoal-blue' : 'text-steel-gray'}`}>
+                            <span className={`text-sm tracking-wide uppercase ${currentCategory === cat ? 'font-bold text-charcoal-blue' : 'text-steel-gray font-medium group-hover:text-charcoal-blue'}`}>
                                 {cat}
                             </span>
                         </label>
@@ -84,15 +84,15 @@ export default function EventFilters() {
                 <h3 className="mb-4 font-bold text-charcoal-blue">Date</h3>
                 <div className="space-y-2">
                     {['Any Date', 'Today', 'This Weekend', 'Next Month'].map((label) => (
-                        <label key={label} className="flex items-center space-x-3 cursor-pointer">
+                        <label key={label} className="flex items-center space-x-3 cursor-pointer group hover:bg-gray-50 p-1 -ml-1 transition-colors">
                             <input
                                 type="radio"
                                 name="date"
                                 checked={(currentDate === label) || (label === 'Any Date' && !currentDate)}
                                 onChange={() => updateFilter('date', label === 'Any Date' ? '' : label)}
-                                className="h-4 w-4 border-soft-slate text-muted-teal focus:ring-muted-teal"
+                                className="h-4 w-4 border-2 border-gray-400 text-charcoal-blue focus:ring-0 rounded-none checked:bg-charcoal-blue hover:border-gray-900 transition-colors"
                             />
-                            <span className={`text-sm ${((currentDate === label) || (label === 'Any Date' && !currentDate)) ? 'text-charcoal-blue font-bold' : 'text-steel-gray'}`}>
+                            <span className={`text-sm tracking-wide uppercase ${((currentDate === label) || (label === 'Any Date' && !currentDate)) ? 'text-charcoal-blue font-bold' : 'text-steel-gray font-medium group-hover:text-charcoal-blue'}`}>
                                 {label}
                             </span>
                         </label>
@@ -102,7 +102,7 @@ export default function EventFilters() {
 
             <button
                 onClick={handleReset}
-                className="w-full rounded-lg border border-soft-slate bg-off-white py-2 text-sm font-medium text-charcoal-blue hover:bg-soft-slate/50"
+                className="w-full border-2 border-gray-200 bg-white py-2 text-sm font-bold uppercase tracking-wider text-charcoal-blue hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all"
             >
                 Reset Filters
             </button>
