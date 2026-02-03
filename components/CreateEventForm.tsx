@@ -51,7 +51,7 @@ export default function CreateEventForm() {
     const currentStepInfo = STEPS[step - 1];
 
     return (
-        <div className="flex flex-col h-screen pt-20 overflow-hidden bg-gray-50">
+        <div className="flex flex-col h-screen pt-[72px] overflow-hidden bg-gray-50">
             {/* Progress Line - Fixed to top of content area */}
             <div className="w-full bg-gray-200 h-1 shrink-0">
                 <div
@@ -145,7 +145,7 @@ export default function CreateEventForm() {
 
                     {/* SCROLLABLE FORM AREA */}
                     <div className="flex-1 overflow-y-auto">
-                        <div className="max-w-3xl mx-auto p-6 lg:p-12">
+                        <div className="w-full h-full p-6 lg:p-12">
                             <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 {/* Form fields rendered here */}
                                 {/* STEP 1: BASICS */}
@@ -352,7 +352,7 @@ export default function CreateEventForm() {
 
                     {/* Footer / Controls */}
                     <div className="p-6 lg:px-10 border-t border-gray-200 bg-white shrink-0">
-                        <div className="max-w-3xl mx-auto flex items-center justify-between">
+                        <div className="w-full flex items-center justify-between">
                             <button
                                 type="button"
                                 onClick={step > 1 ? prevStep : undefined}
