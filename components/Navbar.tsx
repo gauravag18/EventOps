@@ -61,135 +61,139 @@ export default function Navbar() {
 
             {/* Right Sidebar */}
             <div
-                className={`fixed top-0 right-0 h-full w-80 bg-white z-[70] border-l-2 border-soft-slate shadow-2xl transform transition-transform duration-300 ease-out ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                className={`fixed top-0 right-0 h-full w-[24rem] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-out border-l border-soft-slate/50 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >
                 <div className="flex flex-col h-full">
                     {/* Header */}
-                    <div className="p-6 border-b-2 border-soft-slate flex items-center justify-between bg-off-white">
-                        <span className="text-sm font-bold uppercase tracking-wider text-charcoal-blue">Menu</span>
-                        <button onClick={() => setIsSidebarOpen(false)} className="text-steel-gray hover:text-charcoal-blue transition-colors">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="px-6 py-5 border-b border-soft-slate flex items-center justify-between bg-white">
+                        <span className="text-sm font-bold text-charcoal-blue tracking-wide">Account</span>
+                        <button
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="p-1 rounded-md text-steel-gray hover:text-charcoal-blue hover:bg-soft-slate/50 transition-all"
+                        >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                    <div className="flex-1 overflow-y-auto">
                         {session ? (
-                            <>
-                                {/* Profile Info */}
-                                <div className="flex items-center gap-4 pb-6 border-b-2 border-soft-slate">
-                                    <div className="w-12 h-12 bg-muted-teal/10 border-2 border-muted-teal/20 flex items-center justify-center shrink-0">
+                            <div className="px-3 py-6 space-y-8">
+                                {/* Profile Card */}
+                                <div className="px-3 flex items-center gap-4">
+                                    <div className="w-14 h-14 rounded-full bg-soft-slate/30 border border-soft-slate flex items-center justify-center shrink-0 overflow-hidden">
                                         {session.user?.image ? (
                                             <img src={session.user.image} alt="User" className="w-full h-full object-cover" />
                                         ) : (
-                                            <span className="text-lg font-bold text-muted-teal uppercase">{session.user?.name?.[0] || 'U'}</span>
+                                            <span className="text-xl font-bold text-muted-teal uppercase">{session.user?.name?.[0] || 'U'}</span>
                                         )}
                                     </div>
-                                    <div className="overflow-hidden">
-                                        <h3 className="font-bold text-charcoal-blue truncate">{session.user?.name || 'User'}</h3>
-                                        <p className="text-xs text-steel-gray truncate">{session.user?.email}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-bold text-charcoal-blue truncate text-lg leading-tight">{session.user?.name || 'Guest User'}</h3>
+                                        <p className="text-sm text-steel-gray truncate">{session.user?.email}</p>
                                     </div>
                                 </div>
 
-                                {/* General Links */}
-                                <div className="space-y-3">
-                                    <Link
-                                        href="/profile"
-                                        onClick={() => setIsSidebarOpen(false)}
-                                        className="flex items-center gap-3 text-steel-gray hover:text-charcoal-blue font-bold transition-colors group"
-                                    >
-                                        <span className="w-2 h-2 bg-steel-gray group-hover:bg-muted-teal transition-colors rounded-sm" />
-                                        Profile
-                                    </Link>
-                                    <Link
-                                        href="/settings"
-                                        onClick={() => setIsSidebarOpen(false)}
-                                        className="flex items-center gap-3 text-steel-gray hover:text-charcoal-blue font-bold transition-colors group"
-                                    >
-                                        <span className="w-2 h-2 bg-steel-gray group-hover:bg-muted-teal transition-colors rounded-sm" />
-                                        Settings
-                                    </Link>
-                                </div>
-
-                                {/* ATTENDEE SECTION */}
-                                <div className="space-y-4 pt-4 border-t-2 border-soft-slate">
-                                    <h4 className="text-xs font-bold uppercase tracking-widest text-muted-teal">Attendee</h4>
-                                    <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-6">
+                                    {/* General Links */}
+                                    <div className="space-y-1">
                                         <Link
-                                            href="/my-tickets"
+                                            href="/profile"
                                             onClick={() => setIsSidebarOpen(false)}
-                                            className="border-2 border-soft-slate hover:border-charcoal-blue p-3 text-center transition-all hover:bg-off-white group"
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-steel-gray hover:text-charcoal-blue hover:bg-off-white transition-all group"
                                         >
-                                            <div className="flex justify-center mb-2">
-                                                <svg className="w-6 h-6 text-steel-gray group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-xs font-bold text-charcoal-blue uppercase">My Tickets</span>
+                                            <svg className="w-5 h-5 text-steel-gray/70 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            <span className="font-medium">Profile</span>
+                                        </Link>
+                                        <Link
+                                            href="/settings"
+                                            onClick={() => setIsSidebarOpen(false)}
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-steel-gray hover:text-charcoal-blue hover:bg-off-white transition-all group"
+                                        >
+                                            <svg className="w-5 h-5 text-steel-gray/70 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            <span className="font-medium">Settings</span>
+                                        </Link>
+                                    </div>
+
+                                    {/* ATTENDEE SECTION */}
+                                    <div className="space-y-1">
+                                        <div className="px-3 pb-2">
+                                            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-teal/80">Attendee</h4>
+                                        </div>
+                                        <Link
+                                            href="/attendee/dashboard"
+                                            onClick={() => setIsSidebarOpen(false)}
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-steel-gray hover:text-charcoal-blue hover:bg-off-white transition-all group"
+                                        >
+                                            <svg className="w-5 h-5 text-steel-gray/70 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                                            </svg>
+                                            <span className="font-medium">My Tickets</span>
                                         </Link>
                                         <Link
                                             href="/favorites"
                                             onClick={() => setIsSidebarOpen(false)}
-                                            className="border-2 border-soft-slate hover:border-charcoal-blue p-3 text-center transition-all hover:bg-off-white group"
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-steel-gray hover:text-charcoal-blue hover:bg-off-white transition-all group"
                                         >
-                                            <div className="flex justify-center mb-2">
-                                                <svg className="w-6 h-6 text-steel-gray group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-xs font-bold text-charcoal-blue uppercase">Favorites</span>
+                                            <svg className="w-5 h-5 text-steel-gray/70 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                            <span className="font-medium">Favorites</span>
                                         </Link>
                                     </div>
-                                </div>
 
-                                {/* ORGANIZER SECTION */}
-                                <div className="space-y-4 pt-4 border-t-2 border-soft-slate">
-                                    <h4 className="text-xs font-bold uppercase tracking-widest text-signal-orange">Organizer</h4>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    {/* ORGANIZER SECTION */}
+                                    <div className="space-y-1">
+                                        <div className="px-3 pb-2">
+                                            <h4 className="text-xs font-bold uppercase tracking-widest text-signal-orange/80">Organizer</h4>
+                                        </div>
                                         <Link
-                                            href="/dashboard"
+                                            href="/organizer/dashboard"
                                             onClick={() => setIsSidebarOpen(false)}
-                                            className="border-2 border-soft-slate hover:border-charcoal-blue p-3 text-center transition-all hover:bg-off-white group"
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-steel-gray hover:text-charcoal-blue hover:bg-off-white transition-all group"
                                         >
-                                            <div className="flex justify-center mb-2">
-                                                <svg className="w-6 h-6 text-steel-gray group-hover:text-signal-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-xs font-bold text-charcoal-blue uppercase">Dashboard</span>
+                                            <svg className="w-5 h-5 text-steel-gray/70 group-hover:text-signal-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            </svg>
+                                            <span className="font-medium">Dashboard</span>
                                         </Link>
                                         <Link
                                             href="/organizer/create-event"
                                             onClick={() => setIsSidebarOpen(false)}
-                                            className="border-2 border-soft-slate hover:border-charcoal-blue p-3 text-center transition-all hover:bg-off-white group"
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-steel-gray hover:text-charcoal-blue hover:bg-off-white transition-all group"
                                         >
-                                            <div className="flex justify-center mb-2">
-                                                <svg className="w-6 h-6 text-steel-gray group-hover:text-signal-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-xs font-bold text-charcoal-blue uppercase">New Event</span>
+                                            <svg className="w-5 h-5 text-steel-gray/70 group-hover:text-signal-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                            <span className="font-medium">Create Event</span>
                                         </Link>
                                     </div>
                                 </div>
-                            </>
+                            </div>
                         ) : (
-                            <div className="space-y-6 text-center pt-10">
-                                <h3 className="text-xl font-bold text-charcoal-blue uppercase tracking-tight">Join EventOps</h3>
-                                <p className="text-sm text-steel-gray">Sign in to manage your tickets and events.</p>
+                            <div className="px-6 py-12 text-center space-y-8">
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-bold text-charcoal-blue tracking-tight">Welcome</h3>
+                                    <p className="text-sm text-steel-gray">Sign in to manage your tickets and events.</p>
+                                </div>
                                 <div className="space-y-3">
                                     <Link
                                         href="/login"
                                         onClick={() => setIsSidebarOpen(false)}
-                                        className="block w-full border-2 border-charcoal-blue bg-charcoal-blue py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-white hover:text-charcoal-blue"
+                                        className="block w-full py-3 rounded-lg bg-charcoal-blue text-sm font-bold text-white shadow-lg shadow-charcoal-blue/20 hover:shadow-xl hover:translate-y-[-2px] transition-all"
                                     >
                                         Log In
                                     </Link>
                                     <Link
                                         href="/signup"
                                         onClick={() => setIsSidebarOpen(false)}
-                                        className="block w-full border-2 border-charcoal-blue py-3 text-sm font-bold uppercase tracking-wider text-charcoal-blue transition hover:bg-charcoal-blue hover:text-white"
+                                        className="block w-full py-3 rounded-lg border border-soft-slate bg-white text-sm font-bold text-charcoal-blue hover:bg-off-white hover:border-charcoal-blue transition-all"
                                     >
                                         Sign Up
                                     </Link>
@@ -199,10 +203,10 @@ export default function Navbar() {
                     </div>
 
                     {session && (
-                        <div className="p-6 border-t-2 border-soft-slate bg-off-white">
+                        <div className="p-6 border-t border-soft-slate bg-off-white/50">
                             <button
                                 onClick={handleSignOut}
-                                className="w-full flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-wider text-signal-orange hover:text-charcoal-blue transition-colors"
+                                className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-bold text-steel-gray hover:bg-red-50 hover:text-red-600 transition-colors"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 /* MOCK DATA */
 const MOCK_TICKETS = [
@@ -65,26 +66,27 @@ export default async function MyTicketPage({
 
   return (
     <div className="min-h-screen bg-off-white font-sans text-steel-gray pt-16">
-      <main className="mx-auto max-w-7xl px-6 py-14">
 
-        {/* BACK NAVIGATION */}
-        <div className="mb-8">
-          <a href="/attendee/dashboard" className="group inline-flex items-center text-sm font-bold uppercase tracking-wider text-muted-teal hover:text-charcoal-blue transition">
-            <svg className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to My Tickets
-          </a>
-        </div>
+      {/* HEADER SECTION - Matches Event Detail Page Structure */}
+      <div className="bg-white border-b-2 border-soft-slate">
+        <div className="mx-auto max-w-7xl px-6 py-8">
 
-        {/* EVENT HEADER */}
-        <header className="mb-16">
+          {/* BACK NAVIGATION */}
+          <div className="mb-6">
+            <Link href="/attendee/dashboard" className="group inline-flex items-center text-xs font-bold uppercase tracking-widest text-muted-teal hover:text-charcoal-blue transition">
+              <svg className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to My Tickets
+            </Link>
+          </div>
+
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="max-w-2xl">
-              <h1 className="text-5xl font-extrabold tracking-tight text-charcoal-blue">
+              <h1 className="text-4xl font-extrabold tracking-tight text-charcoal-blue uppercase">
                 {ticket.event.title}
               </h1>
-              <div className="mt-6 flex flex-wrap gap-6 text-base font-medium text-steel-gray">
+              <div className="mt-4 flex flex-wrap gap-6 text-sm font-medium text-steel-gray">
                 <div className="flex items-center gap-2">
                   <svg className="h-5 w-5 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -109,29 +111,32 @@ export default async function MyTicketPage({
 
             {/* STATUS BADGE */}
             <div
-              className={`border-2 px-8 py-4 ${isActive
-                  ? "border-muted-teal bg-muted-teal/10"
-                  : "border-gray-400 bg-gray-100"
+              className={`border-2 px-6 py-3 ${isActive
+                ? "border-muted-teal bg-muted-teal/10"
+                : "border-gray-400 bg-gray-100"
                 }`}
             >
-              <div className="text-xs font-bold uppercase tracking-widest text-steel-gray opacity-80">
-                Status
+              <div className="text-[10px] font-bold uppercase tracking-widest text-steel-gray opacity-80">
+                Ticket Status
               </div>
               <div
-                className={`mt-2 text-2xl font-extrabold uppercase tracking-tight ${isActive ? "text-muted-teal" : "text-gray-600"
+                className={`mt-1 text-xl font-extrabold uppercase tracking-tight ${isActive ? "text-muted-teal" : "text-gray-600"
                   }`}
               >
                 {isActive ? "Valid" : "Used"}
               </div>
             </div>
           </div>
-        </header>
+        </div>
+      </div>
+
+      <main className="mx-auto max-w-7xl px-6 py-10">
 
         {/* MAIN GRID */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
 
           {/* LEFT COLUMN - QR CODE */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-8">
             <div className="border-2 border-soft-slate bg-white">
 
               {/* QR SECTION */}
@@ -172,7 +177,7 @@ export default async function MyTicketPage({
 
               {/* TICKET INFO SECTION */}
               <div className="p-10">
-                <h2 className="mb-8 text-2xl font-bold uppercase tracking-widest text-charcoal-blue">
+                <h2 className="mb-8 text-xl font-bold uppercase tracking-widest text-charcoal-blue">
                   Ticket Details
                 </h2>
 
@@ -222,28 +227,28 @@ export default async function MyTicketPage({
 
             {/* INSTRUCTIONS */}
             {isActive && (
-              <div className="mt-8 border-2 border-muted-teal/20 bg-muted-teal/5 p-8">
+              <div className="border-2 border-muted-teal/20 bg-muted-teal/5 p-8">
                 <h3 className="mb-4 flex items-center text-lg font-bold uppercase tracking-tight text-charcoal-blue">
                   <svg className="mr-3 h-6 w-6 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Important Information
                 </h3>
-                <ul className="space-y-3 text-steel-gray">
+                <ul className="space-y-3 text-steel-gray text-sm font-medium">
                   <li className="flex items-start">
-                    <span className="mr-3 mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-teal"></span>
+                    <span className="mr-3 mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-teal"></span>
                     <span>Arrive at least 30 minutes before the event start time</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="mr-3 mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-teal"></span>
+                    <span className="mr-3 mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-teal"></span>
                     <span>Bring a valid photo ID for verification</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="mr-3 mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-teal"></span>
+                    <span className="mr-3 mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-teal"></span>
                     <span>Screenshot or print this QR code for backup access</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="mr-3 mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-teal"></span>
+                    <span className="mr-3 mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-muted-teal"></span>
                     <span>Each ticket can only be scanned once for entry</span>
                   </li>
                 </ul>

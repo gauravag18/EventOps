@@ -68,8 +68,8 @@ export default function LandingPage() {
                   <span className="relative z-10">Browse Events</span>
                 </a>
                 <a
-                  href="/create-event"
-                  className="relative overflow-hidden border-2 border-teal-600 bg-teal-600 px-8 py-4 font-sans text-lg font-bold uppercase tracking-wider text-white transition-all hover:bg-transparent hover:text-teal-600"
+                  href="/organizer/create-event"
+                  className="relative overflow-hidden border-2 border-signal-orange bg-signal-orange px-8 py-4 font-sans text-lg font-bold uppercase tracking-wider text-white transition-all hover:bg-transparent hover:text-signal-orange"
                 >
                   <span className="relative z-10">Create Event</span>
                 </a>
@@ -163,10 +163,10 @@ export default function LandingPage() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className="group relative overflow-hidden border-l-4 border-teal-500 bg-white/5 p-8 transition-all hover:border-teal-400 hover:bg-white/10"
+                className="group relative overflow-hidden border-l-4 border-signal-orange bg-white/5 p-8 transition-all hover:border-signal-orange hover:bg-white/10"
               >
                 <div className="absolute top-0 right-0 h-4 w-4 border-t border-r border-white/20" />
-                <h3 className="mb-4 font-sans text-2xl font-bold tracking-tight uppercase text-teal-400">{feature.title}</h3>
+                <h3 className="mb-4 font-sans text-2xl font-bold tracking-tight uppercase text-signal-orange">{feature.title}</h3>
                 <p className="text-gray-300 font-sans border-l border-white/10 pl-4">{feature.description}</p>
               </div>
             ))}

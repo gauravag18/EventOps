@@ -12,9 +12,28 @@ const STEPS = [
     { number: 4, title: 'Ticketing', description: 'Price & final review' },
 ];
 
-export default function CreateEventForm() {
+interface EventFormData {
+    title: string;
+    tagline: string;
+    category: string;
+    date: string;
+    time: string;
+    location: string;
+    description: string;
+    image: string;
+    capacity: number;
+    price: string;
+    isFree: boolean;
+}
+
+interface CreateEventFormProps {
+    initialData?: EventFormData;
+    isEditMode?: boolean;
+}
+
+export default function CreateEventForm({ initialData, isEditMode = false }: CreateEventFormProps) {
     const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<EventFormData>(initialData || {
         title: '',
         tagline: '',
         category: CATEGORIES[0] || 'Technology',
@@ -55,7 +74,7 @@ export default function CreateEventForm() {
             {/* Progress Line - Fixed to top of content area */}
             <div className="w-full bg-soft-slate h-1 shrink-0">
                 <div
-                    className="h-full bg-muted-teal transition-all duration-500 ease-out"
+                    className="h-full bg-signal-orange transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
                 />
             </div>
@@ -68,10 +87,10 @@ export default function CreateEventForm() {
                         {/* Current Step Focus Header */}
                         <div className="mb-10">
                             <div className="flex items-center gap-3 mb-4">
-                                <span className="flex items-center justify-center w-10 h-10 bg-muted-teal/10 text-muted-teal font-bold text-lg">
+                                <span className="flex items-center justify-center w-10 h-10 bg-signal-orange/10 text-signal-orange font-bold text-lg">
                                     {step}
                                 </span>
-                                <span className="text-sm font-bold tracking-wider text-muted-teal uppercase">Current Step</span>
+                                <span className="text-sm font-bold tracking-wider text-signal-orange uppercase">Current Step</span>
                             </div>
                             <h1 className="text-4xl font-bold text-charcoal-blue tracking-tight leading-tight uppercase">
                                 {currentStepInfo.title}
@@ -87,9 +106,9 @@ export default function CreateEventForm() {
                                 <div
                                     key={s.number}
                                     className={`flex items-center p-3 border-l-4 transition-all ${s.number === step
-                                        ? 'bg-muted-teal/5 border-muted-teal'
+                                        ? 'bg-signal-orange/5 border-signal-orange'
                                         : s.number < step
-                                            ? 'text-muted-teal border-muted-teal'
+                                            ? 'text-signal-orange border-signal-orange'
                                             : 'text-steel-gray border-transparent'
                                         }`}
                                 >
@@ -97,8 +116,8 @@ export default function CreateEventForm() {
                                         {/* Icon/Number */}
                                         <div className={`
                                             w-8 h-8 flex items-center justify-center text-sm font-bold border-2 transition-colors
-                                            ${s.number === step ? 'border-muted-teal bg-muted-teal text-white' :
-                                                s.number < step ? 'border-muted-teal bg-muted-teal text-white' :
+                                            ${s.number === step ? 'border-signal-orange bg-signal-orange text-white' :
+                                                s.number < step ? 'border-signal-orange bg-signal-orange text-white' :
                                                     'border-soft-slate text-steel-gray'}
                                         `}>
                                             {s.number < step ? '✓' : s.number}
@@ -111,7 +130,7 @@ export default function CreateEventForm() {
                                         </div>
                                     </div>
                                     {s.number === step && (
-                                        <div className="ml-auto w-2 h-2 bg-muted-teal animate-pulse" />
+                                        <div className="ml-auto w-2 h-2 bg-signal-orange animate-pulse" />
                                     )}
                                 </div>
                             ))}
@@ -138,7 +157,7 @@ export default function CreateEventForm() {
                     {/* Mobile Header */}
                     <div className="lg:hidden p-6 border-b-2 border-soft-slate bg-white">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold bg-muted-teal/10 text-muted-teal px-2 py-1 uppercase tracking-wider">Step {step} of 4</span>
+                            <span className="text-xs font-bold bg-signal-orange/10 text-signal-orange px-2 py-1 uppercase tracking-wider">Step {step} of 4</span>
                         </div>
                         <h2 className="text-xl font-bold text-charcoal-blue uppercase tracking-tight">{currentStepInfo.title}</h2>
                     </div>
@@ -238,7 +257,7 @@ export default function CreateEventForm() {
                                                     className="w-full pl-11 pr-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none transition-all placeholder:text-steel-gray/50 bg-white text-charcoal-blue"
                                                     required
                                                 />
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-teal text-lg">📍</span>
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-signal-orange text-lg">📍</span>
                                             </div>
                                         </div>
                                     </div>
@@ -294,7 +313,7 @@ export default function CreateEventForm() {
                                                 </div>
                                                 <div
                                                     onClick={() => handleToggle('isFree')}
-                                                    className={`w-14 h-8 flex items-center p-1 cursor-pointer transition-colors border-2 ${formData.isFree ? 'bg-muted-teal border-muted-teal' : 'bg-transparent border-soft-slate'}`}
+                                                    className={`w-14 h-8 flex items-center p-1 cursor-pointer transition-colors border-2 ${formData.isFree ? 'bg-signal-orange border-signal-orange' : 'bg-transparent border-soft-slate'}`}
                                                 >
                                                     <div className={`w-5 h-5 shadow-sm transform transition-transform ${formData.isFree ? 'translate-x-6 bg-white' : 'translate-x-0 bg-charcoal-blue'}`} />
                                                 </div>
@@ -338,7 +357,7 @@ export default function CreateEventForm() {
                                                             <span>📍</span> {formData.location || 'No location set'}
                                                         </p>
                                                     </div>
-                                                    <div className="mt-3 inline-flex px-3 py-1 bg-muted-teal/10 text-muted-teal text-xs font-bold uppercase tracking-wider border-2 border-muted-teal/20">
+                                                    <div className="mt-3 inline-flex px-3 py-1 bg-signal-orange/10 text-signal-orange text-xs font-bold uppercase tracking-wider border-2 border-signal-orange/20">
                                                         {formData.isFree ? 'Free Ticket' : `$${formData.price || '0.00'}`}
                                                     </div>
                                                 </div>
@@ -365,7 +384,7 @@ export default function CreateEventForm() {
                                 <button
                                     type="button"
                                     onClick={nextStep}
-                                    className="bg-charcoal-blue hover:bg-charcoal-blue/90 text-white px-8 py-3 font-bold uppercase tracking-wider transition-all border-2 border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,0.5)]"
+                                    className="bg-signal-orange hover:bg-signal-orange/90 text-white px-8 py-3 font-bold uppercase tracking-wider transition-all border-2 border-signal-orange hover:shadow-[4px_4px_0px_0px_rgba(194,65,12,0.5)]"
                                 >
                                     Continue
                                 </button>
@@ -375,7 +394,7 @@ export default function CreateEventForm() {
                                     onClick={handleSubmit}
                                     className="bg-signal-orange hover:bg-signal-orange/90 text-white px-8 py-3 font-bold uppercase tracking-wider transition-all border-2 border-signal-orange hover:shadow-[4px_4px_0px_0px_rgba(194,65,12,0.5)]"
                                 >
-                                    Publish Event
+                                    {isEditMode ? 'Save Changes' : 'Publish Event'}
                                 </button>
                             )}
                         </div>
