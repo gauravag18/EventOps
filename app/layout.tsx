@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Rajdhani, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { Providers } from "@/components/Providers";
 
 const rajdhani = Rajdhani({
   variable: "--font-rajdhani",
@@ -29,8 +30,10 @@ export default function RootLayout({
       <body
         className={`${rajdhani.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        {children}
+        <Providers>
+          <Navbar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
