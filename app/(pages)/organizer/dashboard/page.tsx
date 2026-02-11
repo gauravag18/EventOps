@@ -1,48 +1,58 @@
 import React from "react";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { getAuthOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
-/* MOCK DATA FOR ORGANIZER */
-const ORGANIZED_EVENTS = [
-    {
-        id: "e1",
-        title: "Global Developer Summit 2026",
-        date: "Oct 15, 2026",
-        location: "San Francisco, CA",
-        status: "PUBLISHED",
-        sold: 2450,
-        capacity: 5000,
-        revenue: 732550,
-        category: "Technology"
-    },
-    {
-        id: "e2",
-        title: "Product Design Leadership",
-        date: "Jan 15, 2027",
-        location: "New York, NY",
-        status: "DRAFT",
-        sold: 0,
-        capacity: 200,
-        revenue: 0,
-        category: "Design"
-    },
-    {
-        id: "e3",
-        title: "Cybersecurity Ops Workshop",
-        date: "Feb 20, 2027",
-        location: "Berlin, DE",
-        status: "PUBLISHED",
-        sold: 45,
-        capacity: 100,
-        revenue: 8955,
-        category: "Security"
+export default async function OrganizerDashboard() {
+    const session = await getServerSession(getAuthOptions());
+
+    if (!session?.user?.id) {
+        redirect(`/login?error=${encodeURIComponent("You must be logged in to view the organizer dashboard.")}`);
     }
-];
 
-export default function OrganizerDashboard() {
+    // Fetch events for the logged-in organizer
+    const events = await prisma.event.findMany({
+        where: {
+            organizers: {
+                some: {
+                    id: session.user.id
+                }
+            }
+        },
+        include: {
+            participants: true
+        },
+        orderBy: {
+            createdAt: 'desc'
+        }
+    });
+
+    // Helper to calculate stats
+    const organizedEvents = events.map(event => {
+        const sold = event.participants.length;
+        // Parse price safely
+        const priceVal = event.isFree ? 0 : parseFloat(event.price || "0");
+        const revenue = sold * (isNaN(priceVal) ? 0 : priceVal);
+
+        // Determine status simply based on date for now
+        const isPast = new Date(event.date) < new Date();
+        const status = isPast ? "ENDED" : "PUBLISHED";
+
+        return {
+            ...event,
+            sold,
+            revenue,
+            status,
+            formattedDate: new Date(event.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+        };
+    });
+
     // Stats calculation
-    const totalEvents = ORGANIZED_EVENTS.length;
-    const totalRevenue = ORGANIZED_EVENTS.reduce((acc, curr) => acc + curr.revenue, 0);
-    const totalTicketsSold = ORGANIZED_EVENTS.reduce((acc, curr) => acc + curr.sold, 0);
+    const totalEvents = organizedEvents.length;
+    const totalRevenue = organizedEvents.reduce((acc, curr) => acc + curr.revenue, 0);
+    const totalTicketsSold = organizedEvents.reduce((acc, curr) => acc + curr.sold, 0);
 
     // Format currency
     const formatCurrency = (amount: number) => {
@@ -155,7 +165,7 @@ export default function OrganizerDashboard() {
                                     {totalEvents}
                                 </div>
                                 <p className="text-sm font-medium text-steel-gray">
-                                    {ORGANIZED_EVENTS.filter(e => e.status === 'PUBLISHED').length} Published, {ORGANIZED_EVENTS.filter(e => e.status === 'DRAFT').length} Draft
+                                    {organizedEvents.filter(e => e.status === 'PUBLISHED').length} Published, {organizedEvents.filter(e => e.status === 'ENDED').length} Ended
                                 </p>
                             </div>
                         </div>
@@ -169,115 +179,127 @@ export default function OrganizerDashboard() {
                         <h2 className="text-2xl font-bold uppercase tracking-widest text-charcoal-blue">
                             My Events
                         </h2>
+                        {/* Filter mockup - could be functional later */}
                         <div className="flex gap-4">
                             <select className="border-b-2 border-gray-200 bg-transparent py-1 pl-3 pr-8 text-sm font-bold uppercase tracking-wide text-charcoal-blue focus:border-charcoal-blue focus:ring-0">
                                 <option>All Events</option>
                                 <option>Published</option>
-                                <option>Draft</option>
                                 <option>Ended</option>
                             </select>
                         </div>
                     </div>
 
                     <div className="space-y-6">
-                        {ORGANIZED_EVENTS.map((event) => {
-                            const isPublished = event.status === "PUBLISHED";
-                            const percentSold = Math.round((event.sold / event.capacity) * 100);
-
-                            return (
-                                <div
-                                    key={event.id}
-                                    className="group relative border-2 border-soft-slate bg-white transition-all hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        {organizedEvents.length === 0 ? (
+                            <div className="text-center py-20 border-2 border-dashed border-gray-300 rounded-lg">
+                                <p className="text-lg text-steel-gray mb-4">You haven't created any events yet.</p>
+                                <Link
+                                    href="/organizer/create-event"
+                                    className="text-signal-orange font-bold hover:underline"
                                 >
-                                    {/* Status Indicator */}
-                                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${isPublished ? "bg-signal-orange" : "bg-gray-400"}`} />
+                                    Create your first event
+                                </Link>
+                            </div>
+                        ) : (
+                            organizedEvents.map((event) => {
+                                const isPublished = event.status === "PUBLISHED";
+                                const percentSold = event.capacity > 0 ? Math.round((event.sold / event.capacity) * 100) : 0;
 
-                                    <div className="flex flex-col lg:flex-row lg:items-center">
-                                        {/* Main Info */}
-                                        <div className="flex-1 p-8 pl-10">
-                                            <div className="mb-2 flex items-center gap-3">
-                                                <span className={`inline-block border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${isPublished
-                                                    ? "border-signal-orange bg-signal-orange/10 text-signal-orange"
-                                                    : "border-gray-300 bg-gray-100 text-gray-500"
-                                                    }`}>
-                                                    {event.status}
-                                                </span>
-                                                <span className="text-[10px] font-bold uppercase tracking-wider text-steel-gray">
-                                                    {event.category}
-                                                </span>
-                                            </div>
+                                return (
+                                    <div
+                                        key={event.id}
+                                        className="group relative border-2 border-soft-slate bg-white transition-all hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                                    >
+                                        {/* Status Indicator */}
+                                        <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${isPublished ? "bg-signal-orange" : "bg-gray-400"}`} />
 
-                                            <h3 className="mb-3 text-xl font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-signal-orange transition">
-                                                {event.title}
-                                            </h3>
-
-                                            <div className="flex flex-wrap gap-6 text-sm font-medium text-steel-gray">
-                                                <div className="flex items-center gap-1.5">
-                                                    <svg className="h-4 w-4 text-signal-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    {event.date}
+                                        <div className="flex flex-col lg:flex-row lg:items-center">
+                                            {/* Main Info */}
+                                            <div className="flex-1 p-8 pl-10">
+                                                <div className="mb-2 flex items-center gap-3">
+                                                    <span className={`inline-block border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${isPublished
+                                                        ? "border-signal-orange bg-signal-orange/10 text-signal-orange"
+                                                        : "border-gray-300 bg-gray-100 text-gray-500"
+                                                        }`}>
+                                                        {event.status}
+                                                    </span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-steel-gray">
+                                                        {event.category}
+                                                    </span>
                                                 </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    <svg className="h-4 w-4 text-signal-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                    {event.location}
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        {/* Stats Mini-Dashboard */}
-                                        <div className="border-t border-soft-slate bg-gray-50/50 p-8 lg:w-96 lg:border-l lg:border-t-0">
-                                            <div className="mb-4 grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">Sold</div>
-                                                    <div className="font-mono text-lg font-bold text-charcoal-blue">
-                                                        {event.sold} <span className="text-gray-400 text-sm">/ {event.capacity}</span>
+                                                <h3 className="mb-3 text-xl font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-signal-orange transition">
+                                                    {event.title}
+                                                </h3>
+
+                                                <div className="flex flex-wrap gap-6 text-sm font-medium text-steel-gray">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <svg className="h-4 w-4 text-signal-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        {event.formattedDate}
                                                     </div>
-                                                </div>
-                                                <div>
-                                                    <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">Revenue</div>
-                                                    <div className="font-mono text-lg font-bold text-charcoal-blue">
-                                                        {formatCurrency(event.revenue)}
+                                                    <div className="flex items-center gap-1.5">
+                                                        <svg className="h-4 w-4 text-signal-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                        {event.location?.split('|')[0]}
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/* Progress Bar */}
-                                            <div className="mb-6">
-                                                <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider mb-1">
-                                                    <span>Capacity</span>
-                                                    <span>{percentSold}%</span>
+                                            {/* Stats Mini-Dashboard */}
+                                            <div className="border-t border-soft-slate bg-gray-50/50 p-8 lg:w-96 lg:border-l lg:border-t-0">
+                                                <div className="mb-4 grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">Sold</div>
+                                                        <div className="font-mono text-lg font-bold text-charcoal-blue">
+                                                            {event.sold} <span className="text-gray-400 text-sm">/ {event.capacity}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">Revenue</div>
+                                                        <div className="font-mono text-lg font-bold text-charcoal-blue">
+                                                            {formatCurrency(event.revenue)}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="h-2 w-full bg-gray-200 overflow-hidden rounded-full">
-                                                    <div
-                                                        className="h-full bg-signal-orange transition-all duration-500"
-                                                        style={{ width: `${percentSold}%` }}
-                                                    />
-                                                </div>
-                                            </div>
 
-                                            <div className="flex gap-3">
-                                                <Link
-                                                    href={`/organizer/event/${event.id}`}
-                                                    className="flex-1 border border-soft-slate bg-white py-2 text-xs font-bold uppercase tracking-widest text-charcoal-blue hover:border-charcoal-blue hover:bg-charcoal-blue hover:text-white transition text-center"
-                                                >
-                                                    Manage
-                                                </Link>
-                                                <Link
-                                                    href={`/organizer/event/${event.id}/edit`}
-                                                    className="flex-1 border border-soft-slate bg-white py-2 text-xs font-bold uppercase tracking-widest text-steel-gray hover:border-signal-orange hover:bg-red-50 hover:text-signal-orange transition text-center"
-                                                >
-                                                    Edit
-                                                </Link>
+                                                {/* Progress Bar */}
+                                                <div className="mb-6">
+                                                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider mb-1">
+                                                        <span>Capacity</span>
+                                                        <span>{percentSold}%</span>
+                                                    </div>
+                                                    <div className="h-2 w-full bg-gray-200 overflow-hidden rounded-full">
+                                                        <div
+                                                            className="h-full bg-signal-orange transition-all duration-500"
+                                                            style={{ width: `${percentSold}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex gap-3">
+                                                    <Link
+                                                        href={`/organizer/event/${event.id}`}
+                                                        className="flex-1 border border-soft-slate bg-white py-2 text-xs font-bold uppercase tracking-widest text-charcoal-blue hover:border-charcoal-blue hover:bg-charcoal-blue hover:text-white transition text-center"
+                                                    >
+                                                        Manage
+                                                    </Link>
+                                                    <Link
+                                                        href={`/organizer/event/${event.id}/edit`}
+                                                        className="flex-1 border border-soft-slate bg-white py-2 text-xs font-bold uppercase tracking-widest text-steel-gray hover:border-signal-orange hover:bg-red-50 hover:text-signal-orange transition text-center"
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
                 </section>
 

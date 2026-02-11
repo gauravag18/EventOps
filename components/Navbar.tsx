@@ -5,11 +5,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
-    const { data: realSession } = useSession();
-    // DEV MODE: Mock session to show authenticated UI
-    const session = realSession || {
-        user: { name: "Dev User", email: "dev@local", image: null }
-    };
+    const { data: session } = useSession();
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const router = useRouter();

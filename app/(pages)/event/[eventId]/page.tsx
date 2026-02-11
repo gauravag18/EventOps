@@ -1,6 +1,11 @@
 import React from 'react';
-import { getEvent } from '@/lib/data';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { getServerSession } from "next-auth";
+import { getAuthOptions } from "@/lib/auth";
+import RegisterButton from '@/components/RegisterButton';
+import EventMap from '@/components/EventMap';
+import { fetchFromApi } from '@/lib/api-client';
 
 export default async function EventDetailPage({
     params,
@@ -8,11 +13,41 @@ export default async function EventDetailPage({
     params: Promise<{ eventId: string }>;
 }) {
     const { eventId } = await params;
-    const event = getEvent(eventId);
+    const session = await getServerSession(getAuthOptions());
+
+    const event = await fetchFromApi(`/api/events/${eventId}`);
 
     if (!event) {
         notFound();
     }
+
+    // Process data
+    const locationParts = event.location ? event.location.split('|') : [];
+    const displayLocation = locationParts[0] || 'TBD';
+    const coordinates = locationParts[1] || ''; // "lat,lng"
+
+    const soldCount = event.participants.length;
+    const spotsLeft = event.capacity - soldCount;
+    const isFree = event.isFree;
+    const priceDisplay = isFree ? 'Free' : `$${event.price}`;
+
+    // Check if registered
+    const isRegistered = session?.user?.id ? event.participants.some(p => p.id === session.user.id) : false;
+
+    // Date Formatting
+    const eventDate = new Date(event.date);
+    const dateStr = eventDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    const timeStr = eventDate.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const organizerName = event.organizers[0]?.name || 'EventOps Organizer';
 
     return (
         <div className="min-h-screen bg-off-white font-sans text-steel-gray selection:bg-muted-teal selection:text-white pt-16">
@@ -20,39 +55,39 @@ export default async function EventDetailPage({
             <main className="mx-auto max-w-7xl px-6 py-8">
                 {/* Breadcrumb / Back Navigation */}
                 <div className="mb-4">
-                    <a href="/events" className="group inline-flex items-center text-sm font-bold uppercase tracking-wider text-muted-teal hover:text-charcoal-blue">
+                    <Link href="/events" className="group inline-flex items-center text-sm font-bold uppercase tracking-wider text-muted-teal hover:text-charcoal-blue">
                         <svg className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                         Back to Events
-                    </a>
+                    </Link>
                 </div>
 
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 items-start">
                     {/* Main Content Column */}
                     <div className="lg:col-span-2">
                         {/* Hero Image Placeholder */}
-                        <div className="mb-8 aspect-video w-full overflow-hidden border-2 border-gray-200 bg-soft-slate shadow-sm">
-                            {/* In a real app, <img src={event.image} /> */}
-                            <div className="flex h-full w-full items-center justify-center font-bold uppercase tracking-widest text-steel-gray opacity-50">
-                                Event Cover Image
-                            </div>
+                        <div className="mb-8 aspect-video w-full overflow-hidden border-2 border-gray-200 bg-soft-slate shadow-sm relative">
+                            {event.image && event.image !== '/placeholder-1.jpg' ? (
+                                <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center font-bold uppercase tracking-widest text-steel-gray opacity-50">
+                                    Event Cover Image
+                                </div>
+                            )}
                         </div>
 
                         <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-charcoal-blue lg:text-5xl">
                             {event.title}
                         </h1>
-                        <p className="mb-6 text-xl text-steel-gray">
-                            {event.tagline}
-                        </p>
 
-                        <div className="mb-10 flex flex-wrap gap-4 text-sm font-medium text-charcoal-blue">
+                        <div className="mb-10 flex flex-wrap gap-4 text-sm font-medium text-charcoal-blue mt-4">
                             <span className="inline-flex items-center rounded-full bg-soft-slate/50 px-3 py-1 text-charcoal-blue">
                                 {event.category}
                             </span>
-                            <span className="inline-flex items-center rounded-full bg-soft-slate/50 px-3 py-1 text-charcoal-blue">
+                            {/* <span className="inline-flex items-center rounded-full bg-soft-slate/50 px-3 py-1 text-charcoal-blue">
                                 Conference
-                            </span>
+                            </span> */}
                         </div>
 
                         <div className="sticky top-18.25 z-10 -mx-6 mb-8 border-b-2 border-soft-slate bg-off-white/95 px-6 backdrop-blur-md">
@@ -60,14 +95,8 @@ export default async function EventDetailPage({
                                 <a href="#overview" className="border-b-4 border-muted-teal py-4 text-sm font-bold uppercase tracking-wider text-muted-teal whitespace-nowrap">
                                     Overview
                                 </a>
-                                <a href="#agenda" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
-                                    Agenda
-                                </a>
-                                <a href="#speakers" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
-                                    Speakers
-                                </a>
                                 <a href="#venue" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
-                                    Venue & Policies
+                                    Venue & Location
                                 </a>
                             </nav>
                         </div>
@@ -81,76 +110,21 @@ export default async function EventDetailPage({
                                 </p>
                             </section>
 
-                            {/* Agenda Section */}
-                            <section id="agenda" className="scroll-mt-36">
-                                <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Agenda Highlights</h3>
-                                <div className="space-y-4">
-                                    <div className="border border-soft-slate bg-white p-5 transition hover:border-muted-teal">
-                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <div className="border border-soft-slate bg-soft-slate/10 px-3 py-2 text-center">
-                                                    <span className="block text-xs font-bold uppercase text-steel-gray">Oct</span>
-                                                    <span className="block text-xl font-bold text-charcoal-blue">15</span>
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-lg font-bold uppercase tracking-tight text-charcoal-blue">Opening Keynote</h4>
-                                                    <p className="text-sm font-medium text-steel-gray">09:00 AM – 10:30 AM</p>
-                                                </div>
-                                            </div>
-                                            <span className="inline-flex items-center border border-charcoal-blue/20 bg-charcoal-blue/5 px-2.5 py-0.5 text-xs font-bold uppercase text-charcoal-blue">
-                                                Main Stage
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="border border-soft-slate bg-white p-5 transition hover:border-muted-teal">
-                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <div className="border border-soft-slate bg-soft-slate/10 px-3 py-2 text-center">
-                                                    <span className="block text-xs font-bold uppercase text-steel-gray">Oct</span>
-                                                    <span className="block text-xl font-bold text-charcoal-blue">15</span>
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-lg font-bold uppercase tracking-tight text-charcoal-blue">Scalable Architecture Workshop</h4>
-                                                    <p className="text-sm font-medium text-steel-gray">11:30 AM – 01:00 PM</p>
-                                                </div>
-                                            </div>
-                                            <span className="inline-flex items-center border border-muted-teal/20 bg-muted-teal/5 px-2.5 py-0.5 text-xs font-bold uppercase text-muted-teal">
-                                                Room A
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-
-                            {/* Speakers Section */}
-                            <section id="speakers" className="scroll-mt-36">
-                                <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Featured Speakers</h3>
-                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                                    {[1, 2, 3, 4].map((i) => (
-                                        <div key={i} className="flex items-center gap-4 border border-soft-slate bg-white p-4 shadow-sm">
-                                            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-soft-slate border-2 border-gray-200">
-                                                {/* Placeholder Avatar */}
-                                                <svg className="h-full w-full text-soft-slate" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-charcoal-blue uppercase tracking-tight">Sarah Jenkins</div>
-                                                <div className="text-sm font-medium text-steel-gray">CTO, TechGrowth</div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-
                             {/* Venue Section */}
                             <section id="venue" className="scroll-mt-36">
-                                <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Venue & Travel</h3>
+                                <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Venue & Location</h3>
                                 <div className="rounded-xl border border-soft-slate bg-white p-6">
-                                    <div className="mb-4 aspect-video w-full rounded-lg bg-soft-slate/50">
-                                        <div className="flex h-full items-center justify-center text-steel-gray">Map View</div>
+                                    <div className="mb-4 w-full rounded-lg overflow-hidden bg-soft-slate/50 border-2 border-gray-100">
+                                        {coordinates ? (
+                                            <EventMap value={coordinates} readOnly={true} />
+                                        ) : (
+                                            <div className="aspect-video flex items-center justify-center text-steel-gray font-medium">
+                                                No map coordinates available
+                                            </div>
+                                        )}
                                     </div>
-                                    <h4 className="font-bold text-charcoal-blue">{event.location}</h4>
-                                    <p className="text-sm text-steel-gray">747 Howard St, San Francisco, CA 94103</p>
+                                    <h4 className="font-bold text-charcoal-blue text-lg">{displayLocation}</h4>
+                                    {/* <p className="text-sm text-steel-gray">747 Howard St, San Francisco, CA 94103</p> */}
                                 </div>
                             </section>
                         </div>
@@ -161,17 +135,19 @@ export default async function EventDetailPage({
                         {/* Registration Card */}
                         <div className="border-2 border-soft-slate bg-white p-8 shadow-sm">
                             <div className="mb-6 flex items-baseline justify-between border-b-2 border-gray-100 pb-4">
-                                <span className="text-3xl font-bold text-charcoal-blue">{event.price}</span>
+                                <span className="text-3xl font-bold text-charcoal-blue">{priceDisplay}</span>
                                 <span className="text-sm font-bold uppercase tracking-wider text-steel-gray">per attendee</span>
                             </div>
 
-                            <button className="flex w-full items-center justify-center border-2 border-charcoal-blue bg-charcoal-blue px-6 py-4 text-center text-lg font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-white hover:text-charcoal-blue">
-                                Register Now
-                            </button>
+                            <RegisterButton
+                                eventId={event.id}
+                                isFull={spotsLeft <= 0}
+                                isRegistered={isRegistered}
+                            />
 
                             <div className="mt-4 text-center">
-                                <p className="text-sm font-medium text-signal-orange">
-                                    Only {event.spotsLeft} spots remaining!
+                                <p className={`text-sm font-medium ${spotsLeft < 10 ? 'text-signal-orange' : 'text-muted-teal'}`}>
+                                    {spotsLeft > 0 ? (spotsLeft < 20 ? `Only ${spotsLeft} spots remaining!` : `${spotsLeft} spots available`) : 'Event is full'}
                                 </p>
                             </div>
 
@@ -184,8 +160,8 @@ export default async function EventDetailPage({
                                     </svg>
                                     <div>
                                         <h4 className="font-semibold text-charcoal-blue">Date & Time</h4>
-                                        <p className="text-sm text-steel-gray">{event.date}</p>
-                                        <p className="text-sm text-steel-gray">{event.time}</p>
+                                        <p className="text-sm text-steel-gray">{dateStr}</p>
+                                        <p className="text-sm text-steel-gray">{timeStr}</p>
                                         <a href="#" className="mt-1 block text-sm font-medium text-muted-teal hover:underline">Add to Calendar</a>
                                     </div>
                                 </div>
@@ -197,8 +173,8 @@ export default async function EventDetailPage({
                                     </svg>
                                     <div>
                                         <h4 className="font-semibold text-charcoal-blue">Location</h4>
-                                        <p className="text-sm text-steel-gray">{event.location}</p>
-                                        <a href="#" className="mt-1 block text-sm font-medium text-muted-teal hover:underline">View Map</a>
+                                        <p className="text-sm text-steel-gray">{displayLocation}</p>
+                                        <a href="#venue" className="mt-1 block text-sm font-medium text-muted-teal hover:underline">View Map</a>
                                     </div>
                                 </div>
 
@@ -208,7 +184,7 @@ export default async function EventDetailPage({
                                     </svg>
                                     <div>
                                         <h4 className="font-semibold text-charcoal-blue">Organizer</h4>
-                                        <p className="text-sm text-steel-gray">{event.organizer}</p>
+                                        <p className="text-sm text-steel-gray">{organizerName}</p>
                                         <a href="#" className="mt-1 block text-sm font-medium text-muted-teal hover:underline">Contact</a>
                                     </div>
                                 </div>

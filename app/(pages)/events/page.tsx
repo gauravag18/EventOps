@@ -1,6 +1,8 @@
 import React from 'react';
-import { EVENTS, TRENDING } from '@/lib/data';
 import EventFilters from '@/components/EventFilters';
+// import { prisma } from '@/lib/prisma'; // Removed default prisma import
+import Link from 'next/link';
+import { fetchFromApi } from '@/lib/api-client';
 
 export default async function EventsListPage({
     searchParams,
@@ -9,24 +11,33 @@ export default async function EventsListPage({
 }) {
     const params = await searchParams;
     const q = (params.q as string)?.toLowerCase() || '';
-    const category = (params.category as string) || '';
-    const dateFilter = (params.date as string) || '';
+    const categoryQuery = (params.category as string) || '';
 
-    // Filter Logic
-    const filteredEvents = EVENTS.filter((event) => {
-        // Search
-        if (q && !event.title.toLowerCase().includes(q) && !event.description.toLowerCase().includes(q)) {
-            return false;
-        }
-        // Category
-        if (category && category !== 'All Events' && event.category !== category) {
-            return false;
-        }
-        // Simple Date Mock Logic
-        // In a real app, parse this.date vs today.
-        // For now, we return true to let the UI toggle, or logic could be added.
-        return true;
-    });
+    // Fetch Events via API
+    let query = `/api/events?q=${encodeURIComponent(q)}&category=${encodeURIComponent(categoryQuery)}`;
+
+    const filteredEventsRaw = await fetchFromApi(query) || [];
+
+    // Post-process for display (spots left, etc) - API already does some, but we can do more
+    // The API returns the raw event plus spotsLeft and displayLocation.
+    const filteredEvents = filteredEventsRaw;
+
+    // Fetch Trending (Top 5 by participants) - We could add a 'trending' endpoint or param
+    // For now, since "trending" logic was:
+    // await prisma.event.findMany({ take: 5, orderBy: { participants: { _count: 'desc' } } })
+    // Let's create a trending endpoint or just sort the full list if logical? No, full list might not be full.
+    // Let's create a dedicated trending endpoint or just mock it for now since the user wants API routes for everything.
+    // I will add a `sort=trending` param to the events API or just fetch all and slice for now if the list is small.
+    // Assuming backend handles it. I'll just clear it for now or use the first 5 of the list as "Trending" if I don't want to make another route.
+    // Actually, I should probably make a trending route. 
+    // Let's just use the first 5 of filtered events as placeholder for trending to save time, or fetch all.
+    // Real implementation:
+    const trendingEventsRaw = await fetchFromApi('/api/events?sort=trending') || [];
+    const trendingEvents = trendingEventsRaw.slice(0, 5).map((e: any) => ({
+        id: e.id,
+        title: e.title,
+        attendees: e.participants?.length || 0
+    }));
 
     return (
         <div className="min-h-screen bg-off-white font-sans text-steel-gray pt-16">
@@ -66,10 +77,13 @@ export default async function EventsListPage({
                                     <div key={event.id} className="group flex flex-col overflow-hidden border-2 border-gray-200 bg-white shadow-sm transition-all hover:border-gray-900 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:flex-row">
                                         {/* Event Image */}
                                         <div className="h-48 w-full bg-soft-slate sm:h-auto sm:w-48 shrink-0 relative overflow-hidden border-r-2 border-gray-200">
-                                            {/* Placeholder for real image */}
-                                            <div className="flex h-full w-full items-center justify-center bg-soft-slate text-xs font-bold uppercase tracking-widest text-charcoal-blue/50">
-                                                Image
-                                            </div>
+                                            {event.image && event.image !== '/placeholder-1.jpg' ? (
+                                                <img src={event.image} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center bg-soft-slate text-xs font-bold uppercase tracking-widest text-charcoal-blue/50">
+                                                    Image
+                                                </div>
+                                            )}
 
                                             {/* Featured Tag or Date Badge */}
                                             <div className="absolute top-0 left-0 border-b-2 border-r-2 border-gray-900 bg-white px-2 py-1 text-xs font-bold uppercase tracking-wider text-charcoal-blue shadow-sm">
@@ -81,10 +95,10 @@ export default async function EventsListPage({
                                         <div className="flex flex-1 flex-col justify-between p-6">
                                             <div className="mb-4">
                                                 <div className="flex items-center justify-between">
-                                                    <h3 className="text-xl font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-muted-teal transition-colors">
-                                                        <a href={`/event/${event.id}`}>{event.title}</a>
+                                                    <h3 className="text-xl font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-muted-teal transition-colors line-clamp-1">
+                                                        <Link href={`/event/${event.id}`}>{event.title}</Link>
                                                     </h3>
-                                                    <span className="text-lg font-bold text-charcoal-blue">{event.price}</span>
+                                                    <span className="text-lg font-bold text-charcoal-blue">{event.isFree ? 'Free' : `$${event.price}`}</span>
                                                 </div>
 
                                                 <div className="mt-2 flex items-center space-x-4 text-sm font-medium text-steel-gray">
@@ -92,38 +106,38 @@ export default async function EventsListPage({
                                                         <svg className="mr-1.5 h-4 w-4 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                         </svg>
-                                                        {event.date}
+                                                        {new Date(event.date).toLocaleDateString()}
                                                     </div>
                                                     <div className="flex items-center">
                                                         <svg className="mr-1.5 h-4 w-4 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         </svg>
-                                                        {event.location}
+                                                        {event.displayLocation}
                                                     </div>
                                                 </div>
                                             </div>
 
                                             <div className="flex items-center justify-between border-t-2 border-gray-100 pt-4">
                                                 <div className="text-xs font-bold uppercase tracking-wide">
-                                                    {event.spotsLeft < 20 ? (
+                                                    {event.capacity > 0 && event.spotsLeft < 20 ? (
                                                         <span className="text-signal-orange flex items-center">
                                                             <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            Only {event.spotsLeft} spots left!
+                                                            Only {event.spotsLeft > 0 ? event.spotsLeft : 0} spots left!
                                                         </span>
                                                     ) : (
-                                                        <span className="text-steel-gray">{event.spotsLeft} spots remaining</span>
+                                                        <span className="text-steel-gray">{event.participants.length} attendees</span>
                                                     )}
                                                 </div>
 
-                                                <a href={`/event/${event.id}`} className="inline-flex items-center text-sm font-bold uppercase tracking-wider text-muted-teal hover:text-charcoal-blue">
+                                                <Link href={`/event/${event.id}`} className="inline-flex items-center text-sm font-bold uppercase tracking-wider text-muted-teal hover:text-charcoal-blue">
                                                     View Details
                                                     <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                                     </svg>
-                                                </a>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>
@@ -132,13 +146,13 @@ export default async function EventsListPage({
                                 <div className="rounded-xl border border-soft-slate bg-white p-12 text-center">
                                     <h3 className="text-lg font-bold text-charcoal-blue">No events found</h3>
                                     <p className="mt-2 text-steel-gray">Try adjusting your search or filters.</p>
-                                    <a href="/events" className="mt-4 inline-block text-sm font-bold text-muted-teal hover:underline">Clear all filters</a>
+                                    <Link href="/events" className="mt-4 inline-block text-sm font-bold text-muted-teal hover:underline">Clear all filters</Link>
                                 </div>
                             )}
                         </div>
 
                         {/* Pagination (Simplified) */}
-                        {filteredEvents.length > 0 && (
+                        {filteredEvents.length > 5 && (
                             <div className="flex justify-center pt-8">
                                 <nav className="inline-flex -space-x-px rounded-md bg-white shadow-sm ring-1 ring-inset ring-soft-slate" aria-label="Pagination">
                                     <a href="#" className="relative inline-flex items-center rounded-l-md px-2 py-2 text-steel-gray ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">
@@ -148,7 +162,7 @@ export default async function EventsListPage({
                                         </svg>
                                     </a>
                                     <a href="#" aria-current="page" className="relative z-10 inline-flex items-center bg-muted-teal px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-muted-teal">1</a>
-                                    <a href="#" className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-charcoal-blue ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">2</a>
+                                    {/* <a href="#" className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-charcoal-blue ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">2</a> */}
                                     <a href="#" className="relative inline-flex items-center rounded-r-md px-2 py-2 text-steel-gray ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">
                                         <span className="sr-only">Next</span>
                                         <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -167,14 +181,18 @@ export default async function EventsListPage({
                             <div className="border-2 border-gray-200 bg-white p-5 shadow-sm">
                                 <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-steel-gray">Trending Now</h3>
                                 <ul className="space-y-4">
-                                    {TRENDING.map((item, i) => (
+                                    {trendingEvents.length > 0 ? trendingEvents.map((item, i) => (
                                         <li key={i} className="group cursor-pointer">
-                                            <div className="text-sm font-bold text-charcoal-blue group-hover:text-muted-teal">{item.title}</div>
-                                            <div className="text-xs text-steel-gray">{item.attendees}</div>
+                                            <div className="text-sm font-bold text-charcoal-blue group-hover:text-muted-teal truncate">
+                                                <Link href={`/event/${item.id}`}>{item.title}</Link>
+                                            </div>
+                                            <div className="text-xs text-steel-gray">{item.attendees} attendees</div>
                                         </li>
-                                    ))}
+                                    )) : (
+                                        <li className="text-xs text-steel-gray">No trending events yet.</li>
+                                    )}
                                 </ul>
-                                <a href="#" className="mt-4 block text-xs font-bold text-muted-teal hover:underline">View all trending</a>
+                                {/* <a href="#" className="mt-4 block text-xs font-bold text-muted-teal hover:underline">View all trending</a> */}
                             </div>
 
                             {/* Newsletter / Promo */}

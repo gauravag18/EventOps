@@ -3,6 +3,7 @@ import { Rajdhani, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Providers } from "@/components/Providers";
+import { ToastProvider } from "@/components/ToastProvider";
 
 const rajdhani = Rajdhani({
   variable: "--font-rajdhani",
@@ -31,8 +32,10 @@ export default function RootLayout({
         className={`${rajdhani.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <Navbar />
-          {children}
+          <ToastProvider>
+            <Navbar />
+            {children}
+          </ToastProvider>
         </Providers>
       </body>
     </html>

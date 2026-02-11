@@ -1,41 +1,7 @@
 import React from "react";
 import Link from "next/link";
-
-/* MOCK DATA */
-const MOCK_TICKETS = [
-  {
-    id: "t1",
-    status: "VALID",
-    event: {
-      id: "1",
-      title: "Tech Conference 2026",
-      date: "Feb 15, 2026",
-      time: "09:00 AM - 05:00 PM",
-      location: "San Francisco, CA",
-      venue: "Moscone Center",
-      organizer: "TechEvents Inc.",
-    },
-    ticketType: "General Admission",
-    purchaseDate: "Jan 28, 2026",
-    price: "$299",
-  },
-  {
-    id: "t2",
-    status: "USED",
-    event: {
-      id: "2",
-      title: "Design Workshop",
-      date: "Feb 20, 2026",
-      time: "10:00 AM - 04:00 PM",
-      location: "New York, NY",
-      venue: "Design Hub",
-      organizer: "Creative Studios",
-    },
-    ticketType: "VIP Pass",
-    purchaseDate: "Jan 15, 2026",
-    price: "$149",
-  },
-];
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
 
 export default async function MyTicketPage({
   params,
@@ -43,9 +9,20 @@ export default async function MyTicketPage({
   params: Promise<{ ticketId: string }>;
 }) {
   const { ticketId } = await params;
-  const ticket = MOCK_TICKETS.find((t) => t.id === ticketId);
+
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+    include: {
+      event: {
+        include: {
+          organizers: true
+        }
+      }
+    }
+  });
 
   if (!ticket) {
+    // For now, simple 404
     return (
       <div className="min-h-screen flex items-center justify-center bg-off-white">
         <div className="text-center border-2 border-soft-slate bg-white p-12">
@@ -54,15 +31,34 @@ export default async function MyTicketPage({
           </svg>
           <h2 className="mt-4 text-2xl font-bold text-charcoal-blue">Ticket Not Found</h2>
           <p className="mt-2 text-steel-gray">The ticket you're looking for doesn't exist.</p>
-          <a href="/attendee/dashboard" className="mt-6 inline-block border-2 border-charcoal-blue bg-charcoal-blue px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-charcoal-blue">
+          <Link href="/attendee/dashboard" className="mt-6 inline-block border-2 border-charcoal-blue bg-charcoal-blue px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-charcoal-blue">
             Back to Dashboard
-          </a>
+          </Link>
         </div>
       </div>
     );
   }
 
   const isActive = ticket.status === "VALID";
+  const event = ticket.event;
+  const organizerName = event.organizers[0]?.name || 'EventOps Organizer';
+
+  // Date Formatting
+  const eventDate = new Date(event.date);
+  const dateStr = eventDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  const timeStr = eventDate.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  const purchaseDateStr = new Date(ticket.createdAt).toLocaleDateString();
+  const locationParts = event.location ? event.location.split('|') : [];
+  const displayLocation = locationParts[0] || 'TBD';
 
   return (
     <div className="min-h-screen bg-off-white font-sans text-steel-gray pt-16">
@@ -84,27 +80,27 @@ export default async function MyTicketPage({
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="max-w-2xl">
               <h1 className="text-4xl font-extrabold tracking-tight text-charcoal-blue uppercase">
-                {ticket.event.title}
+                {event.title}
               </h1>
               <div className="mt-4 flex flex-wrap gap-6 text-sm font-medium text-steel-gray">
                 <div className="flex items-center gap-2">
                   <svg className="h-5 w-5 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span>{ticket.event.date}</span>
+                  <span>{dateStr}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <svg className="h-5 w-5 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span>{ticket.event.time}</span>
+                  <span>{timeStr}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <svg className="h-5 w-5 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span>{ticket.event.location}</span>
+                  <span>{displayLocation}</span>
                 </div>
               </div>
             </div>
@@ -188,7 +184,7 @@ export default async function MyTicketPage({
                       Ticket ID
                     </div>
                     <div className="mt-2 font-mono text-lg font-bold text-charcoal-blue">
-                      {ticket.id.toUpperCase()}
+                      {ticket.id.split('-')[0].toUpperCase()}
                     </div>
                   </div>
 
@@ -198,7 +194,7 @@ export default async function MyTicketPage({
                       Ticket Type
                     </div>
                     <div className="mt-2 text-lg font-bold text-charcoal-blue">
-                      {ticket.ticketType}
+                      General Admission
                     </div>
                   </div>
 
@@ -208,7 +204,7 @@ export default async function MyTicketPage({
                       Purchase Date
                     </div>
                     <div className="mt-2 text-lg font-bold text-charcoal-blue">
-                      {ticket.purchaseDate}
+                      {purchaseDateStr}
                     </div>
                   </div>
 
@@ -218,7 +214,7 @@ export default async function MyTicketPage({
                       Price Paid
                     </div>
                     <div className="mt-2 text-lg font-bold text-charcoal-blue">
-                      {ticket.price}
+                      {event.isFree ? 'Free' : `$${event.price}`}
                     </div>
                   </div>
                 </div>
@@ -274,8 +270,8 @@ export default async function MyTicketPage({
                       </svg>
                       <span className="text-xs font-bold uppercase tracking-wider">Venue</span>
                     </div>
-                    <div className="font-bold text-charcoal-blue">{ticket.event.venue}</div>
-                    <div className="mt-1 text-sm text-steel-gray">{ticket.event.location}</div>
+                    {/* <div className="font-bold text-charcoal-blue">{ticket.event.venue}</div> */}
+                    <div className="mt-1 text-sm text-steel-gray">{displayLocation}</div>
                   </div>
 
                   <div className="border-t-2 border-gray-100 pt-6">
@@ -285,7 +281,7 @@ export default async function MyTicketPage({
                       </svg>
                       <span className="text-xs font-bold uppercase tracking-wider">Organizer</span>
                     </div>
-                    <div className="font-bold text-charcoal-blue">{ticket.event.organizer}</div>
+                    <div className="font-bold text-charcoal-blue">{organizerName}</div>
                     <a href="#" className="mt-2 inline-block text-sm font-medium text-muted-teal hover:underline">
                       Contact Support
                     </a>
@@ -294,7 +290,7 @@ export default async function MyTicketPage({
 
                 <div className="mt-6 border-t-2 border-gray-100 pt-6">
                   <a
-                    href={`/event/${ticket.event.id}`}
+                    href={`/event/${event.id}`}
                     className="flex w-full items-center justify-center border-2 border-charcoal-blue bg-charcoal-blue px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-charcoal-blue"
                   >
                     View Event Details

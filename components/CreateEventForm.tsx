@@ -1,8 +1,17 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CATEGORIES } from '@/lib/data';
 import Link from 'next/link';
+
+import dynamic from 'next/dynamic';
+
+// Dynamically import Leaflet component to avoid SSR issues
+const LocationPicker = dynamic(() => import('./LocationPicker'), {
+    ssr: false,
+    loading: () => <div className="h-[300px] w-full bg-off-white animate-pulse flex items-center justify-center text-steel-gray">Loading Map...</div>
+});
 
 // Detailed steps for the form wizard
 const STEPS = [
@@ -19,6 +28,7 @@ interface EventFormData {
     date: string;
     time: string;
     location: string;
+    coordinates?: string; // New field for lat,lng
     description: string;
     image: string;
     capacity: number;
@@ -29,9 +39,10 @@ interface EventFormData {
 interface CreateEventFormProps {
     initialData?: EventFormData;
     isEditMode?: boolean;
+    eventId?: string;
 }
 
-export default function CreateEventForm({ initialData, isEditMode = false }: CreateEventFormProps) {
+export default function CreateEventForm({ initialData, isEditMode = false, eventId }: CreateEventFormProps) {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState<EventFormData>(initialData || {
         title: '',
@@ -59,10 +70,57 @@ export default function CreateEventForm({ initialData, isEditMode = false }: Cre
     const nextStep = () => setStep(prev => Math.min(prev + 1, STEPS.length));
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Submitting Event:", formData);
-        alert("Event Created! (Simulation)");
+
+        // Final validation if strictly needed, otherwise trust backend
+        if (step !== STEPS.length) {
+            // Just in case they somehow triggered submit early
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            // Prepare payload - if coordinates exist, append them to location string using a delimiter
+            // This is a workaround since we don't have a migration for coordinates column yet
+            const payload = {
+                ...formData,
+                location: formData.coordinates
+                    ? `${formData.location}|${formData.coordinates}`
+                    : formData.location
+            };
+
+            const url = isEditMode && eventId ? `/api/events/${eventId}` : '/api/events/create';
+            const method = isEditMode && eventId ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Something went wrong');
+            }
+
+            // Redirect to the new event page or dashboard
+            router.push(`/organizer/dashboard`); // Or `/events/${data.eventId}`
+            router.refresh();
+
+        } catch (error) {
+            console.error("Submission error:", error);
+            alert(error instanceof Error ? error.message : "Failed to create event");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     // Calculate progress percentage
@@ -246,19 +304,57 @@ export default function CreateEventForm({ initialData, isEditMode = false }: Cre
                                             </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="block text-sm font-bold text-charcoal-blue uppercase tracking-wider">Location</label>
-                                            <div className="relative">
-                                                <input
-                                                    type="text"
-                                                    name="location"
-                                                    value={formData.location}
-                                                    onChange={handleChange}
-                                                    placeholder="Venue name or address"
-                                                    className="w-full pl-11 pr-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none transition-all placeholder:text-steel-gray/50 bg-white text-charcoal-blue"
-                                                    required
-                                                />
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-signal-orange text-lg">📍</span>
+                                            <label className="block text-sm font-bold text-charcoal-blue uppercase tracking-wider">Location / Venue Name</label>
+                                            <div className="relative flex gap-2">
+                                                <div className="relative flex-1">
+                                                    <input
+                                                        type="text"
+                                                        name="location"
+                                                        value={formData.location}
+                                                        onChange={handleChange}
+                                                        placeholder="Venue name or address"
+                                                        className="w-full pl-11 pr-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none transition-all placeholder:text-steel-gray/50 bg-white text-charcoal-blue"
+                                                        required
+                                                    />
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-signal-orange text-lg">📍</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={async () => {
+                                                        if (!formData.location) return;
+                                                        try {
+                                                            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(formData.location)}`);
+                                                            const data = await res.json();
+                                                            if (data && data[0]) {
+                                                                const coords = `${data[0].lat},${data[0].lon}`;
+                                                                setFormData(prev => ({ ...prev, coordinates: coords }));
+                                                            } else {
+                                                                alert('Location not found');
+                                                            }
+                                                        } catch (e) {
+                                                            console.error(e);
+                                                            alert('Failed to fetch coordinates');
+                                                        }
+                                                    }}
+                                                    className="px-4 py-3 bg-charcoal-blue text-white font-bold uppercase tracking-wider text-sm border-2 border-charcoal-blue hover:bg-white hover:text-charcoal-blue transition-colors"
+                                                >
+                                                    Find
+                                                </button>
                                             </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <label className="block text-sm font-bold text-charcoal-blue uppercase tracking-wider">Pin on Map</label>
+                                                <span className="text-xs text-steel-gray">Optional</span>
+                                            </div>
+                                            <div className="overflow-hidden border-2 border-soft-slate">
+                                                <LocationPicker
+                                                    value={formData.coordinates || ''}
+                                                    onChange={(coords) => setFormData(prev => ({ ...prev, coordinates: coords }))}
+                                                />
+                                            </div>
+                                            <p className="text-xs text-steel-gray">Click on the map to set precise location.</p>
                                         </div>
                                     </div>
                                 )}
@@ -394,7 +490,7 @@ export default function CreateEventForm({ initialData, isEditMode = false }: Cre
                                     onClick={handleSubmit}
                                     className="bg-signal-orange hover:bg-signal-orange/90 text-white px-8 py-3 font-bold uppercase tracking-wider transition-all border-2 border-signal-orange hover:shadow-[4px_4px_0px_0px_rgba(194,65,12,0.5)]"
                                 >
-                                    {isEditMode ? 'Save Changes' : 'Publish Event'}
+                                    {isSubmitting ? 'Creating...' : (isEditMode ? 'Save Changes' : 'Publish Event')}
                                 </button>
                             )}
                         </div>
