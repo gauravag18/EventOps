@@ -221,7 +221,7 @@ export default function SignupPage() {
                     className="w-full h-full bg-cover bg-center opacity-50 mix-blend-overlay"
                     style={{ backgroundImage: "url('/dispatch_bg.png')" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-l from-charcoal-blue/90 to-signal-orange/40" />
+                <div className="absolute inset-0 bg-linear-to-l from-charcoal-blue/90 to-signal-orange/40" />
 
                 <div className="absolute bottom-20 right-12 text-white max-w-md text-right p-8">
                     <h2 className="text-4xl font-bold mb-4 font-sans tracking-tight">Join EventOps</h2>
