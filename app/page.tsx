@@ -44,13 +44,13 @@ export default async function LandingPage() {
               <div className="flex flex-wrap items-center gap-4">
                 <Link
                   href="/events"
-                  className="relative overflow-hidden border-2 border-gray-900 bg-transparent px-8 py-4 font-sans text-lg font-bold uppercase tracking-wider text-gray-900 transition-all hover:bg-gray-900 hover:text-white"
+                  className="relative overflow-hidden border-2 border-gray-900 bg-transparent px-8 py-4 font-sans text-lg font-bold  tracking-wider text-gray-900 transition-all hover:bg-gray-900 hover:text-white"
                 >
                   <span className="relative z-10">Browse Events</span>
                 </Link>
                 <Link
                   href="/organizer/create-event"
-                  className="relative overflow-hidden border-2 border-signal-orange bg-signal-orange px-8 py-4 font-sans text-lg font-bold uppercase tracking-wider text-white transition-all hover:bg-transparent hover:text-signal-orange"
+                  className="relative overflow-hidden border-2 border-signal-orange bg-signal-orange px-8 py-4 font-sans text-lg font-bold  tracking-wider text-white transition-all hover:bg-transparent hover:text-signal-orange"
                 >
                   <span className="relative z-10">Create Event</span>
                 </Link>
@@ -77,7 +77,7 @@ export default async function LandingPage() {
             <div className="relative hidden lg:block">
 
               {/* Brand label */}
-              <span className="mb-4 inline-block border-2 border-gray-900 px-4 py-1 text-sm font-bold uppercase tracking-wider text-gray-900 bg-white">
+              <span className="mb-4 inline-block border-2 border-gray-900 px-4 py-1 text-sm font-bold  tracking-wider text-gray-900 bg-white">
                 EventOps
               </span>
 
@@ -103,7 +103,7 @@ export default async function LandingPage() {
 
               {/* Floating stat card */}
               <div className="absolute -bottom-10 -left-10 border-2 border-gray-900 bg-gray-900 px-6 py-4 text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]">
-                <div className="text-xs font-bold uppercase tracking-wider opacity-80">Live Attendees</div>
+                <div className="text-xs font-bold  tracking-wider opacity-80">Live Attendees</div>
                 <div className="text-2xl font-bold font-mono">1,248</div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default async function LandingPage() {
                 className="group relative overflow-hidden border-l-4 border-signal-orange bg-white/5 p-8 transition-all hover:border-signal-orange hover:bg-white/10"
               >
                 <div className="absolute top-0 right-0 h-4 w-4 border-t border-r border-white/20" />
-                <h3 className="mb-4 font-sans text-2xl font-bold tracking-tight uppercase text-signal-orange">{feature.title}</h3>
+                <h3 className="mb-4 font-sans text-2xl font-bold tracking-tight  text-signal-orange">{feature.title}</h3>
                 <p className="text-gray-300 font-sans border-l border-white/10 pl-4">{feature.description}</p>
               </div>
             ))}
@@ -195,7 +195,7 @@ export default async function LandingPage() {
 
                   <div className="p-6">
                     <div className="mb-3 flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5 border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-teal-900">
+                      <span className="inline-flex items-center gap-1.5 border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold  tracking-wider text-teal-900">
                         {event.category}
                       </span>
                       <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -224,7 +224,7 @@ export default async function LandingPage() {
                       </div>
                       <Link
                         href={`/event/${event.id}`}
-                        className="inline-flex items-center gap-1 border-2 border-gray-900 bg-gray-900 px-4 py-2 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-white hover:text-gray-900"
+                        className="inline-flex items-center gap-1 border-2 border-gray-900 bg-gray-900 px-4 py-2 text-sm font-bold  tracking-wider text-white transition hover:bg-white hover:text-gray-900"
                       >
                         View Details
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -241,7 +241,7 @@ export default async function LandingPage() {
           <div className="mt-16 text-center">
             <Link
               href="/events"
-              className="group inline-flex items-center gap-2 border-b-2 border-teal-600 pb-1 font-sans text-lg font-bold text-teal-700 uppercase tracking-widest transition-all hover:bg-teal-50 hover:px-4"
+              className="group inline-flex items-center gap-2 border-b-2 border-teal-600 pb-1 font-sans text-lg font-bold text-teal-700  tracking-widest transition-all hover:bg-teal-50 hover:px-4"
             >
               Explore All Operations
               <svg className="h-5 w-5 transition-transform group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -256,8 +256,8 @@ export default async function LandingPage() {
       <footer className="border-t-2 border-gray-200 bg-white py-12">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <span className="text-xl font-extrabold uppercase tracking-tighter text-gray-900">EventOps</span>
-            <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <span className="text-xl font-extrabold  tracking-tighter text-gray-900">EventOps</span>
+            <p className="text-sm font-medium text-gray-500  tracking-wider">
               © 2026 EventOps. All rights reserved.
             </p>
           </div>

@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
-import { Rajdhani, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Providers } from "@/components/Providers";
 import { ToastProvider } from "@/components/ToastProvider";
 
-const rajdhani = Rajdhani({
-  variable: "--font-rajdhani",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space",
   subsets: ["latin"],
 });
 
@@ -29,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${rajdhani.variable} ${geistMono.variable} antialiased`}
+        className={`${bricolage.variable} ${spaceGrotesk.variable} antialiased font-sans`}
       >
         <Providers>
           <ToastProvider>

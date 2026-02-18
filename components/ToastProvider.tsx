@@ -115,7 +115,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                             )}
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-sm font-bold uppercase tracking-wider">
+                            <h3 className="text-sm font-bold  tracking-wider">
                                 {toast.type === 'error' ? 'Error' : toast.type === 'success' ? 'Success' : 'Notice'}
                             </h3>
                             <p className="text-sm font-medium text-steel-gray mt-1 leading-snug">{toast.message}</p>

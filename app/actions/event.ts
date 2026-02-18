@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAuthOptions } from "@/lib/auth";
+import { invalidateEventCache } from "@/lib/event-cache";
 
 export async function registerForEvent(eventId: string) {
     const session = await getServerSession(getAuthOptions());
@@ -61,6 +62,8 @@ export async function registerForEvent(eventId: string) {
                 }
             }
         });
+
+        await invalidateEventCache(eventId);
 
         revalidatePath(`/event/${eventId}`);
         revalidatePath(`/events`);

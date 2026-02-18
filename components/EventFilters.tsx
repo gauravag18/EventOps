@@ -49,7 +49,7 @@ export default function EventFilters() {
                         placeholder="SEARCH EVENTS..."
                         defaultValue={currentSearch}
                         onChange={(e) => updateFilter('q', e.target.value)}
-                        className="w-full border-2 border-gray-200 bg-off-white px-4 py-2 text-sm font-bold uppercase tracking-wide text-charcoal-blue placeholder-steel-gray/50 focus:border-charcoal-blue focus:outline-none focus:ring-0 disabled:opacity-50"
+                        className="w-full border-2 border-gray-200 bg-off-white px-4 py-2 text-sm font-bold  tracking-wide text-charcoal-blue placeholder-steel-gray/50 focus:border-charcoal-blue focus:outline-none focus:ring-0 disabled:opacity-50"
                         disabled={isPending}
                     />
                     <svg className="absolute top-2.5 right-3 h-4 w-4 text-steel-gray/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,7 +71,7 @@ export default function EventFilters() {
                                 onChange={() => updateFilter('category', cat)}
                                 className="h-4 w-4 border-2 border-gray-400 text-charcoal-blue focus:ring-0 rounded-none checked:bg-charcoal-blue hover:border-gray-900 transition-colors"
                             />
-                            <span className={`text-sm tracking-wide uppercase ${currentCategory === cat ? 'font-bold text-charcoal-blue' : 'text-steel-gray font-medium group-hover:text-charcoal-blue'}`}>
+                            <span className={`text-sm tracking-wide  ${currentCategory === cat ? 'font-bold text-charcoal-blue' : 'text-steel-gray font-medium group-hover:text-charcoal-blue'}`}>
                                 {cat}
                             </span>
                         </label>
@@ -92,7 +92,7 @@ export default function EventFilters() {
                                 onChange={() => updateFilter('date', label === 'Any Date' ? '' : label)}
                                 className="h-4 w-4 border-2 border-gray-400 text-charcoal-blue focus:ring-0 rounded-none checked:bg-charcoal-blue hover:border-gray-900 transition-colors"
                             />
-                            <span className={`text-sm tracking-wide uppercase ${((currentDate === label) || (label === 'Any Date' && !currentDate)) ? 'text-charcoal-blue font-bold' : 'text-steel-gray font-medium group-hover:text-charcoal-blue'}`}>
+                            <span className={`text-sm tracking-wide  ${((currentDate === label) || (label === 'Any Date' && !currentDate)) ? 'text-charcoal-blue font-bold' : 'text-steel-gray font-medium group-hover:text-charcoal-blue'}`}>
                                 {label}
                             </span>
                         </label>
@@ -102,7 +102,7 @@ export default function EventFilters() {
 
             <button
                 onClick={handleReset}
-                className="w-full border-2 border-gray-200 bg-white py-2 text-sm font-bold uppercase tracking-wider text-charcoal-blue hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all"
+                className="w-full border-2 border-gray-200 bg-white py-2 text-sm font-bold  tracking-wider text-charcoal-blue hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all"
             >
                 Reset Filters
             </button>

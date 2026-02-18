@@ -60,7 +60,7 @@ export default async function AttendeeDashboard() {
 
                         <Link
                             href="/events"
-                            className="group inline-flex items-center gap-2 border-2 border-muted-teal bg-muted-teal px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-muted-teal"
+                            className="group inline-flex items-center gap-2 border-2 border-muted-teal bg-muted-teal px-8 py-4 text-sm font-bold  tracking-widest text-white transition hover:bg-white hover:text-muted-teal"
                         >
                             Browse Events
                             <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,7 +82,7 @@ export default async function AttendeeDashboard() {
 
                             <div className="relative z-10">
                                 <div className="mb-2 flex items-center justify-between">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-white/70">
+                                    <span className="text-xs font-bold  tracking-widest text-white/70">
                                         Total Tickets
                                     </span>
                                     <svg className="h-8 w-8 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,7 +106,7 @@ export default async function AttendeeDashboard() {
 
                             <div className="relative z-10 px-8 py-10">
                                 <div className="mb-2 flex items-center justify-between">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-muted-teal">
+                                    <span className="text-xs font-bold  tracking-widest text-muted-teal">
                                         Upcoming
                                     </span>
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted-teal/10">
@@ -131,7 +131,7 @@ export default async function AttendeeDashboard() {
 
                             <div className="relative z-10 px-8 py-10">
                                 <div className="mb-2 flex items-center justify-between">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-600">
+                                    <span className="text-xs font-bold  tracking-widest text-gray-600">
                                         Past / Attended
                                     </span>
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
@@ -160,7 +160,7 @@ export default async function AttendeeDashboard() {
 
                         <section>
                             <div className="mb-8 flex items-center justify-between">
-                                <h2 className="text-2xl font-bold uppercase tracking-widest text-charcoal-blue">
+                                <h2 className="text-2xl font-bold  tracking-widest text-charcoal-blue">
                                     All Tickets
                                 </h2>
                             </div>
@@ -184,13 +184,13 @@ export default async function AttendeeDashboard() {
 
                                             {/* Right side - Status badge and button */}
                                             <div className="absolute right-6 top-6 flex flex-col items-end gap-3">
-                                                <span className={`inline-block border px-4 py-2 text-xs font-bold uppercase tracking-widest ${isActive ? "border-muted-teal bg-muted-teal/10 text-muted-teal" : "border-gray-300 bg-gray-100 text-gray-500"}`}>
+                                                <span className={`inline-block border px-4 py-2 text-xs font-bold  tracking-widest ${isActive ? "border-muted-teal bg-muted-teal/10 text-muted-teal" : "border-gray-300 bg-gray-100 text-gray-500"}`}>
                                                     {isActive ? "Valid" : "Past"}
                                                 </span>
 
                                                 <Link
                                                     href={`/attendee/ticket/${ticket.id}`}
-                                                    className="inline-flex shrink-0 items-center gap-2 border-2 border-charcoal-blue bg-charcoal-blue px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-charcoal-blue"
+                                                    className="inline-flex shrink-0 items-center gap-2 border-2 border-charcoal-blue bg-charcoal-blue px-6 py-3 text-sm font-bold  tracking-widest text-white transition hover:bg-white hover:text-charcoal-blue"
                                                 >
                                                     View Ticket
                                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,7 +200,7 @@ export default async function AttendeeDashboard() {
                                             </div>
 
                                             <div className="p-8 pl-10 pr-32">
-                                                <h3 className="mb-3 text-xl font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-muted-teal transition">
+                                                <h3 className="mb-3 text-xl font-bold  tracking-tight text-charcoal-blue group-hover:text-muted-teal transition">
                                                     {ticket.event.title}
                                                 </h3>
 
@@ -223,7 +223,7 @@ export default async function AttendeeDashboard() {
                                                 <div className="flex items-center gap-2 text-xs text-steel-gray">
                                                     <span>Registered: {new Date(ticket.createdAt).toLocaleDateString()}</span>
                                                     <span>•</span>
-                                                    <span className="font-mono">ID: {ticket.id.split('-')[0].toUpperCase()}</span>
+                                                    <span className="font-mono">ID: {ticket.id.split('-')[0].to()}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -240,12 +240,12 @@ export default async function AttendeeDashboard() {
 
                         {/* QUICK STATS */}
                         <section className="border-2 border-soft-slate bg-white p-8">
-                            <h3 className="mb-6 text-lg font-bold uppercase tracking-widest text-charcoal-blue">
+                            <h3 className="mb-6 text-lg font-bold  tracking-widest text-charcoal-blue">
                                 Your Activity
                             </h3>
                             <div className="grid gap-6 sm:grid-cols-3">
                                 <div className="border-l-4 border-muted-teal bg-muted-teal/5 px-4 py-3">
-                                    <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">
+                                    <div className="text-xs font-bold  tracking-wider text-steel-gray">
                                         Upcoming
                                     </div>
                                     <div className="mt-1 text-2xl font-bold text-charcoal-blue">
@@ -253,7 +253,7 @@ export default async function AttendeeDashboard() {
                                     </div>
                                 </div>
                                 <div className="border-l-4 border-charcoal-blue bg-charcoal-blue/5 px-4 py-3">
-                                    <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">
+                                    <div className="text-xs font-bold  tracking-wider text-steel-gray">
                                         Categories
                                     </div>
                                     <div className="mt-1 text-2xl font-bold text-charcoal-blue">
@@ -261,7 +261,7 @@ export default async function AttendeeDashboard() {
                                     </div>
                                 </div>
                                 <div className="border-l-4 border-gray-400 bg-gray-100/50 px-4 py-3">
-                                    <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">
+                                    <div className="text-xs font-bold  tracking-wider text-steel-gray">
                                         Total Events
                                     </div>
                                     <div className="mt-1 text-2xl font-bold text-charcoal-blue">
@@ -279,7 +279,7 @@ export default async function AttendeeDashboard() {
 
                             {/* UPCOMING ATTENDANCE */}
                             <section className="border-2 border-soft-slate bg-white p-8 shadow-sm">
-                                <h3 className="mb-6 text-sm font-bold uppercase tracking-wider text-steel-gray">
+                                <h3 className="mb-6 text-sm font-bold  tracking-wider text-steel-gray">
                                     Next Event
                                 </h3>
 
@@ -294,7 +294,7 @@ export default async function AttendeeDashboard() {
                                                 {/* Date Badge */}
                                                 <div className="mb-4 inline-flex items-center gap-3">
                                                     <div className="flex h-16 w-16 flex-col items-center justify-center border-2 border-muted-teal bg-muted-teal/10">
-                                                        <span className="text-xs font-bold uppercase tracking-widest text-muted-teal">
+                                                        <span className="text-xs font-bold  tracking-widest text-muted-teal">
                                                             {eventDate.toLocaleString('default', { month: 'short' })}
                                                         </span>
                                                         <span className="text-2xl font-extrabold text-muted-teal">
@@ -302,7 +302,7 @@ export default async function AttendeeDashboard() {
                                                         </span>
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="text-xs font-bold uppercase tracking-wider text-steel-gray">
+                                                        <span className="text-xs font-bold  tracking-wider text-steel-gray">
                                                             Days to go
                                                         </span>
                                                         <span className="text-3xl font-extrabold text-charcoal-blue">
@@ -311,7 +311,7 @@ export default async function AttendeeDashboard() {
                                                     </div>
                                                 </div>
 
-                                                <h4 className="mb-2 text-lg font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-muted-teal transition line-clamp-1">
+                                                <h4 className="mb-2 text-lg font-bold  tracking-tight text-charcoal-blue group-hover:text-muted-teal transition line-clamp-1">
                                                     {nextEvent.event.title}
                                                 </h4>
                                                 <p className="mb-4 text-sm font-medium text-steel-gray">
@@ -320,7 +320,7 @@ export default async function AttendeeDashboard() {
 
                                                 <Link
                                                     href={`/attendee/ticket/${nextEvent.id}`}
-                                                    className="inline-flex w-full items-center justify-center border-2 border-muted-teal bg-muted-teal px-4 py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-muted-teal"
+                                                    className="inline-flex w-full items-center justify-center border-2 border-muted-teal bg-muted-teal px-4 py-3 text-sm font-bold  tracking-widest text-white transition hover:bg-white hover:text-muted-teal"
                                                 >
                                                     View Ticket
                                                 </Link>
@@ -335,7 +335,7 @@ export default async function AttendeeDashboard() {
                             {/* RECOMMENDATIONS */}
                             <section className="border-2 border-soft-slate bg-white p-8 shadow-sm">
                                 <div className="mb-6 flex items-center justify-between">
-                                    <h3 className="text-lg font-bold uppercase tracking-widest text-charcoal-blue">
+                                    <h3 className="text-lg font-bold  tracking-widest text-charcoal-blue">
                                         Recommended For You
                                     </h3>
                                     <svg className="h-6 w-6 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -350,10 +350,10 @@ export default async function AttendeeDashboard() {
                                             className="group cursor-pointer border-2 border-soft-slate bg-white p-5 transition-all hover:border-muted-teal hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]"
                                         >
                                             <div className="mb-3 flex items-start justify-between gap-3">
-                                                <h4 className="text-base font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-muted-teal transition line-clamp-1">
+                                                <h4 className="text-base font-bold  tracking-tight text-charcoal-blue group-hover:text-muted-teal transition line-clamp-1">
                                                     {event.title}
                                                 </h4>
-                                                <span className="shrink-0 border border-muted-teal/20 bg-muted-teal/5 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-muted-teal">
+                                                <span className="shrink-0 border border-muted-teal/20 bg-muted-teal/5 px-2.5 py-1 text-xs font-bold  tracking-wider text-muted-teal">
                                                     {event.category}
                                                 </span>
                                             </div>
@@ -367,7 +367,7 @@ export default async function AttendeeDashboard() {
 
                                             <Link
                                                 href={`/event/${event.id}`}
-                                                className="inline-flex items-center gap-1 text-sm font-bold uppercase tracking-wider text-muted-teal hover:text-charcoal-blue transition"
+                                                className="inline-flex items-center gap-1 text-sm font-bold  tracking-wider text-muted-teal hover:text-charcoal-blue transition"
                                             >
                                                 View Details
                                                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -382,7 +382,7 @@ export default async function AttendeeDashboard() {
 
                                 <Link
                                     href="/events"
-                                    className="mt-6 flex w-full items-center justify-center border-2 border-charcoal-blue bg-charcoal-blue px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-charcoal-blue"
+                                    className="mt-6 flex w-full items-center justify-center border-2 border-charcoal-blue bg-charcoal-blue px-6 py-3 text-sm font-bold  tracking-widest text-white transition hover:bg-white hover:text-charcoal-blue"
                                 >
                                     Explore All Events
                                 </Link>
@@ -396,7 +396,7 @@ export default async function AttendeeDashboard() {
                                     <p className="mb-4 text-sm text-white/80">
                                         Get $20 credit for each friend who registers for an event
                                     </p>
-                                    <button className="w-full border-2 border-white bg-white px-4 py-2 text-sm font-bold uppercase tracking-wider text-charcoal-blue transition hover:bg-transparent hover:text-white">
+                                    <button className="w-full border-2 border-white bg-white px-4 py-2 text-sm font-bold  tracking-wider text-charcoal-blue transition hover:bg-transparent hover:text-white">
                                         Share Link
                                     </button>
                                 </div>

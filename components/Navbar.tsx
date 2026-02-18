@@ -22,11 +22,11 @@ export default function Navbar() {
         <>
             <nav className="fixed top-0 z-50 w-full border-b-2 border-soft-slate bg-white">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                    <Link href="/" className="text-2xl font-extrabold uppercase tracking-tighter text-charcoal-blue border-2 border-transparent hover:border-charcoal-blue px-2 -mx-2 transition-all">
+                    <Link href="/" className="text-2xl font-extrabold  tracking-tighter text-charcoal-blue border-2 border-transparent hover:border-charcoal-blue px-2 -mx-2 transition-all">
                         EventOps
                     </Link>
                     <div className="flex items-center gap-8">
-                        <Link href="/events" className="hidden md:block text-xs font-bold uppercase tracking-wider text-steel-gray transition hover:text-charcoal-blue hover:underline decoration-2 underline-offset-4">
+                        <Link href="/events" className="hidden md:block text-xs font-bold  tracking-wider text-steel-gray transition hover:text-charcoal-blue hover:underline decoration-2 underline-offset-4">
                             Browse Events
                         </Link>
 
@@ -82,7 +82,7 @@ export default function Navbar() {
                                         {session.user?.image ? (
                                             <img src={session.user.image} alt="User" className="w-full h-full object-cover" />
                                         ) : (
-                                            <span className="text-xl font-bold text-muted-teal uppercase">{session.user?.name?.[0] || 'U'}</span>
+                                            <span className="text-xl font-bold text-muted-teal ">{session.user?.name?.[0] || 'U'}</span>
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -120,7 +120,7 @@ export default function Navbar() {
                                     {/* ATTENDEE SECTION */}
                                     <div className="space-y-1">
                                         <div className="px-3 pb-2">
-                                            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-teal/80">Attendee</h4>
+                                            <h4 className="text-xs font-bold  tracking-widest text-muted-teal/80">Attendee</h4>
                                         </div>
                                         <Link
                                             href="/attendee/dashboard"
@@ -147,7 +147,7 @@ export default function Navbar() {
                                     {/* ORGANIZER SECTION */}
                                     <div className="space-y-1">
                                         <div className="px-3 pb-2">
-                                            <h4 className="text-xs font-bold uppercase tracking-widest text-signal-orange/80">Organizer</h4>
+                                            <h4 className="text-xs font-bold  tracking-widest text-signal-orange/80">Organizer</h4>
                                         </div>
                                         <Link
                                             href="/organizer/dashboard"

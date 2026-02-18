@@ -58,18 +58,18 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <Link href="/organizer/dashboard" className="text-xs font-bold uppercase tracking-widest text-steel-gray hover:text-signal-orange transition flex items-center gap-1">
+                                <Link href="/organizer/dashboard" className="text-xs font-bold  tracking-widest text-steel-gray hover:text-signal-orange transition flex items-center gap-1">
                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                     </svg>
                                     Back to Dashboard
                                 </Link>
                                 <span className="w-1 h-1 rounded-full bg-soft-slate"></span>
-                                <span className={`inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${event.status === 'PUBLISHED' ? 'border-signal-orange bg-signal-orange/10 text-signal-orange' : 'border-gray-300 text-gray-500'}`}>
+                                <span className={`inline-block px-2 py-0.5 text-[10px] font-bold  tracking-wider border ${event.status === 'PUBLISHED' ? 'border-signal-orange bg-signal-orange/10 text-signal-orange' : 'border-gray-300 text-gray-500'}`}>
                                     {event.status}
                                 </span>
                             </div>
-                            <h1 className="text-3xl font-extrabold text-charcoal-blue uppercase tracking-tight">
+                            <h1 className="text-3xl font-extrabold text-charcoal-blue  tracking-tight">
                                 {event.title}
                             </h1>
                             <div className="mt-2 flex items-center gap-4 text-sm font-medium text-steel-gray">
@@ -90,10 +90,10 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <Link href={`/organizer/event/${event.id}/edit`} className="px-5 py-2.5 bg-white border-2 border-soft-slate text-charcoal-blue font-bold uppercase tracking-widest text-xs hover:border-signal-orange hover:text-signal-orange transition">
+                            <Link href={`/organizer/event/${event.id}/edit`} className="px-5 py-2.5 bg-white border-2 border-soft-slate text-charcoal-blue font-bold  tracking-widest text-xs hover:border-signal-orange hover:text-signal-orange transition">
                                 Edit Event
                             </Link>
-                            <Link href={`/event/${event.id}`} className="px-5 py-2.5 bg-signal-orange border-2 border-signal-orange text-white font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-signal-orange transition shadow-md">
+                            <Link href={`/event/${event.id}`} className="px-5 py-2.5 bg-signal-orange border-2 border-signal-orange text-white font-bold  tracking-widest text-xs hover:bg-white hover:text-signal-orange transition shadow-md">
                                 View Public Page
                             </Link>
                         </div>
@@ -105,7 +105,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`pb-3 text-sm font-bold uppercase tracking-widest border-b-2 transition-all ${activeTab === tab
+                                className={`pb-3 text-sm font-bold  tracking-widest border-b-2 transition-all ${activeTab === tab
                                     ? 'border-signal-orange text-signal-orange'
                                     : 'border-transparent text-steel-gray hover:text-charcoal-blue'
                                     }`}
@@ -131,7 +131,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                 { label: "Conversion", value: stats.conversionRate, trend: "-2%" }
                             ].map((stat, i) => (
                                 <div key={i} className="bg-white p-6 border-2 border-soft-slate transition hover:border-signal-orange group">
-                                    <div className="text-xs font-bold uppercase tracking-widest text-steel-gray mb-2">{stat.label}</div>
+                                    <div className="text-xs font-bold  tracking-widest text-steel-gray mb-2">{stat.label}</div>
                                     <div className="text-3xl font-extrabold text-charcoal-blue mb-2">{stat.value} <span className="text-sm text-steel-gray font-medium">{stat.sub}</span></div>
                                     <div className={`text-xs font-bold ${stat.trend.startsWith('+') ? 'text-green-600' : 'text-red-500'}`}>
                                         {stat.trend} <span className="text-steel-gray font-medium">vs last week</span>
@@ -145,8 +145,8 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                             {/* Main Chart Area */}
                             <div className="lg:col-span-2 bg-white border-2 border-soft-slate p-8">
                                 <div className="flex items-center justify-between mb-8">
-                                    <h3 className="text-lg font-bold uppercase tracking-tight text-charcoal-blue">Sales Over Time</h3>
-                                    <select className="text-xs font-bold uppercase tracking-wider border-none bg-gray-100 px-3 py-1 rounded text-steel-gray focus:ring-0 cursor-pointer">
+                                    <h3 className="text-lg font-bold  tracking-tight text-charcoal-blue">Sales Over Time</h3>
+                                    <select className="text-xs font-bold  tracking-wider border-none bg-gray-100 px-3 py-1 rounded text-steel-gray focus:ring-0 cursor-pointer">
                                         <option>Last 30 Days</option>
                                         <option>Last 7 Days</option>
                                         <option>All Time</option>
@@ -158,7 +158,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                             <div key={i} className="flex-1 bg-signal-orange/80 hover:bg-signal-orange transition-all duration-300" style={{ height: `${h}%` }} />
                                         ))}
                                     </div>
-                                    <span className="relative z-10 bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-steel-gray border border-gray-200 shadow-sm">
+                                    <span className="relative z-10 bg-white px-3 py-1 text-xs font-bold  tracking-widest text-steel-gray border border-gray-200 shadow-sm">
                                         Chart Visualization
                                     </span>
                                 </div>
@@ -166,7 +166,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
 
                             {/* Activity Feed */}
                             <div className="bg-white border-2 border-soft-slate p-8">
-                                <h3 className="text-lg font-bold uppercase tracking-tight text-charcoal-blue mb-6">Recent Activity</h3>
+                                <h3 className="text-lg font-bold  tracking-tight text-charcoal-blue mb-6">Recent Activity</h3>
                                 <div className="space-y-6">
                                     {[
                                         { user: "Sarah M.", action: "bought 1 VIP Ticket", time: "2 mins ago" },
@@ -178,12 +178,12 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                             <div className="w-2 h-2 mt-2 rounded-full bg-signal-orange shrink-0"></div>
                                             <div>
                                                 <p className="text-sm font-bold text-charcoal-blue">{item.user} <span className="font-medium text-steel-gray">{item.action}</span></p>
-                                                <p className="text-xs text-gray-400 mt-1 uppercase tracking-wide">{item.time}</p>
+                                                <p className="text-xs text-gray-400 mt-1  tracking-wide">{item.time}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                                <button className="w-full mt-6 py-2 border border-soft-slate text-xs font-bold uppercase tracking-widest text-steel-gray hover:bg-off-white transition">
+                                <button className="w-full mt-6 py-2 border border-soft-slate text-xs font-bold  tracking-widest text-steel-gray hover:bg-off-white transition">
                                     View All
                                 </button>
                             </div>
@@ -206,13 +206,13 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                 />
                             </div>
                             <div className="flex gap-3">
-                                <button className="px-4 py-2 border border-soft-slate text-xs font-bold uppercase tracking-widest text-steel-gray hover:text-signal-orange hover:border-signal-orange transition flex items-center gap-2">
+                                <button className="px-4 py-2 border border-soft-slate text-xs font-bold  tracking-widest text-steel-gray hover:text-signal-orange hover:border-signal-orange transition flex items-center gap-2">
                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
                                     Export CSV
                                 </button>
-                                <button className="px-4 py-2 bg-charcoal-blue text-white text-xs font-bold uppercase tracking-widest hover:bg-charcoal-blue/90 transition shadow-md">
+                                <button className="px-4 py-2 bg-charcoal-blue text-white text-xs font-bold  tracking-widest hover:bg-charcoal-blue/90 transition shadow-md">
                                     + Add Attendee
                                 </button>
                             </div>
@@ -224,7 +224,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                 <thead className="bg-off-white border-b border-soft-slate">
                                     <tr>
                                         {["Name", "Ticket Type", "Purchase Date", "Status", "Actions"].map((h) => (
-                                            <th key={h} className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-steel-gray">{h}</th>
+                                            <th key={h} className="px-6 py-4 text-xs font-bold  tracking-wider text-steel-gray">{h}</th>
                                         ))}
                                     </tr>
                                 </thead>
@@ -236,7 +236,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                                 <div className="text-xs text-steel-gray">{attendee.email}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="inline-block px-2 py-1 bg-gray-100 text-[10px] font-bold uppercase tracking-wider text-steel-gray border border-gray-200">
+                                                <span className="inline-block px-2 py-1 bg-gray-100 text-[10px] font-bold  tracking-wider text-steel-gray border border-gray-200">
                                                     {attendee.ticket}
                                                 </span>
                                             </td>
@@ -244,7 +244,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                                 {attendee.purchaseDate}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${attendee.status === 'Confirmed' ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'
+                                                <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold  tracking-wider rounded-full ${attendee.status === 'Confirmed' ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'
                                                     }`}>
                                                     <span className={`w-1.5 h-1.5 rounded-full ${attendee.status === 'Confirmed' ? 'bg-green-600' : 'bg-red-500'
                                                         }`} />
@@ -254,11 +254,11 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     {!attendee.checkedIn ? (
-                                                        <button className="text-xs font-bold uppercase tracking-wider text-signal-orange hover:underline">
+                                                        <button className="text-xs font-bold  tracking-wider text-signal-orange hover:underline">
                                                             Check In
                                                         </button>
                                                     ) : (
-                                                        <button className="text-xs font-bold uppercase tracking-wider text-green-600 cursor-default">
+                                                        <button className="text-xs font-bold  tracking-wider text-green-600 cursor-default">
                                                             ✓ Checked In
                                                         </button>
                                                     )}
@@ -282,7 +282,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                         {/* Pagination */}
                         {attendees.length > 5 && (
                             <div className="p-4 border-t border-soft-slate flex items-center justify-between">
-                                <span className="text-xs font-bold uppercase tracking-wider text-steel-gray">Showing {attendees.length} attendees</span>
+                                <span className="text-xs font-bold  tracking-wider text-steel-gray">Showing {attendees.length} attendees</span>
                                 <div className="flex gap-2">
                                     <button className="px-3 py-1 border border-soft-slate text-xs font-bold text-steel-gray hover:bg-gray-50 disabled:opacity-50">Prev</button>
                                     <button className="px-3 py-1 border border-soft-slate text-xs font-bold text-steel-gray hover:bg-gray-50">Next</button>
@@ -295,9 +295,9 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                 {/* SETTINGS TAB */}
                 {activeTab === "Settings" && (
                     <div className="bg-white border-2 border-soft-slate p-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        <h3 className="text-lg font-bold uppercase tracking-tight text-charcoal-blue mb-4">Event Settings</h3>
+                        <h3 className="text-lg font-bold  tracking-tight text-charcoal-blue mb-4">Event Settings</h3>
                         <div className="p-4 border border-red-200 bg-red-50 rounded-sm">
-                            <h4 className="text-sm font-bold text-red-700 uppercase tracking-wide mb-2">Danger Zone</h4>
+                            <h4 className="text-sm font-bold text-red-700  tracking-wide mb-2">Danger Zone</h4>
                             <p className="text-sm text-red-600 mb-4">Deleting this event will remove it from the platform and cancel all tickets. This action cannot be undone.</p>
                             <button
                                 onClick={async () => {
@@ -317,7 +317,7 @@ export default function OrganizerEventView({ event, attendees, stats }: Organize
                                         }
                                     }
                                 }}
-                                className="px-4 py-2 bg-red-600 text-white text-xs font-bold uppercase tracking-widest hover:bg-red-700 transition"
+                                className="px-4 py-2 bg-red-600 text-white text-xs font-bold  tracking-widest hover:bg-red-700 transition"
                             >
                                 Delete Event
                             </button>

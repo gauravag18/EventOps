@@ -59,10 +59,10 @@ export default async function EventsListPage({
                     <div className="space-y-6 lg:col-span-3">
                         {/* Toolbar */}
                         <div className="flex items-center justify-between border-2 border-gray-200 bg-white px-6 py-3 shadow-sm">
-                            <span className="text-sm font-bold uppercase tracking-wider text-steel-gray">Showing <strong className="text-charcoal-blue">{filteredEvents.length}</strong> results</span>
+                            <span className="text-sm font-bold  tracking-wider text-steel-gray">Showing <strong className="text-charcoal-blue">{filteredEvents.length}</strong> results</span>
                             <div className="flex items-center space-x-2">
-                                <label className="text-sm font-bold uppercase tracking-wider text-steel-gray">Sort by:</label>
-                                <select className="border-b-2 border-gray-200 bg-transparent py-1 pl-3 pr-8 text-sm font-bold uppercase tracking-wide text-charcoal-blue focus:border-charcoal-blue focus:ring-0">
+                                <label className="text-sm font-bold  tracking-wider text-steel-gray">Sort by:</label>
+                                <select className="border-b-2 border-gray-200 bg-transparent py-1 pl-3 pr-8 text-sm font-bold  tracking-wide text-charcoal-blue focus:border-charcoal-blue focus:ring-0">
                                     <option>Most Popular</option>
                                     <option>Date: Soonest</option>
                                     <option>Newest Added</option>
@@ -80,13 +80,13 @@ export default async function EventsListPage({
                                             {event.image && event.image !== '/placeholder-1.jpg' ? (
                                                 <img src={event.image} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                             ) : (
-                                                <div className="flex h-full w-full items-center justify-center bg-soft-slate text-xs font-bold uppercase tracking-widest text-charcoal-blue/50">
+                                                <div className="flex h-full w-full items-center justify-center bg-soft-slate text-xs font-bold  tracking-widest text-charcoal-blue/50">
                                                     Image
                                                 </div>
                                             )}
 
                                             {/* Featured Tag or Date Badge */}
-                                            <div className="absolute top-0 left-0 border-b-2 border-r-2 border-gray-900 bg-white px-2 py-1 text-xs font-bold uppercase tracking-wider text-charcoal-blue shadow-sm">
+                                            <div className="absolute top-0 left-0 border-b-2 border-r-2 border-gray-900 bg-white px-2 py-1 text-xs font-bold  tracking-wider text-charcoal-blue shadow-sm">
                                                 {event.category}
                                             </div>
                                         </div>
@@ -95,7 +95,7 @@ export default async function EventsListPage({
                                         <div className="flex flex-1 flex-col justify-between p-6">
                                             <div className="mb-4">
                                                 <div className="flex items-center justify-between">
-                                                    <h3 className="text-xl font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-muted-teal transition-colors line-clamp-1">
+                                                    <h3 className="text-xl font-bold  tracking-tight text-charcoal-blue group-hover:text-muted-teal transition-colors line-clamp-1">
                                                         <Link href={`/event/${event.id}`}>{event.title}</Link>
                                                     </h3>
                                                     <span className="text-lg font-bold text-charcoal-blue">{event.isFree ? 'Free' : `$${event.price}`}</span>
@@ -119,7 +119,7 @@ export default async function EventsListPage({
                                             </div>
 
                                             <div className="flex items-center justify-between border-t-2 border-gray-100 pt-4">
-                                                <div className="text-xs font-bold uppercase tracking-wide">
+                                                <div className="text-xs font-bold  tracking-wide">
                                                     {event.capacity > 0 && event.spotsLeft < 20 ? (
                                                         <span className="text-signal-orange flex items-center">
                                                             <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,7 +132,7 @@ export default async function EventsListPage({
                                                     )}
                                                 </div>
 
-                                                <Link href={`/event/${event.id}`} className="inline-flex items-center text-sm font-bold uppercase tracking-wider text-muted-teal hover:text-charcoal-blue">
+                                                <Link href={`/event/${event.id}`} className="inline-flex items-center text-sm font-bold  tracking-wider text-muted-teal hover:text-charcoal-blue">
                                                     View Details
                                                     <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -179,7 +179,7 @@ export default async function EventsListPage({
                         <div className="sticky top-24 space-y-6">
                             {/* Trending Widget */}
                             <div className="border-2 border-gray-200 bg-white p-5 shadow-sm">
-                                <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-steel-gray">Trending Now</h3>
+                                <h3 className="mb-4 text-sm font-bold  tracking-wider text-steel-gray">Trending Now</h3>
                                 <ul className="space-y-4">
                                     {trendingEvents.length > 0 ? trendingEvents.map((item, i) => (
                                         <li key={i} className="group cursor-pointer">
@@ -208,7 +208,7 @@ export default async function EventsListPage({
                                         placeholder="you@email.com"
                                         className="w-full border-2 border-steel-gray bg-charcoal-blue/50 px-3 py-2 text-sm text-white placeholder-soft-slate focus:border-muted-teal focus:outline-none focus:ring-0"
                                     />
-                                    <button className="w-full bg-muted-teal px-3 py-2 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-white hover:text-muted-teal border-2 border-transparent hover:border-muted-teal">
+                                    <button className="w-full bg-muted-teal px-3 py-2 text-sm font-bold  tracking-wider text-white transition hover:bg-white hover:text-muted-teal border-2 border-transparent hover:border-muted-teal">
                                         Subscribe
                                     </button>
                                 </div>
@@ -216,7 +216,7 @@ export default async function EventsListPage({
 
                             {/* Featured Organizer */}
                             <div className="border-2 border-gray-200 bg-slate-50 p-5">
-                                <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-steel-gray">Featured Organizer</h3>
+                                <h3 className="mb-2 text-xs font-bold  tracking-wider text-steel-gray">Featured Organizer</h3>
                                 <div className="flex items-center space-x-3">
                                     <div className="h-10 w-10 rounded-full bg-charcoal-blue"></div>
                                     <div>
@@ -224,7 +224,7 @@ export default async function EventsListPage({
                                         <div className="text-xs text-steel-gray">12 events hosted</div>
                                     </div>
                                 </div>
-                                <button className="mt-3 w-full border-2 border-gray-200 bg-white py-1.5 text-xs font-bold uppercase tracking-wider text-steel-gray hover:border-gray-900 hover:text-charcoal-blue transition-all">
+                                <button className="mt-3 w-full border-2 border-gray-200 bg-white py-1.5 text-xs font-bold  tracking-wider text-steel-gray hover:border-gray-900 hover:text-charcoal-blue transition-all">
                                     Follow
                                 </button>
                             </div>

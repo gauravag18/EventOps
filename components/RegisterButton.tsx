@@ -40,7 +40,7 @@ export default function RegisterButton({ eventId, isFull, isRegistered }: Regist
 
     if (isRegistered) {
         return (
-            <button disabled className="w-full border-2 border-gray-300 bg-gray-100 px-8 py-4 text-sm font-bold uppercase tracking-widest text-gray-500 cursor-not-allowed opacity-75">
+            <button disabled className="w-full border-2 border-gray-300 bg-gray-100 px-8 py-4 text-sm font-bold  tracking-widest text-gray-500 cursor-not-allowed opacity-75">
                 Already Registered
             </button>
         );
@@ -48,7 +48,7 @@ export default function RegisterButton({ eventId, isFull, isRegistered }: Regist
 
     if (isFull) {
         return (
-            <button disabled className="w-full border-2 border-gray-300 bg-gray-100 px-8 py-4 text-sm font-bold uppercase tracking-widest text-gray-500 cursor-not-allowed opacity-75">
+            <button disabled className="w-full border-2 border-gray-300 bg-gray-100 px-8 py-4 text-sm font-bold  tracking-widest text-gray-500 cursor-not-allowed opacity-75">
                 Sold Out
             </button>
         );
@@ -58,7 +58,7 @@ export default function RegisterButton({ eventId, isFull, isRegistered }: Regist
         <button
             onClick={handleRegister}
             disabled={loading}
-            className="w-full border-2 border-muted-teal bg-muted-teal px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-muted-teal disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full border-2 border-muted-teal bg-muted-teal px-8 py-4 text-sm font-bold  tracking-widest text-white transition hover:bg-white hover:text-muted-teal disabled:opacity-50 disabled:cursor-not-allowed"
         >
             {loading ? 'Processing...' : 'Register Now'}
         </button>

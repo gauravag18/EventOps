@@ -81,7 +81,7 @@ export default async function OrganizerDashboard() {
 
                         <Link
                             href="/organizer/create-event"
-                            className="group inline-flex items-center gap-2 border-2 border-signal-orange bg-signal-orange px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-white hover:text-signal-orange"
+                            className="group inline-flex items-center gap-2 border-2 border-signal-orange bg-signal-orange px-8 py-4 text-sm font-bold  tracking-widest text-white transition hover:bg-white hover:text-signal-orange"
                         >
                             Create New Event
                             <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,7 +103,7 @@ export default async function OrganizerDashboard() {
 
                             <div className="relative z-10">
                                 <div className="mb-2 flex items-center justify-between">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-white/70">
+                                    <span className="text-xs font-bold  tracking-widest text-white/70">
                                         Total Revenue
                                     </span>
                                     <svg className="h-8 w-8 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,7 +127,7 @@ export default async function OrganizerDashboard() {
 
                             <div className="relative z-10 px-8 py-10">
                                 <div className="mb-2 flex items-center justify-between">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-signal-orange">
+                                    <span className="text-xs font-bold  tracking-widest text-signal-orange">
                                         Tickets Sold
                                     </span>
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-signal-orange/10">
@@ -152,7 +152,7 @@ export default async function OrganizerDashboard() {
 
                             <div className="relative z-10 px-8 py-10">
                                 <div className="mb-2 flex items-center justify-between">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-600">
+                                    <span className="text-xs font-bold  tracking-widest text-gray-600">
                                         Events
                                     </span>
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
@@ -176,12 +176,12 @@ export default async function OrganizerDashboard() {
                 {/* EVENTS LIST */}
                 <section>
                     <div className="mb-8 flex items-center justify-between">
-                        <h2 className="text-2xl font-bold uppercase tracking-widest text-charcoal-blue">
+                        <h2 className="text-2xl font-bold  tracking-widest text-charcoal-blue">
                             My Events
                         </h2>
                         {/* Filter mockup - could be functional later */}
                         <div className="flex gap-4">
-                            <select className="border-b-2 border-gray-200 bg-transparent py-1 pl-3 pr-8 text-sm font-bold uppercase tracking-wide text-charcoal-blue focus:border-charcoal-blue focus:ring-0">
+                            <select className="border-b-2 border-gray-200 bg-transparent py-1 pl-3 pr-8 text-sm font-bold  tracking-wide text-charcoal-blue focus:border-charcoal-blue focus:ring-0">
                                 <option>All Events</option>
                                 <option>Published</option>
                                 <option>Ended</option>
@@ -217,18 +217,18 @@ export default async function OrganizerDashboard() {
                                             {/* Main Info */}
                                             <div className="flex-1 p-8 pl-10">
                                                 <div className="mb-2 flex items-center gap-3">
-                                                    <span className={`inline-block border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${isPublished
+                                                    <span className={`inline-block border px-2.5 py-1 text-[10px] font-bold  tracking-wider ${isPublished
                                                         ? "border-signal-orange bg-signal-orange/10 text-signal-orange"
                                                         : "border-gray-300 bg-gray-100 text-gray-500"
                                                         }`}>
                                                         {event.status}
                                                     </span>
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-steel-gray">
+                                                    <span className="text-[10px] font-bold  tracking-wider text-steel-gray">
                                                         {event.category}
                                                     </span>
                                                 </div>
 
-                                                <h3 className="mb-3 text-xl font-bold uppercase tracking-tight text-charcoal-blue group-hover:text-signal-orange transition">
+                                                <h3 className="mb-3 text-xl font-bold  tracking-tight text-charcoal-blue group-hover:text-signal-orange transition">
                                                     {event.title}
                                                 </h3>
 
@@ -253,13 +253,13 @@ export default async function OrganizerDashboard() {
                                             <div className="border-t border-soft-slate bg-gray-50/50 p-8 lg:w-96 lg:border-l lg:border-t-0">
                                                 <div className="mb-4 grid grid-cols-2 gap-4">
                                                     <div>
-                                                        <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">Sold</div>
+                                                        <div className="text-xs font-bold  tracking-wider text-steel-gray">Sold</div>
                                                         <div className="font-mono text-lg font-bold text-charcoal-blue">
                                                             {event.sold} <span className="text-gray-400 text-sm">/ {event.capacity}</span>
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-xs font-bold uppercase tracking-wider text-steel-gray">Revenue</div>
+                                                        <div className="text-xs font-bold  tracking-wider text-steel-gray">Revenue</div>
                                                         <div className="font-mono text-lg font-bold text-charcoal-blue">
                                                             {formatCurrency(event.revenue)}
                                                         </div>
@@ -268,7 +268,7 @@ export default async function OrganizerDashboard() {
 
                                                 {/* Progress Bar */}
                                                 <div className="mb-6">
-                                                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider mb-1">
+                                                    <div className="flex items-center justify-between text-[10px] font-bold  tracking-wider mb-1">
                                                         <span>Capacity</span>
                                                         <span>{percentSold}%</span>
                                                     </div>
@@ -283,13 +283,13 @@ export default async function OrganizerDashboard() {
                                                 <div className="flex gap-3">
                                                     <Link
                                                         href={`/organizer/event/${event.id}`}
-                                                        className="flex-1 border border-soft-slate bg-white py-2 text-xs font-bold uppercase tracking-widest text-charcoal-blue hover:border-charcoal-blue hover:bg-charcoal-blue hover:text-white transition text-center"
+                                                        className="flex-1 border border-soft-slate bg-white py-2 text-xs font-bold  tracking-widest text-charcoal-blue hover:border-charcoal-blue hover:bg-charcoal-blue hover:text-white transition text-center"
                                                     >
                                                         Manage
                                                     </Link>
                                                     <Link
                                                         href={`/organizer/event/${event.id}/edit`}
-                                                        className="flex-1 border border-soft-slate bg-white py-2 text-xs font-bold uppercase tracking-widest text-steel-gray hover:border-signal-orange hover:bg-red-50 hover:text-signal-orange transition text-center"
+                                                        className="flex-1 border border-soft-slate bg-white py-2 text-xs font-bold  tracking-widest text-steel-gray hover:border-signal-orange hover:bg-red-50 hover:text-signal-orange transition text-center"
                                                     >
                                                         Edit
                                                     </Link>

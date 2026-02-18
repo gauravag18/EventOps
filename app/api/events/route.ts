@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getCachedEvents, cacheEvents } from '@/lib/event-cache';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const q = searchParams.get('q')?.toLowerCase() || '';
     const category = searchParams.get('category') || '';
+
+    // Construct Cache Key
+    const cacheKey = JSON.stringify({ q, category });
+
+    // Check Cache
+    const cachedEvents = await getCachedEvents(cacheKey);
+    if (cachedEvents) {
+        return NextResponse.json(cachedEvents);
+    }
 
     // Construct Where Clause
     const where: any = {};
@@ -36,6 +46,9 @@ export async function GET(request: NextRequest) {
             spotsLeft: event.capacity - event.participants.length,
             displayLocation: event.location ? event.location.split('|')[0] : 'TBD'
         }));
+
+        // Cache the result
+        await cacheEvents(cacheKey, processedEvents);
 
         return NextResponse.json(processedEvents);
     } catch (error) {

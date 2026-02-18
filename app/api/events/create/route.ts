@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthOptions } from "@/lib/auth";
+import { invalidateEventCache } from "@/lib/event-cache";
 
 export async function POST(req: Request) {
     try {
@@ -41,6 +42,11 @@ export async function POST(req: Request) {
                 }
             }
         });
+
+        // Initialize participants array as empty for the new event
+        // The creator is added as an organizer, not necessarily a participant
+
+        await invalidateEventCache();
 
         return NextResponse.json({ success: true, eventId: event.id });
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
+import { invalidateEventCache, getCachedEvent, cacheEvent } from "@/lib/event-cache";
 
 export async function GET(
     request: NextRequest,
@@ -10,6 +11,12 @@ export async function GET(
     const { eventId } = await context.params;
 
     try {
+        // Check Redis Cache
+        const cachedEvent = await getCachedEvent(eventId);
+        if (cachedEvent) {
+            return NextResponse.json(cachedEvent);
+        }
+
         const event = await prisma.event.findUnique({
             where: { id: eventId },
             include: {
@@ -21,6 +28,9 @@ export async function GET(
         if (!event) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
+
+        // Cache the result
+        await cacheEvent(eventId, event);
 
         return NextResponse.json(event);
     } catch (error) {
@@ -75,6 +85,9 @@ export async function PUT(
             }
         });
 
+        // Invalidate cache (both list and this specific event)
+        await invalidateEventCache(eventId);
+
         return NextResponse.json(updatedEvent);
 
     } catch (error) {
@@ -113,6 +126,9 @@ export async function DELETE(
         await prisma.event.delete({
             where: { id: eventId }
         });
+
+        // Invalidate cache (both list and this specific event)
+        await invalidateEventCache(eventId);
 
         return NextResponse.json({ success: true });
 

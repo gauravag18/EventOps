@@ -6,6 +6,7 @@ import { getAuthOptions } from "@/lib/auth";
 import RegisterButton from '@/components/RegisterButton';
 import EventMap from '@/components/EventMap';
 import { fetchFromApi } from '@/lib/api-client';
+import { unpackEventDescription } from '@/lib/event-details';
 
 export default async function EventDetailPage({
     params,
@@ -20,6 +21,10 @@ export default async function EventDetailPage({
     if (!event) {
         notFound();
     }
+
+    const details = unpackEventDescription(event.description);
+    // Use unpacked overview for the main description display if available
+    const descriptionText = details.overview || event.description || '';
 
     // Process data
     const locationParts = event.location ? event.location.split('|') : [];
@@ -95,8 +100,18 @@ export default async function EventDetailPage({
                                 <a href="#overview" className="border-b-4 border-muted-teal py-4 text-sm font-bold uppercase tracking-wider text-muted-teal whitespace-nowrap">
                                     Overview
                                 </a>
+                                {details.agenda.length > 0 && (
+                                    <a href="#agenda" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
+                                        Agenda
+                                    </a>
+                                )}
+                                {details.speakers.length > 0 && (
+                                    <a href="#speakers" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
+                                        Speakers
+                                    </a>
+                                )}
                                 <a href="#venue" className="border-b-4 border-transparent py-4 text-sm font-bold uppercase tracking-wider text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
-                                    Venue & Location
+                                    Venue & Info
                                 </a>
                             </nav>
                         </div>
@@ -106,14 +121,61 @@ export default async function EventDetailPage({
                             <section id="overview" className="scroll-mt-36 prose prose-lg prose-slate max-w-none text-steel-gray">
                                 <h3 className="text-2xl font-bold text-charcoal-blue">About this Event</h3>
                                 <p className="mt-4 leading-relaxed whitespace-pre-line">
-                                    {event.description}
+                                    {descriptionText}
                                 </p>
                             </section>
 
-                            {/* Venue Section */}
+                            {/* Agenda Section */}
+                            {details.agenda.length > 0 && (
+                                <section id="agenda" className="scroll-mt-36">
+                                    <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Event Agenda</h3>
+                                    <div className="space-y-4">
+                                        {details.agenda.map((item, idx) => (
+                                            <div key={idx} className="flex flex-col sm:flex-row gap-4 p-6 bg-white border-2 border-soft-slate hover:border-muted-teal transition-colors">
+                                                <div className="sm:w-32 shrink-0">
+                                                    <span className="inline-block px-3 py-1 bg-soft-slate text-charcoal-blue text-sm font-bold rounded">
+                                                        {item.time}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-lg font-bold text-charcoal-blue">{item.title}</h4>
+                                                    {item.description && <p className="mt-2 text-steel-gray">{item.description}</p>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Speakers Section */}
+                            {details.speakers.length > 0 && (
+                                <section id="speakers" className="scroll-mt-36">
+                                    <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Speakers</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {details.speakers.map((speaker, idx) => (
+                                            <div key={idx} className="flex items-center gap-4 p-4 bg-white border-2 border-soft-slate">
+                                                <div className="w-16 h-16 rounded-full bg-soft-slate overflow-hidden border-2 border-gray-200 shrink-0">
+                                                    {speaker.avatar ? (
+                                                        <img src={speaker.avatar} alt={speaker.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-2xl">👤</div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-charcoal-blue">{speaker.name}</h4>
+                                                    <p className="text-sm text-muted-teal font-medium uppercase tracking-wide">{speaker.role}</p>
+                                                    {speaker.company && <p className="text-sm text-steel-gray">{speaker.company}</p>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* Venue & Policies Section */}
                             <section id="venue" className="scroll-mt-36">
                                 <h3 className="mb-6 text-2xl font-bold text-charcoal-blue">Venue & Location</h3>
-                                <div className="rounded-xl border border-soft-slate bg-white p-6">
+                                <div className="rounded-xl border border-soft-slate bg-white p-6 mb-8">
                                     <div className="mb-4 w-full rounded-lg overflow-hidden bg-soft-slate/50 border-2 border-gray-100">
                                         {coordinates ? (
                                             <EventMap value={coordinates} readOnly={true} />
@@ -124,8 +186,16 @@ export default async function EventDetailPage({
                                         )}
                                     </div>
                                     <h4 className="font-bold text-charcoal-blue text-lg">{displayLocation}</h4>
-                                    {/* <p className="text-sm text-steel-gray">747 Howard St, San Francisco, CA 94103</p> */}
                                 </div>
+
+                                {details.policies && (
+                                    <>
+                                        <h3 className="mb-4 text-xl font-bold text-charcoal-blue">Policies & Additional Info</h3>
+                                        <div className="prose prose-slate text-steel-gray p-6 bg-off-white border-l-4 border-muted-teal">
+                                            <p className="whitespace-pre-line">{details.policies}</p>
+                                        </div>
+                                    </>
+                                )}
                             </section>
                         </div>
                     </div>

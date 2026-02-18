@@ -71,8 +71,8 @@ export default function SignupPage() {
             <div className="w-full lg:w-[45%] min-h-screen flex flex-col justify-center items-center p-8 pt-24 z-10 relative">
                 <div className="w-full max-w-md space-y-8 bg-white p-10 border-2 border-charcoal-blue shadow-[8px_8px_0px_0px_rgba(31,42,55,0.2)]">
                     <div className="text-center space-y-2">
-                        <h1 className="text-4xl font-black text-charcoal-blue tracking-tighter uppercase">Create Account</h1>
-                        <p className="text-sm font-medium text-steel-gray uppercase tracking-wide">
+                        <h1 className="text-4xl font-black text-charcoal-blue tracking-tighter ">Create Account</h1>
+                        <p className="text-sm font-medium text-steel-gray  tracking-wide">
                             Already have an account?{" "}
                             <Link href="/login" className="font-bold text-signal-orange hover:text-charcoal-blue hover:underline underline-offset-4 transition-all">
                                 Sign in
@@ -82,19 +82,19 @@ export default function SignupPage() {
 
                     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                         {error && (
-                            <div className="p-4 bg-red-50 border-2 border-red-200 text-red-600 text-sm font-bold uppercase tracking-wide">
+                            <div className="p-4 bg-red-50 border-2 border-red-200 text-red-600 text-sm font-bold  tracking-wide">
                                 {error}
                             </div>
                         )}
                         {success && (
-                            <div className="p-4 bg-green-50 border-2 border-green-200 text-green-700 text-sm font-bold uppercase tracking-wide">
+                            <div className="p-4 bg-green-50 border-2 border-green-200 text-green-700 text-sm font-bold  tracking-wide">
                                 {success}
                             </div>
                         )}
 
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="name" className="block text-xs font-bold text-charcoal-blue mb-1 uppercase tracking-widest">
+                                <label htmlFor="name" className="block text-xs font-bold text-charcoal-blue mb-1  tracking-widest">
                                     Full Name
                                 </label>
                                 <input
@@ -111,7 +111,7 @@ export default function SignupPage() {
                             </div>
 
                             <div>
-                                <label htmlFor="email" className="block text-xs font-bold text-charcoal-blue mb-1 uppercase tracking-widest">
+                                <label htmlFor="email" className="block text-xs font-bold text-charcoal-blue mb-1  tracking-widest">
                                     Email address
                                 </label>
                                 <input
@@ -128,7 +128,7 @@ export default function SignupPage() {
                             </div>
 
                             <div>
-                                <label htmlFor="password" className="block text-xs font-bold text-charcoal-blue mb-1 uppercase tracking-widest">
+                                <label htmlFor="password" className="block text-xs font-bold text-charcoal-blue mb-1  tracking-widest">
                                     Password
                                 </label>
                                 <input
@@ -145,7 +145,7 @@ export default function SignupPage() {
                             </div>
 
                             <div>
-                                <label htmlFor="confirmPassword" className="block text-xs font-bold text-charcoal-blue mb-1 uppercase tracking-widest">
+                                <label htmlFor="confirmPassword" className="block text-xs font-bold text-charcoal-blue mb-1  tracking-widest">
                                     Confirm Password
                                 </label>
                                 <input
@@ -166,7 +166,7 @@ export default function SignupPage() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="group relative w-full flex justify-center py-3.5 px-4 border-2 border-charcoal-blue text-sm font-black uppercase tracking-widest text-white bg-charcoal-blue hover:bg-signal-orange hover:border-signal-orange focus:outline-none transition-all shadow-none hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:shadow-none disabled:hover:translate-y-0"
+                                className="group relative w-full flex justify-center py-3.5 px-4 border-2 border-charcoal-blue text-sm font-black  tracking-widest text-white bg-charcoal-blue hover:bg-signal-orange hover:border-signal-orange focus:outline-none transition-all shadow-none hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:shadow-none disabled:hover:translate-y-0"
                             >
                                 {isLoading ? (
                                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -185,14 +185,14 @@ export default function SignupPage() {
                                 <div className="w-full border-t-2 border-soft-slate"></div>
                             </div>
                             <div className="relative flex justify-center">
-                                <span className="px-4 bg-white text-xs font-bold text-steel-gray uppercase tracking-widest">Or sign up with</span>
+                                <span className="px-4 bg-white text-xs font-bold text-steel-gray  tracking-widest">Or sign up with</span>
                             </div>
                         </div>
 
                         <div className="mt-6">
                             <button
                                 onClick={handleGoogleSignIn}
-                                className="w-full inline-flex justify-center py-3 px-4 border-2 border-soft-slate bg-white text-sm font-bold text-charcoal-blue hover:bg-off-white hover:border-charcoal-blue hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all uppercase tracking-wide"
+                                className="w-full inline-flex justify-center py-3 px-4 border-2 border-soft-slate bg-white text-sm font-bold text-charcoal-blue hover:bg-off-white hover:border-charcoal-blue hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all  tracking-wide"
                                 title="Use Google Sign In"
                             >
                                 <svg className="h-5 w-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
