@@ -40,29 +40,39 @@ export default async function EventsListPage({
     }));
 
     return (
-        <div className="min-h-screen bg-off-white font-sans text-steel-gray pt-16">
+        <div className="min-h-screen bg-[#F8F9FA] font-sans text-steel-gray pt-16">
+
+            {/* Subtle page header */}
+            <div className="bg-white border-b border-gray-100">
+                <main className="mx-auto max-w-400 px-6 py-8">
+                    <p className="text-xs font-semibold tracking-widest uppercase text-muted-teal mb-1.5">Discover</p>
+                    <h1 className="text-3xl font-bold text-charcoal-blue">Explore Events</h1>
+                    <p className="mt-1.5 text-[15px] text-steel-gray">Conferences, workshops, and meetups tailored for you.</p>
+                </main>
+            </div>
+
             <main className="mx-auto max-w-400 px-6 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold tracking-tight text-charcoal-blue">Explore Events</h1>
-                    <p className="mt-2 text-steel-gray">Discover conferences, workshops, and meetups tailored for you.</p>
-                </div>
 
                 {/* 1 : 3 : 1 Layout Grid */}
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
 
                     {/* LEFT COLUMN (Filters) - Span 1 */}
                     <div className="lg:col-span-1">
+                        <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-3">Filters</p>
                         <EventFilters />
                     </div>
 
                     {/* CENTER COLUMN (Events List) - Span 3 */}
-                    <div className="space-y-6 lg:col-span-3">
+                    <div className="space-y-5 lg:col-span-3">
+
                         {/* Toolbar */}
-                        <div className="flex items-center justify-between border-2 border-gray-200 bg-white px-6 py-3 shadow-sm">
-                            <span className="text-sm font-bold  tracking-wider text-steel-gray">Showing <strong className="text-charcoal-blue">{filteredEvents.length}</strong> results</span>
-                            <div className="flex items-center space-x-2">
-                                <label className="text-sm font-bold  tracking-wider text-steel-gray">Sort by:</label>
-                                <select className="border-b-2 border-gray-200 bg-transparent py-1 pl-3 pr-8 text-sm font-bold  tracking-wide text-charcoal-blue focus:border-charcoal-blue focus:ring-0">
+                        <div className="flex items-center justify-between bg-white border border-gray-100 px-5 py-3">
+                            <span className="text-sm text-steel-gray">
+                                Showing <strong className="font-semibold text-charcoal-blue">{filteredEvents.length}</strong> results
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm text-steel-gray">Sort by:</label>
+                                <select className="bg-transparent text-sm font-medium text-charcoal-blue border-b border-gray-300 py-0.5 pl-1 pr-6 focus:border-muted-teal focus:outline-none cursor-pointer">
                                     <option>Most Popular</option>
                                     <option>Date: Soonest</option>
                                     <option>Newest Added</option>
@@ -71,45 +81,50 @@ export default async function EventsListPage({
                         </div>
 
                         {/* Cards List */}
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {filteredEvents.length > 0 ? (
                                 filteredEvents.map((event) => (
-                                    <div key={event.id} className="group flex flex-col overflow-hidden border-2 border-gray-200 bg-white shadow-sm transition-all hover:border-gray-900 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:flex-row">
+                                    <div
+                                        key={event.id}
+                                        className="group flex flex-col overflow-hidden bg-white border border-gray-100 transition-all duration-200 hover:border-gray-200 hover:shadow-md sm:flex-row"
+                                    >
                                         {/* Event Image */}
-                                        <div className="h-48 w-full bg-soft-slate sm:h-auto sm:w-48 shrink-0 relative overflow-hidden border-r-2 border-gray-200">
+                                        <div className="h-48 w-full sm:h-auto sm:w-44 shrink-0 relative overflow-hidden bg-gray-100">
                                             {event.image && event.image !== '/placeholder-1.jpg' ? (
-                                                <img src={event.image} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                <img src={event.image} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                             ) : (
-                                                <div className="flex h-full w-full items-center justify-center bg-soft-slate text-xs font-bold  tracking-widest text-charcoal-blue/50">
-                                                    Image
+                                                <div className="flex h-full w-full items-center justify-center bg-gray-100 text-xs font-medium tracking-wider text-gray-300 uppercase">
+                                                    No Image
                                                 </div>
                                             )}
 
                                             {/* Featured Tag or Date Badge */}
-                                            <div className="absolute top-0 left-0 border-b-2 border-r-2 border-gray-900 bg-white px-2 py-1 text-xs font-bold  tracking-wider text-charcoal-blue shadow-sm">
+                                            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase text-charcoal-blue">
                                                 {event.category}
                                             </div>
                                         </div>
 
                                         {/* Content */}
-                                        <div className="flex flex-1 flex-col justify-between p-6">
-                                            <div className="mb-4">
-                                                <div className="flex items-center justify-between">
-                                                    <h3 className="text-xl font-bold  tracking-tight text-charcoal-blue group-hover:text-muted-teal transition-colors line-clamp-1">
+                                        <div className="flex flex-1 flex-col justify-between p-5">
+                                            <div>
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <h3 className="text-[17px] font-semibold text-charcoal-blue group-hover:text-muted-teal transition-colors line-clamp-1 leading-snug">
                                                         <Link href={`/event/${event.id}`}>{event.title}</Link>
                                                     </h3>
-                                                    <span className="text-lg font-bold text-charcoal-blue">{event.isFree ? 'Free' : `$${event.price}`}</span>
+                                                    <span className="shrink-0 text-base font-bold text-charcoal-blue">
+                                                        {event.isFree ? 'Free' : `$${event.price}`}
+                                                    </span>
                                                 </div>
 
-                                                <div className="mt-2 flex items-center space-x-4 text-sm font-medium text-steel-gray">
-                                                    <div className="flex items-center">
-                                                        <svg className="mr-1.5 h-4 w-4 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <div className="mt-2.5 flex flex-wrap items-center gap-4 text-[13px] text-steel-gray">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <svg className="h-3.5 w-3.5 text-muted-teal shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                         </svg>
-                                                        {new Date(event.date).toLocaleDateString()}
+                                                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                                     </div>
-                                                    <div className="flex items-center">
-                                                        <svg className="mr-1.5 h-4 w-4 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <svg className="h-3.5 w-3.5 text-muted-teal shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         </svg>
@@ -118,23 +133,26 @@ export default async function EventsListPage({
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-between border-t-2 border-gray-100 pt-4">
-                                                <div className="text-xs font-bold  tracking-wide">
+                                            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-50">
+                                                <div className="text-[13px]">
                                                     {event.capacity > 0 && event.spotsLeft < 20 ? (
-                                                        <span className="text-signal-orange flex items-center">
-                                                            <svg className="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <span className="text-signal-orange font-medium flex items-center gap-1">
+                                                            <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg>
-                                                            Only {event.spotsLeft > 0 ? event.spotsLeft : 0} spots left!
+                                                            Only {event.spotsLeft > 0 ? event.spotsLeft : 0} spots left
                                                         </span>
                                                     ) : (
                                                         <span className="text-steel-gray">{event.participants.length} attendees</span>
                                                     )}
                                                 </div>
 
-                                                <Link href={`/event/${event.id}`} className="inline-flex items-center text-sm font-bold  tracking-wider text-muted-teal hover:text-charcoal-blue">
+                                                <Link
+                                                    href={`/event/${event.id}`}
+                                                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted-teal hover:text-charcoal-blue transition-colors"
+                                                >
                                                     View Details
-                                                    <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                                     </svg>
                                                 </Link>
@@ -143,29 +161,31 @@ export default async function EventsListPage({
                                     </div>
                                 ))
                             ) : (
-                                <div className="rounded-xl border border-soft-slate bg-white p-12 text-center">
-                                    <h3 className="text-lg font-bold text-charcoal-blue">No events found</h3>
-                                    <p className="mt-2 text-steel-gray">Try adjusting your search or filters.</p>
-                                    <Link href="/events" className="mt-4 inline-block text-sm font-bold text-muted-teal hover:underline">Clear all filters</Link>
+                                <div className="bg-white border border-gray-100 p-16 text-center">
+                                    <h3 className="text-base font-semibold text-charcoal-blue">No events found</h3>
+                                    <p className="mt-1.5 text-sm text-steel-gray">Try adjusting your search or filters.</p>
+                                    <Link href="/events" className="mt-4 inline-block text-sm font-semibold text-muted-teal hover:underline underline-offset-2">
+                                        Clear all filters
+                                    </Link>
                                 </div>
                             )}
                         </div>
 
                         {/* Pagination (Simplified) */}
                         {filteredEvents.length > 5 && (
-                            <div className="flex justify-center pt-8">
-                                <nav className="inline-flex -space-x-px rounded-md bg-white shadow-sm ring-1 ring-inset ring-soft-slate" aria-label="Pagination">
-                                    <a href="#" className="relative inline-flex items-center rounded-l-md px-2 py-2 text-steel-gray ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">
+                            <div className="flex justify-center pt-6">
+                                <nav className="inline-flex items-center gap-1" aria-label="Pagination">
+                                    <a href="#" className="flex items-center justify-center w-9 h-9 text-steel-gray hover:text-charcoal-blue hover:bg-white border border-transparent hover:border-gray-200 transition-all">
                                         <span className="sr-only">Previous</span>
-                                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                             <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
                                         </svg>
                                     </a>
-                                    <a href="#" aria-current="page" className="relative z-10 inline-flex items-center bg-muted-teal px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-muted-teal">1</a>
-                                    {/* <a href="#" className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-charcoal-blue ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">2</a> */}
-                                    <a href="#" className="relative inline-flex items-center rounded-r-md px-2 py-2 text-steel-gray ring-1 ring-inset ring-soft-slate hover:bg-off-white focus:z-20 focus:outline-offset-0">
+                                    <a href="#" aria-current="page" className="flex items-center justify-center w-9 h-9 bg-charcoal-blue text-sm font-semibold text-white">1</a>
+                                    {/* <a href="#" className="flex items-center justify-center w-9 h-9 text-sm font-medium text-charcoal-blue hover:bg-white border border-transparent hover:border-gray-200 transition-all">2</a> */}
+                                    <a href="#" className="flex items-center justify-center w-9 h-9 text-steel-gray hover:text-charcoal-blue hover:bg-white border border-transparent hover:border-gray-200 transition-all">
                                         <span className="sr-only">Next</span>
-                                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                             <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
                                         </svg>
                                     </a>
@@ -177,16 +197,20 @@ export default async function EventsListPage({
                     {/* RIGHT COLUMN (Sidebar/Trending) - Span 1 */}
                     <div className="lg:col-span-1">
                         <div className="sticky top-24 space-y-6">
+
                             {/* Trending Widget */}
-                            <div className="border-2 border-gray-200 bg-white p-5 shadow-sm">
-                                <h3 className="mb-4 text-sm font-bold  tracking-wider text-steel-gray">Trending Now</h3>
-                                <ul className="space-y-4">
+                            <div>
+                                <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-3">Trending Now</p>
+                                <ul className="space-y-3">
                                     {trendingEvents.length > 0 ? trendingEvents.map((item, i) => (
-                                        <li key={i} className="group cursor-pointer">
-                                            <div className="text-sm font-bold text-charcoal-blue group-hover:text-muted-teal truncate">
-                                                <Link href={`/event/${item.id}`}>{item.title}</Link>
+                                        <li key={i} className="group flex items-start gap-2.5">
+                                            <span className="text-[11px] font-bold text-muted-teal mt-0.5 w-3 shrink-0">{i + 1}</span>
+                                            <div className="min-w-0">
+                                                <div className="text-[13px] font-medium text-charcoal-blue group-hover:text-muted-teal truncate transition-colors leading-snug">
+                                                    <Link href={`/event/${item.id}`}>{item.title}</Link>
+                                                </div>
+                                                <div className="text-[11px] text-steel-gray mt-0.5">{item.attendees} attendees</div>
                                             </div>
-                                            <div className="text-xs text-steel-gray">{item.attendees} attendees</div>
                                         </li>
                                     )) : (
                                         <li className="text-xs text-steel-gray">No trending events yet.</li>
@@ -195,39 +219,41 @@ export default async function EventsListPage({
                                 {/* <a href="#" className="mt-4 block text-xs font-bold text-muted-teal hover:underline">View all trending</a> */}
                             </div>
 
-                            {/* Newsletter / Promo */}
-                            <div className="bg-charcoal-blue p-5 text-white shadow-md relative overflow-hidden border-2 border-charcoal-blue">
-                                {/* Decorative circle */}
-                                <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/5 blur-2xl"></div>
+                            <div className="border-t border-gray-100"></div>
 
-                                <h3 className="relative z-10 text-lg font-bold">Stay Updated</h3>
-                                <p className="relative z-10 mt-2 text-sm text-soft-slate">Get the latest tech events delivered to your inbox weekly.</p>
-                                <div className="relative z-10 mt-4 space-y-2">
+                            {/* Newsletter / Promo */}
+                            <div className="bg-charcoal-blue px-5 py-6 text-white">
+                                <h3 className="text-[15px] font-semibold leading-snug">Stay Updated</h3>
+                                <p className="mt-1.5 text-[13px] text-white/60 leading-relaxed">Get the latest tech events delivered to your inbox weekly.</p>
+                                <div className="mt-4 space-y-2">
                                     <input
                                         type="email"
                                         placeholder="you@email.com"
-                                        className="w-full border-2 border-steel-gray bg-charcoal-blue/50 px-3 py-2 text-sm text-white placeholder-soft-slate focus:border-muted-teal focus:outline-none focus:ring-0"
+                                        className="w-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/30 focus:border-muted-teal focus:outline-none transition-colors"
                                     />
-                                    <button className="w-full bg-muted-teal px-3 py-2 text-sm font-bold  tracking-wider text-white transition hover:bg-white hover:text-muted-teal border-2 border-transparent hover:border-muted-teal">
+                                    <button className="w-full bg-muted-teal px-3 py-2 text-sm font-semibold text-white transition hover:bg-white hover:text-muted-teal border border-transparent hover:border-muted-teal">
                                         Subscribe
                                     </button>
                                 </div>
                             </div>
 
+                            <div className="border-t border-gray-100"></div>
+
                             {/* Featured Organizer */}
-                            <div className="border-2 border-gray-200 bg-slate-50 p-5">
-                                <h3 className="mb-2 text-xs font-bold  tracking-wider text-steel-gray">Featured Organizer</h3>
-                                <div className="flex items-center space-x-3">
-                                    <div className="h-10 w-10 rounded-full bg-charcoal-blue"></div>
+                            <div>
+                                <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-3">Featured Organizer</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="h-9 w-9 bg-charcoal-blue shrink-0 flex items-center justify-center text-[10px] font-bold text-white">SD</div>
                                     <div>
-                                        <div className="text-sm font-bold text-charcoal-blue">System Design Co.</div>
-                                        <div className="text-xs text-steel-gray">12 events hosted</div>
+                                        <div className="text-[13px] font-semibold text-charcoal-blue">System Design Co.</div>
+                                        <div className="text-[11px] text-steel-gray">12 events hosted</div>
                                     </div>
                                 </div>
-                                <button className="mt-3 w-full border-2 border-gray-200 bg-white py-1.5 text-xs font-bold  tracking-wider text-steel-gray hover:border-gray-900 hover:text-charcoal-blue transition-all">
+                                <button className="mt-3 w-full border border-gray-200 bg-white py-2 text-[12px] font-semibold text-steel-gray hover:border-charcoal-blue hover:text-charcoal-blue transition-all">
                                     Follow
                                 </button>
                             </div>
+
                         </div>
                     </div>
 
@@ -236,4 +262,3 @@ export default async function EventsListPage({
         </div>
     );
 }
-
