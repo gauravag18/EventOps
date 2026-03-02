@@ -1,4 +1,3 @@
-import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
@@ -36,15 +35,24 @@ export default async function OrganizerEventPage({ params }: { params: Promise<{
         orderBy: { createdAt: 'desc' }
     });
 
-    // Map tickets to attendees
+    // Map tickets to attendees + add qrValue
     const attendees = tickets.map(t => ({
         id: t.id,
         name: t.user.name || "Unknown",
-        email: t.user.email,
+        email: t.user.email || "",
         ticket: event.isFree ? "Free Registration" : "Standard Ticket",
         status: t.status === "VALID" ? "Confirmed" : t.status,
         purchaseDate: t.createdAt.toLocaleDateString(),
-        checkedIn: false
+        checkedIn: false,
+
+        // the attendee's ticket page / view.
+        // Examples of common formats:
+        // `ticket:${t.id}`
+        // `${event.id}-${t.id}`
+        // `event:${event.id}|ticket:${t.id}|user:${t.userId}`
+        // `{"eventId":"${event.id}","ticketId":"${t.id}","email":"${t.user.email}"}`
+        // `checkin:${event.id}:${t.id}:${Date.now()}`
+        qrValue: `ticket:${t.id}`,    // ← ← ← REPLACE / ADJUST THIS LINE
     }));
 
     // Calculate Stats
@@ -56,8 +64,8 @@ export default async function OrganizerEventPage({ params }: { params: Promise<{
         revenue,
         sold,
         capacity: event.capacity,
-        views: 0, // Placeholder
-        conversionRate: "N/A" // Placeholder
+        views: 0,
+        conversionRate: "N/A"
     };
 
     const eventData = {
