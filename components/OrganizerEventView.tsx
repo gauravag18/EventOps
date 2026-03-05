@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import { useOptimistic, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import InviteOrganizerPanel from './InviteOrganizerPanel';
-import { addManualAttendee } from '@/app/actions/ticket';
+import { addManualAttendee, removeAttendee, markTicketUsed } from '@/app/actions/ticket';
 import { useToast } from './ToastProvider';
 
 interface Attendee {
@@ -28,6 +28,18 @@ interface EventStats {
   conversionRate: string;
 }
 
+interface SaleMonth {
+  label: string;
+  count: number;
+}
+
+interface ActivityItem {
+  userName: string;
+  ticketType: string;
+  status: string;
+  timeAgo: string;
+}
+
 interface OrganizerEventViewProps {
   event: {
     id: string;
@@ -39,12 +51,78 @@ interface OrganizerEventViewProps {
   };
   attendees: Attendee[];
   stats: EventStats;
+  salesByMonth: SaleMonth[];
+  recentActivity: ActivityItem[];
+}
+
+// Dropdown menu for attendee row actions
+function AttendeeActionsMenu({
+  attendeeId,
+  ticketStatus,
+  onMarkUsed,
+  onRemove,
+}: {
+  attendeeId: string;
+  ticketStatus: string;
+  onMarkUsed: () => void;
+  onRemove: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="text-[15px] text-gray-400 hover:text-charcoal-blue transition-colors px-1 leading-none font-bold tracking-widest"
+        title="Actions"
+      >
+        •••
+      </button>
+      {open && (
+        <div className="absolute right-0 top-7 z-30 bg-white border-2 border-soft-slate shadow-lg min-w-[180px] py-1">
+          {ticketStatus !== 'USED' && (
+            <button
+              onClick={() => { setOpen(false); onMarkUsed(); }}
+              className="w-full text-left px-4 py-2.5 text-[12px] font-bold tracking-wider text-charcoal-blue hover:bg-gray-50 hover:text-signal-orange transition-colors flex items-center gap-2"
+            >
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Mark Ticket Used
+            </button>
+          )}
+          <button
+            onClick={() => { setOpen(false); onRemove(); }}
+            className="w-full text-left px-4 py-2.5 text-[12px] font-bold tracking-wider text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Remove Attendee
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function OrganizerEventView({
   event,
   attendees: initialAttendees,
   stats,
+  salesByMonth,
+  recentActivity,
 }: OrganizerEventViewProps) {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState("Overview");
@@ -56,6 +134,13 @@ export default function OrganizerEventView({
     return map;
   });
 
+  // Ticket status map (for used state)
+  const [ticketStatusMap, setTicketStatusMap] = useState<Record<string, string>>(() => {
+    const map: Record<string, string> = {};
+    initialAttendees.forEach(a => map[a.id] = a.status === 'Confirmed' ? 'VALID' : a.status.toUpperCase());
+    return map;
+  });
+
   // Add attendee modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [formData, setFormData] = useState({ email: "" });
@@ -63,6 +148,7 @@ export default function OrganizerEventView({
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const router = useRouter();
 
   const [optimisticAttendees, addOptimisticAttendee] = useOptimistic(
@@ -108,16 +194,12 @@ export default function OrganizerEventView({
     });
 
     try {
-      const res = await addManualAttendee({
-        eventId: event.id,
-        email,
-      });
-
+      const res = await addManualAttendee({ eventId: event.id, email });
       if (res.success) {
         setSubmitMessage(res.message || "Attendee added successfully!");
         setFormData({ email: "" });
         router.refresh();
-        setTimeout(() => setShowAddModal(false), 1800); // auto-close after success
+        setTimeout(() => setShowAddModal(false), 1800);
       } else {
         if (res.noAccount) {
           showToast(res.message || "User does not have an account", "error");
@@ -131,6 +213,42 @@ export default function OrganizerEventView({
       console.error(err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleMarkUsed = async (ticketId: string) => {
+    setActionLoading(ticketId);
+    try {
+      const res = await markTicketUsed({ eventId: event.id, ticketId });
+      if (res.success) {
+        setTicketStatusMap(prev => ({ ...prev, [ticketId]: 'USED' }));
+        showToast("Ticket marked as used", "success");
+        router.refresh();
+      } else {
+        showToast(res.message || "Failed to update ticket", "error");
+      }
+    } catch {
+      showToast("An error occurred", "error");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRemoveAttendee = async (ticketId: string, name: string) => {
+    if (!confirm(`Remove ${name} from this event? This will delete their ticket.`)) return;
+    setActionLoading(ticketId);
+    try {
+      const res = await removeAttendee({ eventId: event.id, ticketId });
+      if (res.success) {
+        showToast("Attendee removed", "success");
+        router.refresh();
+      } else {
+        showToast(res.message || "Failed to remove attendee", "error");
+      }
+    } catch {
+      showToast("An error occurred", "error");
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -247,7 +365,7 @@ export default function OrganizerEventView({
                 <div className="bg-white border-2 border-soft-slate flex-1 px-6 py-5 relative overflow-hidden">
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted-teal" />
                   <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-1">Page Views</p>
-                  <p className="text-3xl font-black text-charcoal-blue">{stats.views.toLocaleString()}</p>
+                  <p className="text-3xl font-black text-charcoal-blue">{stats.views > 0 ? stats.views.toLocaleString() : '—'}</p>
                 </div>
                 <div className="bg-white border-2 border-soft-slate flex-1 px-6 py-5 relative overflow-hidden">
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-300" />
@@ -262,31 +380,43 @@ export default function OrganizerEventView({
               {/* Sales chart */}
               <div className="lg:col-span-2 bg-white border-2 border-soft-slate">
                 <div className="flex items-center justify-between px-7 py-5 border-b-2 border-soft-slate">
-                  <h3 className="text-sm font-bold tracking-tight text-charcoal-blue">Sales Over Time</h3>
-                  <select className="border-b-2 border-gray-200 bg-transparent text-[12px] font-bold tracking-wide text-charcoal-blue py-0.5 pl-1 pr-6 focus:border-signal-orange focus:outline-none cursor-pointer">
-                    <option>Last 30 Days</option>
-                    <option>Last 7 Days</option>
-                    <option>All Time</option>
-                  </select>
+                  <h3 className="text-sm font-bold tracking-tight text-charcoal-blue">Ticket Sales by Month</h3>
+                  <span className="text-[11px] font-bold tracking-widest uppercase text-steel-gray">
+                    {salesByMonth.reduce((s, m) => s + m.count, 0)} total
+                  </span>
                 </div>
                 <div className="p-7">
-                  <div className="h-52 flex items-end gap-1.5">
-                    {[40, 65, 45, 80, 55, 90, 70, 85, 60, 75, 50, 95].map((h, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 bg-signal-orange/20 hover:bg-signal-orange transition-colors duration-200 cursor-pointer group relative"
-                        style={{ height: `${h}%` }}
-                      >
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-charcoal-blue opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                          {h}
-                        </div>
+                  {salesByMonth.length > 0 ? (
+                    <>
+                      <div className="h-52 flex items-end gap-1.5">
+                        {salesByMonth.map((m, i) => {
+                          const max = Math.max(...salesByMonth.map(x => x.count), 1);
+                          const pct = Math.round((m.count / max) * 100);
+                          return (
+                            <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+                              <div
+                                className="w-full bg-signal-orange/20 hover:bg-signal-orange transition-colors duration-200 cursor-pointer group relative"
+                                style={{ height: `${Math.max(pct, m.count > 0 ? 4 : 0)}%` }}
+                              >
+                                {m.count > 0 && (
+                                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-charcoal-blue opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    {m.count}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ))}
-                  </div>
-                  <div className="flex justify-between mt-3 text-[10px] font-medium text-gray-300">
-                    <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
-                    <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
-                  </div>
+                      <div className="flex justify-between mt-3 text-[10px] font-medium text-gray-300">
+                        {salesByMonth.map((m, i) => <span key={i}>{m.label}</span>)}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="h-52 flex items-center justify-center text-[13px] text-steel-gray">
+                      No sales data yet.
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -295,30 +425,28 @@ export default function OrganizerEventView({
                 <div className="px-6 py-5 border-b-2 border-soft-slate">
                   <h3 className="text-sm font-bold tracking-tight text-charcoal-blue">Recent Activity</h3>
                 </div>
-                <div className="divide-y divide-gray-50">
-                  {[
-                    { user: "Sarah M.", action: "bought 1 VIP Ticket", time: "2 mins ago", type: "sale" },
-                    { user: "John D.", action: "bought 2 General Tickets", time: "15 mins ago", type: "sale" },
-                    { user: "System", action: "Capacity alert: 80% full", time: "1 hour ago", type: "alert" },
-                    { user: "Mike R.", action: "requested a refund", time: "2 hours ago", type: "refund" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start gap-3.5 px-6 py-4">
-                      <div className={`mt-1.5 w-1.5 h-1.5 shrink-0 ${item.type === 'sale' ? 'bg-muted-teal' : item.type === 'alert' ? 'bg-signal-orange' : 'bg-gray-300'}`} />
-                      <div className="min-w-0">
-                        <p className="text-[13px] text-charcoal-blue">
-                          <span className="font-bold">{item.user}</span>
-                          {' '}<span className="text-steel-gray">{item.action}</span>
-                        </p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">{item.time}</p>
+                {recentActivity.length > 0 ? (
+                  <div className="divide-y divide-gray-50">
+                    {recentActivity.map((item, i) => (
+                      <div key={i} className="flex items-start gap-3.5 px-6 py-4">
+                        <div className={`mt-1.5 w-1.5 h-1.5 shrink-0 ${item.status === 'VALID' ? 'bg-muted-teal' : item.status === 'USED' ? 'bg-signal-orange' : 'bg-gray-300'}`} />
+                        <div className="min-w-0">
+                          <p className="text-[13px] text-charcoal-blue">
+                            <span className="font-bold">{item.userName}</span>
+                            {' '}<span className="text-steel-gray">
+                              {item.status === 'USED' ? 'used their ticket' : item.status === 'CANCELLED' ? 'cancelled their ticket' : `registered · ${item.ticketType}`}
+                            </span>
+                          </p>
+                          <p className="text-[11px] text-gray-400 mt-0.5">{item.timeAgo}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="px-6 py-4 border-t-2 border-soft-slate">
-                  <button className="w-full text-[12px] font-bold tracking-widest text-steel-gray hover:text-charcoal-blue transition-colors">
-                    View All Activity
-                  </button>
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-6 py-10 text-center text-[13px] text-steel-gray">
+                    No activity yet.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -346,8 +474,6 @@ export default function OrganizerEventView({
                   </svg>
                   Export CSV
                 </button>
-
-                {/* ADD ATTENDEE BUTTON – opens beautiful modal */}
                 <button
                   onClick={() => {
                     setFormData({ email: '' });
@@ -386,17 +512,19 @@ export default function OrganizerEventView({
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-soft-slate bg-off-white">
-                    {["Name", "Ticket Type", "Purchase Date", "Status", "QR", "Check-in"].map((h) => (
-                      <th key={h} className="px-6 py-3.5 text-[10px] font-bold tracking-widest uppercase text-steel-gray">{h}</th>
+                    {["Name", "Ticket Type", "Purchase Date", "Status", "QR", "Check-in", ""].map((h, i) => (
+                      <th key={i} className="px-6 py-3.5 text-[10px] font-bold tracking-widest uppercase text-steel-gray">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {optimisticAttendees.length > 0 ? optimisticAttendees.map((attendee) => {
                     const isCheckedIn = checkInMap[attendee.id] ?? attendee.checkedIn;
+                    const tStatus = ticketStatusMap[attendee.id] ?? 'VALID';
+                    const isLoading = actionLoading === attendee.id;
 
                     return (
-                      <tr key={attendee.id} className="hover:bg-gray-50/60 transition-colors">
+                      <tr key={attendee.id} className={`hover:bg-gray-50/60 transition-colors ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
                         <td className="px-6 py-4">
                           <p className="text-[14px] font-semibold text-charcoal-blue">{attendee.name}</p>
                           <p className="text-[12px] text-steel-gray mt-0.5">{attendee.email}</p>
@@ -410,9 +538,15 @@ export default function OrganizerEventView({
                           {attendee.purchaseDate}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wider uppercase px-2.5 py-1 ${attendee.status === 'Confirmed' ? 'bg-muted-teal/10 text-muted-teal' : 'bg-gray-100 text-gray-400'}`}>
-                            <span className={`w-1.5 h-1.5 ${attendee.status === 'Confirmed' ? 'bg-muted-teal' : 'bg-gray-300'}`} />
-                            {attendee.status}
+                          <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wider uppercase px-2.5 py-1 ${
+                            tStatus === 'USED'
+                              ? 'bg-gray-100 text-gray-400'
+                              : attendee.status === 'Confirmed'
+                              ? 'bg-muted-teal/10 text-muted-teal'
+                              : 'bg-gray-100 text-gray-400'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 ${tStatus === 'USED' ? 'bg-gray-300' : attendee.status === 'Confirmed' ? 'bg-muted-teal' : 'bg-gray-300'}`} />
+                            {tStatus === 'USED' ? 'Used' : attendee.status}
                           </span>
                         </td>
 
@@ -427,25 +561,31 @@ export default function OrganizerEventView({
                         </td>
 
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-4">
-                            {isCheckedIn ? (
-                              <span className="text-[12px] font-bold tracking-wider text-muted-teal">✓ Checked In</span>
-                            ) : (
-                              <button
-                                onClick={() => setCheckInMap(prev => ({ ...prev, [attendee.id]: true }))}
-                                className="text-[12px] font-bold tracking-wider text-signal-orange hover:text-charcoal-blue transition-colors"
-                              >
-                                Check In
-                              </button>
-                            )}
-                            <button className="text-[13px] text-gray-300 hover:text-charcoal-blue transition-colors">•••</button>
-                          </div>
+                          {isCheckedIn || tStatus === 'USED' ? (
+                            <span className="text-[12px] font-bold tracking-wider text-muted-teal">✓ Checked In</span>
+                          ) : (
+                            <button
+                              onClick={() => setCheckInMap(prev => ({ ...prev, [attendee.id]: true }))}
+                              className="text-[12px] font-bold tracking-wider text-signal-orange hover:text-charcoal-blue transition-colors"
+                            >
+                              Check In
+                            </button>
+                          )}
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <AttendeeActionsMenu
+                            attendeeId={attendee.id}
+                            ticketStatus={tStatus}
+                            onMarkUsed={() => handleMarkUsed(attendee.id)}
+                            onRemove={() => handleRemoveAttendee(attendee.id, attendee.name)}
+                          />
                         </td>
                       </tr>
                     );
                   }) : (
                     <tr>
-                      <td colSpan={6} className="px-6 py-16 text-center text-steel-gray text-sm">
+                      <td colSpan={7} className="px-6 py-16 text-center text-steel-gray text-sm">
                         No attendees yet.
                       </td>
                     </tr>
@@ -537,7 +677,6 @@ export default function OrganizerEventView({
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border-2 border-soft-slate">
-            {/* Modal Header */}
             <div className="px-6 py-5 border-b-2 border-soft-slate bg-gray-50/60">
               <h3 className="text-lg font-bold tracking-tight text-charcoal-blue">
                 Add Manual Attendee
@@ -547,9 +686,7 @@ export default function OrganizerEventView({
               </p>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleAddAttendee} className="p-6 space-y-5">
-              {/* Email */}
               <div>
                 <label className="block text-[13px] font-semibold text-charcoal-blue mb-1.5">
                   Email Address <span className="text-signal-orange">*</span>
@@ -565,7 +702,6 @@ export default function OrganizerEventView({
                 />
               </div>
 
-              {/* Feedback */}
               {formError && (
                 <div className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
                   {formError}
@@ -577,7 +713,6 @@ export default function OrganizerEventView({
                 </div>
               )}
 
-              {/* Buttons */}
               <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
@@ -587,7 +722,6 @@ export default function OrganizerEventView({
                 >
                   Cancel
                 </button>
-
                 <button
                   type="submit"
                   disabled={isSubmitting}
