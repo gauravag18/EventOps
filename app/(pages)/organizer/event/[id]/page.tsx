@@ -21,14 +21,12 @@ export default async function OrganizerEventPage({ params }: { params: Promise<{
     const isOrganizer = event.organizers.some(o => o.id === session.user.id);
     if (!isOrganizer) redirect("/organizer/dashboard");
 
-    // Fetch all tickets with user info, ordered newest first
     const tickets = await prisma.ticket.findMany({
         where: { eventId: id },
         include: { user: true },
         orderBy: { createdAt: 'desc' }
     });
 
-    // Map tickets to attendees
     const attendees = tickets.map(t => ({
         id: t.id,
         name: t.user.name || "Unknown",
@@ -40,16 +38,14 @@ export default async function OrganizerEventPage({ params }: { params: Promise<{
         qrValue: `ticket:${t.id}`,
     }));
 
-    // Stats — count VALID and USED as sold
     const sold = tickets.filter(t => t.status === "VALID" || t.status === "USED").length;
     const priceVal = event.isFree ? 0 : parseFloat(event.price || "0");
     const revenue = isNaN(priceVal) ? 0 : sold * priceVal;
+
     const stats = {
         revenue,
         sold,
         capacity: event.capacity,
-        views: 0,
-        conversionRate: "N/A"
     };
 
     // Sales by month — last 12 months rolling window
@@ -65,7 +61,6 @@ export default async function OrganizerEventPage({ params }: { params: Promise<{
         salesByMonth.push({ label, count });
     }
 
-    // Recent activity — last 10 ticket events, newest first
     function timeAgo(date: Date): string {
         const diff = Math.floor((Date.now() - date.getTime()) / 1000);
         if (diff < 60) return `${diff}s ago`;
@@ -87,7 +82,8 @@ export default async function OrganizerEventPage({ params }: { params: Promise<{
         status: new Date(event.date) < new Date() ? "ENDED" : "PUBLISHED",
         date: new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         time: event.time || '',
-        location: event.location?.split('|')[0] || ''
+        location: event.location?.split('|')[0] || '',
+        rawDate: event.date.toISOString(),
     };
 
     return (

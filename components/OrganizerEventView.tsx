@@ -24,8 +24,6 @@ interface EventStats {
   revenue: number;
   sold: number;
   capacity: number;
-  views: number;
-  conversionRate: string;
 }
 
 interface SaleMonth {
@@ -48,6 +46,7 @@ interface OrganizerEventViewProps {
     date: string;
     time: string;
     location: string;
+    rawDate: string; 
   };
   attendees: Attendee[];
   stats: EventStats;
@@ -90,7 +89,7 @@ function AttendeeActionsMenu({
         •••
       </button>
       {open && (
-        <div className="absolute right-0 top-7 z-30 bg-white border-2 border-soft-slate shadow-lg min-w-[180px] py-1">
+        <div className="absolute right-0 top-7 z-30 bg-white border-2 border-soft-slate shadow-lg min-w-45 py-1">
           {ticketStatus !== 'USED' && (
             <button
               onClick={() => { setOpen(false); onMarkUsed(); }}
@@ -113,6 +112,36 @@ function AttendeeActionsMenu({
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function ShareLinkBox({ eventId }: { eventId: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = typeof window !== 'undefined' ? `${window.location.origin}/event/${eventId}` : `/event/${eventId}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="flex items-center gap-2 max-w-xl">
+      <div className="flex-1 px-4 py-2.5 border-2 border-soft-slate bg-gray-50 text-[13px] text-steel-gray font-mono truncate select-all">
+        {url}
+      </div>
+      <button
+        onClick={handleCopy}
+        className={`shrink-0 px-5 py-2.5 border-2 text-[12px] font-bold tracking-widest transition ${
+          copied
+            ? 'border-muted-teal bg-muted-teal/10 text-muted-teal'
+            : 'border-charcoal-blue bg-charcoal-blue text-white hover:bg-white hover:text-charcoal-blue'
+        }`}
+      >
+        {copied ? '✓ Copied!' : 'Copy Link'}
+      </button>
     </div>
   );
 }
@@ -332,9 +361,9 @@ export default function OrganizerEventView({
         {activeTab === "Overview" && (
           <div className="space-y-6">
             {/* Stats row */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Revenue */}
-              <div className="lg:col-span-2 bg-charcoal-blue relative overflow-hidden rounded-2xl">
+              <div className="bg-charcoal-blue relative overflow-hidden rounded-2xl">
                 <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)`, backgroundSize: '20px 20px' }} />
                 <div className="relative z-10 px-8 py-7">
                   <p className="text-[11px] font-bold tracking-widest uppercase text-white/40 mb-2">Total Revenue</p>
@@ -360,19 +389,30 @@ export default function OrganizerEventView({
                 </div>
               </div>
 
-              {/* Views + Conversion */}
-              <div className="flex flex-col gap-4">
-                <div className="bg-white border-2 border-soft-slate flex-1 px-6 py-5 relative overflow-hidden">
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted-teal" />
-                  <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-1">Page Views</p>
-                  <p className="text-3xl font-black text-charcoal-blue">{stats.views > 0 ? stats.views.toLocaleString() : '—'}</p>
-                </div>
-                <div className="bg-white border-2 border-soft-slate flex-1 px-6 py-5 relative overflow-hidden">
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-300" />
-                  <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-1">Conversion</p>
-                  <p className="text-3xl font-black text-charcoal-blue">{stats.conversionRate}</p>
-                </div>
-              </div>
+              {/* Days Until Event */}
+              {(() => {
+                const eventDate = new Date(event.rawDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                eventDate.setHours(0, 0, 0, 0);
+                const diff = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                const isEnded = diff < 0;
+                const isToday = diff === 0;
+                return (
+                  <div className="bg-white border-2 border-soft-slate relative overflow-hidden px-7 py-6">
+                    <div className={`absolute bottom-0 left-0 right-0 h-0.5 ${isEnded ? 'bg-gray-200' : isToday ? 'bg-signal-orange' : 'bg-muted-teal'}`} />
+                    <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-2">
+                      {isEnded ? 'Event Ended' : isToday ? 'Event Day' : 'Days Until Event'}
+                    </p>
+                    <p className={`text-4xl font-black ${isEnded ? 'text-gray-300' : isToday ? 'text-signal-orange' : 'text-charcoal-blue'}`}>
+                      {isEnded ? '—' : isToday ? '🎉' : diff}
+                    </p>
+                    <p className="text-[11px] text-steel-gray mt-3">
+                      {isEnded ? `Ended ${Math.abs(diff)} day${Math.abs(diff) !== 1 ? 's' : ''} ago` : isToday ? 'Happening today!' : `on ${event.date}`}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Chart + Activity */}
@@ -612,10 +652,64 @@ export default function OrganizerEventView({
 
         {/* MARKETING TAB */}
         {activeTab === "Marketing" && (
-          <div className="bg-white border-2 border-soft-slate p-8">
-            <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-1.5">Marketing Tools</p>
-            <h3 className="text-lg font-bold text-charcoal-blue mb-6">Promote Your Event</h3>
-            <p className="text-sm text-steel-gray">Marketing tools coming soon.</p>
+          <div className="space-y-4">
+            {/* Shareable Link */}
+            <div className="bg-white border-2 border-soft-slate">
+              <div className="px-7 py-5 border-b-2 border-soft-slate">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-0.5">Shareable Link</p>
+                <h3 className="text-base font-bold text-charcoal-blue">Share your event page</h3>
+              </div>
+              <div className="px-7 py-6">
+                <p className="text-[13px] text-steel-gray mb-4">Copy and share this link anywhere — social media, email, or messages.</p>
+                <ShareLinkBox eventId={event.id} />
+              </div>
+            </div>
+
+            {/* QR Code */}
+            <div className="bg-white border-2 border-soft-slate">
+              <div className="px-7 py-5 border-b-2 border-soft-slate">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-steel-gray mb-0.5">QR Code</p>
+                <h3 className="text-base font-bold text-charcoal-blue">Printable event QR code</h3>
+              </div>
+              <div className="px-7 py-6 flex flex-col sm:flex-row items-start gap-8">
+                <div className="bg-white p-4 border-2 border-soft-slate inline-block shrink-0">
+                  <QRCodeSVG
+                    id="event-qr-code"
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/event/${event.id}`}
+                    size={160}
+                    level="M"
+                  />
+                </div>
+                <div className="flex flex-col gap-3 justify-center">
+                  <p className="text-[13px] text-steel-gray">Print or display this QR code at your venue, on flyers, or in presentations. Scanning it takes people directly to your event page.</p>
+                  <button
+                    onClick={() => {
+                      const svg = document.getElementById('event-qr-code');
+                      if (!svg) return;
+                      const svgData = new XMLSerializer().serializeToString(svg);
+                      const canvas = document.createElement('canvas');
+                      canvas.width = 160; canvas.height = 160;
+                      const ctx = canvas.getContext('2d');
+                      const img = new Image();
+                      img.onload = () => {
+                        ctx?.drawImage(img, 0, 0);
+                        const a = document.createElement('a');
+                        a.download = `event-${event.id}-qr.png`;
+                        a.href = canvas.toDataURL('image/png');
+                        a.click();
+                      };
+                      img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 border-2 border-charcoal-blue bg-charcoal-blue text-[12px] font-bold tracking-widest text-white hover:bg-white hover:text-charcoal-blue transition w-fit"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download PNG
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
