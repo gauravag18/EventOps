@@ -12,11 +12,37 @@ export interface Speaker {
     avatar: string;
 }
 
+// Format-specific metadata — different fields per event format
+export interface FormatMeta {
+    // Hackathon / Competition
+    teamSizeMin?: string;
+    teamSizeMax?: string;
+    prizePool?: string;
+    submissionDeadline?: string;
+    judgingCriteria?: string;
+
+    // Workshop / Bootcamp
+    skillLevel?: string;        // 'Beginner' | 'Intermediate' | 'Advanced'
+    prerequisites?: string;
+    materialsProvided?: boolean;
+    hasCertificate?: boolean;
+    durationWeeks?: string;
+
+    // Webinar
+    meetingLink?: string;
+    recordingAvailable?: boolean;
+
+    // Meetup
+    isRecurring?: boolean;
+    recurringSchedule?: string;
+}
+
 export interface EventDetails {
     overview: string;
     agenda: AgendaItem[];
     speakers: Speaker[];
     policies: string;
+    formatMeta?: FormatMeta;
 }
 
 export function packEventDescription(details: EventDetails): string {
@@ -25,33 +51,23 @@ export function packEventDescription(details: EventDetails): string {
 
 export function unpackEventDescription(description?: string | null): EventDetails {
     if (!description) {
-        return {
-            overview: '',
-            agenda: [],
-            speakers: [],
-            policies: ''
-        };
+        return { overview: '', agenda: [], speakers: [], policies: '' };
     }
 
     try {
         const parsed = JSON.parse(description);
-        // Basic schema check to ensure it's our packed object and not just some random JSON
         if (parsed && typeof parsed === 'object' && 'overview' in parsed) {
             return {
                 overview: parsed.overview || '',
                 agenda: Array.isArray(parsed.agenda) ? parsed.agenda : [],
                 speakers: Array.isArray(parsed.speakers) ? parsed.speakers : [],
-                policies: parsed.policies || ''
+                policies: parsed.policies || '',
+                formatMeta: parsed.formatMeta || {},
             };
         }
     } catch (e) {
-        // Not JSON, assume legacy plain text description
+        // Not JSON — legacy plain text description
     }
 
-    return {
-        overview: description,
-        agenda: [],
-        speakers: [],
-        policies: ''
-    };
+    return { overview: description, agenda: [], speakers: [], policies: '' };
 }

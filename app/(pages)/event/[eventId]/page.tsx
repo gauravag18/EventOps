@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
-import RegisterButton from '@/components/RegisterButton';
+import RegistrationModal from '@/components/RegistrationModal';
 import EventMap from '@/components/EventMap';
 import { fetchFromApi } from '@/lib/api-client';
 import { unpackEventDescription } from '@/lib/event-details';
@@ -23,36 +23,41 @@ export default async function EventDetailPage({
     }
 
     const details = unpackEventDescription(event.description);
-    // Use unpacked overview for the main description display if available
-    const descriptionText = details.overview || event.description || '';
+    const fm = details.formatMeta ?? {};
+    // Only use overview — never fall back to raw event.description (it may be JSON)
+    const descriptionText = details.overview || '';
 
-    // Process data
     const locationParts = event.location ? event.location.split('|') : [];
     const displayLocation = locationParts[0] || 'TBD';
-    const coordinates = locationParts[1] || ''; // "lat,lng"
+    const coordinates = locationParts[1] || '';
 
     const soldCount = event.participants.length;
     const spotsLeft = event.capacity - soldCount;
     const isFree = event.isFree;
     const priceDisplay = isFree ? 'Free' : `$${event.price}`;
 
-    // Check if registered
-    const isRegistered = session?.user?.id ? event.participants.some((p: any) => p.id === session.user.id) : false;
+    const isRegistered = session?.user?.id
+        ? event.participants.some((p: any) => p.id === session.user.id)
+        : false;
 
-    // Date Formatting
     const eventDate = new Date(event.date);
-    const dateStr = eventDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    const timeStr = eventDate.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    const dateStr = eventDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const timeStr = event.time || eventDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
     const organizerName = event.organizers[0]?.name || 'EventOps Organizer';
+    const tags: string[] = event.tags ?? [];
+
+    // Determine agenda/speakers tab labels based on category  
+    const agendaLabel = event.category === 'Bootcamp' ? 'Curriculum' : 'Agenda';
+    const speakersLabel = event.category === 'Webinar' ? 'Presenters' : event.category === 'Expo' ? 'Speakers' : 'Speakers';
+
+    // Check if this format has extra details to show
+    const hasFormatDetails = !!(
+        fm.teamSizeMin || fm.prizePool || fm.submissionDeadline || fm.judgingCriteria ||
+        fm.skillLevel || fm.prerequisites || fm.durationWeeks || fm.hasCertificate ||
+        fm.meetingLink || fm.recordingAvailable !== undefined ||
+        fm.isRecurring || fm.recurringSchedule
+    );
 
     return (
         <div className="min-h-screen bg-[#E8F8F5] font-sans text-steel-gray selection:bg-muted-teal selection:text-white pt-16">
@@ -60,7 +65,6 @@ export default async function EventDetailPage({
             {/* PAGE HEADER */}
             <div className="bg-white/70 backdrop-blur-sm border-b border-[#ccf0ea]">
                 <div className="mx-auto max-w-7xl px-6 py-8">
-
                     <Link href="/events" className="group inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-steel-gray/50 hover:text-charcoal-blue transition-colors mb-5">
                         <svg className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -68,8 +72,14 @@ export default async function EventDetailPage({
                         Back to Events
                     </Link>
 
-                    {/* Category + urgency */}
-                    <div className="flex items-center gap-3 mb-3">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-charcoal-blue leading-tight lg:text-4xl">
+                        {event.title}
+                    </h1>
+                    {event.tagline && (
+                        <p className="mt-2 text-lg text-steel-gray font-medium">{event.tagline}</p>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-2 my-3">
                         <span className="inline-block border border-muted-teal/40 bg-muted-teal/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-teal">
                             {event.category}
                         </span>
@@ -78,18 +88,21 @@ export default async function EventDetailPage({
                                 Only {spotsLeft} spots left
                             </span>
                         )}
+                        {tags.map((tag: string) => (
+                            <span key={tag} className="inline-block border border-gray-200 bg-white px-2.5 py-1 text-[10px] font-bold tracking-wide text-steel-gray">
+                                {tag}
+                            </span>
+                        ))}
                     </div>
 
-                    <h1 className="text-3xl font-extrabold tracking-tight text-charcoal-blue leading-tight lg:text-4xl">
-                        {event.title}
-                    </h1>
+
                 </div>
             </div>
 
             <main className="mx-auto max-w-7xl px-6 py-10">
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-3 items-start">
 
-                    {/* MAIN CONTENT*/}
+                    {/* MAIN CONTENT */}
                     <div className="lg:col-span-2 lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 pb-10 custom-scrollbar">
 
                         {/* Hero Image */}
@@ -106,17 +119,20 @@ export default async function EventDetailPage({
                         {/* Sticky Tab Nav */}
                         <div className="sticky top-0 z-20 -mx-6 mb-10 border-b-2 border-soft-slate bg-[#E8F8F5]/95 px-6 backdrop-blur-md">
                             <nav className="-mb-px flex gap-0 overflow-x-auto scrollbar-hide" aria-label="Tabs">
-                                <a href="#overview" className="border-b-4 border-muted-teal py-4 px-1 mr-8 text-xs font-bold uppercase tracking-widest text-muted-teal whitespace-nowrap">
-                                    Overview
-                                </a>
+                                <a href="#overview" className="border-b-4 border-muted-teal py-4 px-1 mr-8 text-xs font-bold uppercase tracking-widest text-muted-teal whitespace-nowrap">Overview</a>
+                                {hasFormatDetails && (
+                                    <a href="#format-details" className="border-b-4 border-transparent py-4 px-1 mr-8 text-xs font-bold uppercase tracking-widest text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
+                                        {event.category} Info
+                                    </a>
+                                )}
                                 {details.agenda.length > 0 && (
                                     <a href="#agenda" className="border-b-4 border-transparent py-4 px-1 mr-8 text-xs font-bold uppercase tracking-widest text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
-                                        Agenda
+                                        {agendaLabel}
                                     </a>
                                 )}
                                 {details.speakers.length > 0 && (
                                     <a href="#speakers" className="border-b-4 border-transparent py-4 px-1 mr-8 text-xs font-bold uppercase tracking-widest text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
-                                        Speakers
+                                        {speakersLabel}
                                     </a>
                                 )}
                                 <a href="#venue" className="border-b-4 border-transparent py-4 px-1 mr-8 text-xs font-bold uppercase tracking-widest text-steel-gray hover:border-gray-300 hover:text-charcoal-blue whitespace-nowrap transition-colors">
@@ -125,10 +141,9 @@ export default async function EventDetailPage({
                             </nav>
                         </div>
 
-                        {/* Content Sections */}
                         <div className="space-y-16">
 
-                            {/* OVERVIEW */}
+                            {/* OVERVIEW — always shown; placeholder if organiser left it blank */}
                             <section id="overview" className="scroll-mt-36">
                                 <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
                                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
@@ -136,19 +151,181 @@ export default async function EventDetailPage({
                                         <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">About this Event</h3>
                                     </div>
                                     <div className="px-6 py-6">
-                                        <p className="text-base leading-relaxed text-steel-gray whitespace-pre-line">
-                                            {descriptionText}
-                                        </p>
+                                        {descriptionText ? (
+                                            <p className="text-base leading-relaxed text-steel-gray whitespace-pre-line">{descriptionText}</p>
+                                        ) : (
+                                            <p className="text-sm italic text-steel-gray/50">No description provided by the organizer.</p>
+                                        )}
                                     </div>
                                 </div>
                             </section>
 
+                            {/* FORMAT-SPECIFIC DETAILS SECTION */}
+                            {hasFormatDetails && (
+                                <section id="format-details" className="scroll-mt-36">
+                                    <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
+                                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-signal-orange" />
+                                        <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px] flex items-center gap-3">
+                                            <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">{event.category} Details</h3>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-2.5 py-1">{event.category}</span>
+                                        </div>
+                                        <div className="divide-y divide-gray-100">
+
+                                            {/* Hackathon / Competition */}
+                                            {(fm.teamSizeMin || fm.teamSizeMax) && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-signal-orange/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-signal-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Team Size</h4>
+                                                        <p className="text-sm text-steel-gray mt-0.5">
+                                                            {fm.teamSizeMin && fm.teamSizeMax
+                                                                ? `${fm.teamSizeMin}–${fm.teamSizeMax} members per team`
+                                                                : fm.teamSizeMin ? `Min ${fm.teamSizeMin} members` : `Max ${fm.teamSizeMax} members`}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {fm.prizePool && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-signal-orange/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-signal-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Prize Pool</h4>
+                                                        <p className="text-sm text-steel-gray mt-0.5">{fm.prizePool}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {fm.submissionDeadline && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-signal-orange/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-signal-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Submission Deadline</h4>
+                                                        <p className="text-sm text-steel-gray mt-0.5">
+                                                            {new Date(fm.submissionDeadline).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {fm.judgingCriteria && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-signal-orange/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-signal-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Judging Criteria</h4>
+                                                        <p className="text-sm text-steel-gray mt-0.5 whitespace-pre-line">{fm.judgingCriteria}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Workshop / Bootcamp */}
+                                            {fm.skillLevel && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-muted-teal/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Skill Level</h4>
+                                                        <span className="inline-block mt-1 px-3 py-1 bg-muted-teal/10 border border-muted-teal/30 text-xs font-bold text-muted-teal">{fm.skillLevel}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {fm.prerequisites && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-muted-teal/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Prerequisites</h4>
+                                                        <p className="text-sm text-steel-gray mt-0.5 whitespace-pre-line">{fm.prerequisites}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {fm.durationWeeks && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-muted-teal/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Duration</h4>
+                                                        <p className="text-sm text-steel-gray mt-0.5">{fm.durationWeeks} week{Number(fm.durationWeeks) !== 1 ? 's' : ''}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {(fm.materialsProvided !== undefined || fm.hasCertificate !== undefined) && (
+                                                <div className="px-6 py-4 flex flex-wrap gap-3">
+                                                    {fm.materialsProvided && (
+                                                        <span className="flex items-center gap-1.5 text-xs font-bold bg-muted-teal/10 border border-muted-teal/30 text-muted-teal px-3 py-2">
+                                                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                                            Materials Included
+                                                        </span>
+                                                    )}
+                                                    {fm.hasCertificate && (
+                                                        <span className="flex items-center gap-1.5 text-xs font-bold bg-muted-teal/10 border border-muted-teal/30 text-muted-teal px-3 py-2">
+                                                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+                                                            Certificate of Completion
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Webinar */}
+                                            {fm.meetingLink && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-charcoal-blue/5 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-charcoal-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.869v6.262a1 1 0 01-1.447.894L15 14M4 8h8a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4a2 2 0 012-2z" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Meeting Link</h4>
+                                                        <p className="text-xs text-steel-gray mt-0.5">Shared with registered attendees only</p>
+                                                        {isRegistered && (
+                                                            <a href={fm.meetingLink} target="_blank" rel="noopener noreferrer"
+                                                                className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-bold text-muted-teal hover:text-charcoal-blue transition-colors">
+                                                                Join Meeting →
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {fm.recordingAvailable && (
+                                                <div className="px-6 py-4 flex items-center gap-3">
+                                                    <span className="flex items-center gap-1.5 text-xs font-bold bg-muted-teal/10 border border-muted-teal/30 text-muted-teal px-3 py-2">
+                                                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                                        Recording Will Be Available
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Meetup */}
+                                            {fm.isRecurring && (
+                                                <div className="px-6 py-4 flex items-start gap-4">
+                                                    <div className="w-8 h-8 bg-charcoal-blue/5 flex items-center justify-center shrink-0 mt-0.5">
+                                                        <svg className="h-4 w-4 text-charcoal-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-charcoal-blue">Recurring Meetup</h4>
+                                                        {fm.recurringSchedule && <p className="text-sm text-steel-gray mt-0.5">{fm.recurringSchedule}</p>}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                        </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* AGENDA */}
                             {details.agenda.length > 0 && (
                                 <section id="agenda" className="scroll-mt-36">
                                     <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
                                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
                                         <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
-                                            <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">Event Agenda</h3>
+                                            <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">{agendaLabel}</h3>
                                         </div>
                                         <div className="divide-y divide-gray-100">
                                             {details.agenda.map((item, idx) => (
@@ -159,9 +336,7 @@ export default async function EventDetailPage({
                                                     </div>
                                                     <div className="min-w-0">
                                                         <h4 className="text-base font-bold text-charcoal-blue">{item.title}</h4>
-                                                        {item.description && (
-                                                            <p className="mt-1.5 text-sm text-steel-gray">{item.description}</p>
-                                                        )}
+                                                        {item.description && <p className="mt-1.5 text-sm text-steel-gray">{item.description}</p>}
                                                     </div>
                                                 </div>
                                             ))}
@@ -170,12 +345,13 @@ export default async function EventDetailPage({
                                 </section>
                             )}
 
+                            {/* SPEAKERS */}
                             {details.speakers.length > 0 && (
                                 <section id="speakers" className="scroll-mt-36">
                                     <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
                                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
                                         <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
-                                            <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">Speakers</h3>
+                                            <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">{speakersLabel}</h3>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
                                             {details.speakers.map((speaker, idx) => (
@@ -185,18 +361,14 @@ export default async function EventDetailPage({
                                                             <img src={speaker.avatar} alt={speaker.name} className="w-full h-full object-cover" />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-steel-gray/30">
-                                                                <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                                </svg>
+                                                                <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div>
                                                         <h4 className="font-bold text-charcoal-blue">{speaker.name}</h4>
                                                         <p className="text-[11px] font-bold uppercase tracking-wider text-muted-teal mt-0.5">{speaker.role}</p>
-                                                        {speaker.company && (
-                                                            <p className="text-sm text-steel-gray">{speaker.company}</p>
-                                                        )}
+                                                        {speaker.company && <p className="text-sm text-steel-gray">{speaker.company}</p>}
                                                     </div>
                                                 </div>
                                             ))}
@@ -210,11 +382,10 @@ export default async function EventDetailPage({
                                 <h3 className="mb-6 text-xs font-bold uppercase tracking-widest text-steel-gray border-l-4 border-muted-teal pl-4">
                                     Venue & Location
                                 </h3>
-
                                 <div className="bg-white border-2 border-gray-200 relative overflow-hidden mb-6 transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
                                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
                                     <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
-                                        <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">Venue &amp; Location</h3>
+                                        <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">Venue & Location</h3>
                                     </div>
                                     <div className="w-full bg-soft-slate/50 border-b-2 border-gray-100">
                                         {coordinates ? (
@@ -230,9 +401,25 @@ export default async function EventDetailPage({
                                     </div>
                                 </div>
 
+                                {/* Capacity stats */}
+                                <div className="grid grid-cols-3 gap-3 mb-6">
+                                    <div className="bg-white border-2 border-gray-200 px-4 py-4 text-center">
+                                        <span className="block text-2xl font-black text-charcoal-blue">{event.capacity}</span>
+                                        <span className="block text-[10px] font-bold uppercase tracking-widest text-steel-gray mt-1">Capacity</span>
+                                    </div>
+                                    <div className="bg-white border-2 border-gray-200 px-4 py-4 text-center">
+                                        <span className="block text-2xl font-black text-muted-teal">{soldCount}</span>
+                                        <span className="block text-[10px] font-bold uppercase tracking-widest text-steel-gray mt-1">Registered</span>
+                                    </div>
+                                    <div className={`border-2 px-4 py-4 text-center ${spotsLeft <= 0 ? 'bg-signal-orange/10 border-signal-orange/30' : spotsLeft < 20 ? 'bg-signal-orange/10 border-signal-orange/30' : 'bg-white border-gray-200'}`}>
+                                        <span className={`block text-2xl font-black ${spotsLeft <= 0 || spotsLeft < 20 ? 'text-signal-orange' : 'text-charcoal-blue'}`}>{Math.max(0, spotsLeft)}</span>
+                                        <span className="block text-[10px] font-bold uppercase tracking-widest text-steel-gray mt-1">Remaining</span>
+                                    </div>
+                                </div>
+
                                 {details.policies && (
                                     <div className="bg-white border-2 border-gray-200 border-l-4 border-l-muted-teal px-6 py-5">
-                                        <p className="text-xs font-bold uppercase tracking-widest text-charcoal-blue mb-3">Policies &amp; Additional Info</p>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-charcoal-blue mb-3">Policies & Additional Info</p>
                                         <p className="text-sm text-steel-gray leading-relaxed whitespace-pre-line">{details.policies}</p>
                                     </div>
                                 )}
@@ -241,15 +428,13 @@ export default async function EventDetailPage({
                         </div>
                     </div>
 
-                    {/* SIDEBAR  */}
+                    {/* SIDEBAR */}
                     <div className="lg:sticky lg:top-24 space-y-6 self-start lg:h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 pb-8 custom-scrollbar">
 
                         {/* REGISTRATION CARD */}
                         <div className="border-2 border-gray-200 bg-white relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[6px_6px_0px_0px_rgba(31,42,55,1)]">
-                            {/* Teal top accent */}
                             <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
 
-                            {/* Price header */}
                             <div className="border-b-2 border-gray-100 bg-gray-50 px-7 py-6 mt-[3px]">
                                 <div className="flex items-baseline justify-between">
                                     <span className="text-4xl font-black text-charcoal-blue">{priceDisplay}</span>
@@ -265,18 +450,19 @@ export default async function EventDetailPage({
                                 </p>
                             </div>
 
-                            {/* CTA */}
                             <div className="px-7 py-5 border-b-2 border-gray-100">
-                                <RegisterButton
+                                <RegistrationModal
                                     eventId={event.id}
                                     isFull={spotsLeft <= 0}
                                     isRegistered={isRegistered}
+                                    eventCategory={event.category}
+                                    eventTitle={event.title}
+                                    isFree={isFree}
+                                    price={event.price}
                                 />
                             </div>
 
-                            {/* Info rows */}
                             <div className="divide-y divide-gray-100">
-
                                 <div className="flex items-start gap-3 px-7 py-5">
                                     <svg className="mt-0.5 h-5 w-5 text-muted-teal shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -285,9 +471,7 @@ export default async function EventDetailPage({
                                         <h4 className="text-sm font-bold text-charcoal-blue">Date & Time</h4>
                                         <p className="text-sm text-steel-gray mt-1">{dateStr}</p>
                                         <p className="text-sm text-steel-gray">{timeStr}</p>
-                                        <a href="#" className="mt-1.5 block text-sm font-semibold text-muted-teal hover:text-charcoal-blue transition-colors">
-                                            Add to Calendar
-                                        </a>
+                                        <a href="#" className="mt-1.5 block text-sm font-semibold text-muted-teal hover:text-charcoal-blue transition-colors">Add to Calendar</a>
                                     </div>
                                 </div>
 
@@ -299,9 +483,7 @@ export default async function EventDetailPage({
                                     <div>
                                         <h4 className="text-sm font-bold text-charcoal-blue">Location</h4>
                                         <p className="text-sm text-steel-gray mt-1">{displayLocation}</p>
-                                        <a href="#venue" className="mt-1.5 block text-sm font-semibold text-muted-teal hover:text-charcoal-blue transition-colors">
-                                            View Map
-                                        </a>
+                                        <a href="#venue" className="mt-1.5 block text-sm font-semibold text-muted-teal hover:text-charcoal-blue transition-colors">View Map</a>
                                     </div>
                                 </div>
 
@@ -312,14 +494,81 @@ export default async function EventDetailPage({
                                     <div>
                                         <h4 className="text-sm font-bold text-charcoal-blue">Organizer</h4>
                                         <p className="text-sm text-steel-gray mt-1">{organizerName}</p>
-                                        <a href="#" className="mt-1.5 block text-sm font-semibold text-muted-teal hover:text-charcoal-blue transition-colors">
-                                            Contact
-                                        </a>
+                                        <a href="#" className="mt-1.5 block text-sm font-semibold text-muted-teal hover:text-charcoal-blue transition-colors">Contact</a>
                                     </div>
                                 </div>
 
+                                {/* Tags in sidebar */}
+                                {tags.length > 0 && (
+                                    <div className="px-7 py-5">
+                                        <h4 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue mb-3">Topics</h4>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {tags.map((tag: string) => (
+                                                <span key={tag} className="px-2.5 py-1 border-2 border-gray-100 text-[11px] font-bold text-steel-gray bg-gray-50">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
+
+                        {/* FORMAT-SPECIFIC QUICK FACTS in sidebar */}
+                        {(fm.skillLevel || fm.prizePool || fm.teamSizeMin || fm.meetingLink || fm.isRecurring || fm.hasCertificate) && (
+                            <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
+                                <div className="absolute top-0 left-0 right-0 h-[3px] bg-signal-orange" />
+                                <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
+                                    <h4 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">Quick Facts</h4>
+                                </div>
+                                <div className="px-5 py-4 space-y-3">
+                                    {fm.skillLevel && (
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-steel-gray font-medium">Level</span>
+                                            <span className="font-bold text-charcoal-blue">{fm.skillLevel}</span>
+                                        </div>
+                                    )}
+                                    {(fm.teamSizeMin || fm.teamSizeMax) && (
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-steel-gray font-medium">Team Size</span>
+                                            <span className="font-bold text-charcoal-blue">
+                                                {fm.teamSizeMin && fm.teamSizeMax ? `${fm.teamSizeMin}–${fm.teamSizeMax}` : fm.teamSizeMin || fm.teamSizeMax}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {fm.prizePool && (
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-steel-gray font-medium">Prizes</span>
+                                            <span className="font-bold text-signal-orange">{fm.prizePool.split('—')[0].trim()}</span>
+                                        </div>
+                                    )}
+                                    {fm.durationWeeks && (
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-steel-gray font-medium">Duration</span>
+                                            <span className="font-bold text-charcoal-blue">{fm.durationWeeks} weeks</span>
+                                        </div>
+                                    )}
+                                    {fm.hasCertificate && (
+                                        <div className="flex items-center gap-2 text-sm text-muted-teal font-bold">
+                                            <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                            Certificate of Completion
+                                        </div>
+                                    )}
+                                    {fm.recordingAvailable && (
+                                        <div className="flex items-center gap-2 text-sm text-muted-teal font-bold">
+                                            <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                            Recording Available
+                                        </div>
+                                    )}
+                                    {fm.isRecurring && (
+                                        <div className="flex items-center gap-2 text-sm text-charcoal-blue font-bold">
+                                            <svg className="h-4 w-4 shrink-0 text-steel-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                            Recurring Event
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* POLICIES CARD */}
                         <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">

@@ -72,7 +72,37 @@ export const EVENTS = [
     },
 ];
 
-export const CATEGORIES = ["All Events", "Technology", "Design", "Business", "Marketing", "Security"];
+// Format-based — what kind of event it IS (drives registration expectations)
+export const CATEGORIES = [
+    "All Events",
+    "Conference",
+    "Hackathon",
+    "Workshop",
+    "Meetup",
+    "Webinar",
+    "Competition",
+    "Expo",
+    "Bootcamp",
+];
+
+// Topic-based — freeform tags organizers assign for specific filtering
+export const POPULAR_TAGS = [
+    "AI & ML",
+    "Web Dev",
+    "Mobile",
+    "Cybersecurity",
+    "Design",
+    "DevOps",
+    "Blockchain",
+    "Open Source",
+    "Networking",
+    "Product",
+    "Startup",
+    "Data Science",
+    "Gaming",
+    "Career",
+    "No-Code",
+];
 
 export const TRENDING = [
     { title: "HackTheFuture 2026", attendees: "1.2k attending" },

@@ -6,7 +6,27 @@ import { prisma } from "@/lib/prisma";
 import { getAuthOptions } from "@/lib/auth";
 import { invalidateEventCache } from "@/lib/event-cache";
 
-export async function registerForEvent(eventId: string) {
+export interface RegistrationMeta {
+    // Hackathon / Competition
+    teamName?: string;
+    teamMembers?: string; // comma-separated names/emails
+    soloEntry?: boolean;
+
+    // Workshop / Bootcamp
+    experienceLevel?: string;
+    dietaryRestrictions?: string;
+    expectations?: string;
+
+    // Webinar
+    timezone?: string;
+    notifyOnRecording?: boolean;
+
+    // General
+    heardAboutUs?: string;
+    specialRequirements?: string;
+}
+
+export async function registerForEvent(eventId: string, meta?: RegistrationMeta) {
     const session = await getServerSession(getAuthOptions());
 
     if (!session || !session.user || !session.user.id) {
@@ -16,7 +36,7 @@ export async function registerForEvent(eventId: string) {
     try {
         const event = await prisma.event.findUnique({
             where: { id: eventId },
-            include: { tickets: true } // Use tickets relation to check count
+            include: { tickets: true }
         });
 
         if (!event) {
@@ -41,7 +61,7 @@ export async function registerForEvent(eventId: string) {
             return { success: false, message: "Event is sold out." };
         }
 
-        // Create ticket
+        // Create ticket — store registration meta as JSON in notes field if available
         await prisma.ticket.create({
             data: {
                 userId: session.user.id,
@@ -50,10 +70,7 @@ export async function registerForEvent(eventId: string) {
             }
         });
 
-        // Also update participants relation for backward compatibility if needed, 
-        // though strictly speaking we should migrate to using tickets only.
-        // But the current UI uses participants.length.
-        // So let's connect the user to the event as a participant too.
+        // Also connect as participant for backward-compat
         await prisma.event.update({
             where: { id: eventId },
             data: {

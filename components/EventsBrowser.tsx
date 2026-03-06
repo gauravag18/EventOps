@@ -2,10 +2,10 @@
 
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { CATEGORIES } from '@/lib/data';
+import { CATEGORIES, POPULAR_TAGS } from '@/lib/data';
 
 interface EventData {
-    id: string; title: string; description: string; category: string; date: string | Date; image: string;
+    id: string; title: string; description: string; category: string; tags: string[]; date: string | Date; image: string;
     price: string | null; isFree: boolean; capacity: number; displayLocation: string; spotsLeft: number; attendeesCount: number;
 }
 interface TrendingEvent { id: string; title: string; attendees: number; }
@@ -14,6 +14,7 @@ interface EventsBrowserProps { initialEvents: EventData[]; trendingEvents: Trend
 export default function EventsBrowser({ initialEvents, trendingEvents }: EventsBrowserProps) {
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('All Events');
+    const [activeTag, setActiveTag] = useState('');
     const [dateFilter, setDateFilter] = useState('Any Date');
     const [sort, setSort] = useState('Newest');
     const [visibleCount, setVisibleCount] = useState(5);
@@ -22,6 +23,7 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
     const filteredEvents = useMemo(() => {
         let result = initialEvents.filter(event => {
             if (category !== 'All Events' && event.category !== category) return false;
+            if (activeTag && !(event.tags ?? []).includes(activeTag)) return false;
             const searchLower = search.toLowerCase();
             if (search && !(event.title.toLowerCase().includes(searchLower) || (event.description && event.description.toLowerCase().includes(searchLower)))) return false;
             if (dateFilter !== 'Any Date') {
@@ -48,7 +50,7 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
             result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         }
         return result;
-    }, [initialEvents, search, category, dateFilter, sort]);
+    }, [initialEvents, search, category, activeTag, dateFilter, sort]);
 
     const visibleEvents = filteredEvents.slice(0, visibleCount);
 
@@ -62,7 +64,7 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
         if (node) observerRef.current.observe(node);
     }, [visibleCount, filteredEvents.length]);
 
-    useEffect(() => { setVisibleCount(5); }, [search, category, dateFilter, sort]);
+    useEffect(() => { setVisibleCount(5); }, [search, category, activeTag, dateFilter, sort]);
 
     return (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-5 items-start">
@@ -81,13 +83,33 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
                             </div>
                         </div>
                         <div>
-                            <h3 className="mb-4 font-bold text-charcoal-blue">Categories</h3>
+                            <h3 className="mb-4 font-bold text-charcoal-blue">Format</h3>
                             <div className="space-y-2">
                                 {CATEGORIES.map((cat) => (
                                     <label key={cat} className="flex items-center space-x-3 cursor-pointer group hover:bg-gray-50 p-1 -ml-1 transition-colors">
                                         <input type="radio" name="category" checked={category === cat} onChange={() => setCategory(cat)} className="h-4 w-4 border-2 border-gray-400 text-charcoal-blue focus:ring-0 rounded-none checked:bg-charcoal-blue hover:border-gray-900 transition-colors" />
                                         <span className={`text-sm tracking-wide ${category === cat ? 'font-bold text-charcoal-blue' : 'text-steel-gray font-medium group-hover:text-charcoal-blue'}`}>{cat}</span>
                                     </label>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-bold text-charcoal-blue">Tags</h3>
+                                {activeTag && <button onClick={() => setActiveTag('')} className="text-xs font-bold text-steel-gray hover:text-signal-orange transition-colors">Clear</button>}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                                {POPULAR_TAGS.map((tag) => (
+                                    <button
+                                        key={tag}
+                                        onClick={() => setActiveTag(activeTag === tag ? '' : tag)}
+                                        className={`px-2.5 py-1 text-[11px] font-bold tracking-wide border-2 transition-all ${activeTag === tag
+                                                ? 'bg-muted-teal border-muted-teal text-white'
+                                                : 'border-gray-200 text-steel-gray hover:border-muted-teal hover:text-muted-teal bg-white'
+                                            }`}
+                                    >
+                                        {tag}
+                                    </button>
                                 ))}
                             </div>
                         </div>
@@ -102,7 +124,7 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
                                 ))}
                             </div>
                         </div>
-                        <button onClick={() => { setSearch(''); setCategory('All Events'); setDateFilter('Any Date'); }} className="w-full border-2 border-gray-200 bg-white py-2 text-sm font-bold tracking-wider text-charcoal-blue hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all">Reset Filters</button>
+                        <button onClick={() => { setSearch(''); setCategory('All Events'); setActiveTag(''); setDateFilter('Any Date'); }} className="w-full border-2 border-gray-200 bg-white py-2 text-sm font-bold tracking-wider text-charcoal-blue hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all">Reset Filters</button>
                     </div>
                 </div>
             </div>
@@ -156,6 +178,25 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
                                                     <svg className="h-3.5 w-3.5 text-muted-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                                     <span className="text-charcoal-blue">{event.displayLocation}</span>
                                                 </div>
+                                                {(event.tags ?? []).length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mt-1 w-full">
+                                                        {(event.tags ?? []).slice(0, 3).map(tag => (
+                                                            <button
+                                                                key={tag}
+                                                                onClick={(e) => { e.preventDefault(); setActiveTag(activeTag === tag ? '' : tag); }}
+                                                                className={`px-2 py-0.5 text-[10px] font-bold border transition-all ${activeTag === tag
+                                                                        ? 'bg-muted-teal border-muted-teal text-white'
+                                                                        : 'border-gray-200 text-steel-gray hover:border-muted-teal hover:text-muted-teal'
+                                                                    }`}
+                                                            >
+                                                                {tag}
+                                                            </button>
+                                                        ))}
+                                                        {(event.tags ?? []).length > 3 && (
+                                                            <span className="px-2 py-0.5 text-[10px] font-bold border border-gray-200 text-steel-gray">+{(event.tags ?? []).length - 3}</span>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 pt-4 border-t-2 border-gray-100 gap-4">
@@ -204,7 +245,7 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
                         <h3 className="text-lg font-bold text-charcoal-blue">No matching events</h3>
                         <p className="mt-2 text-sm font-medium text-steel-gray">Try adjusting your search or filters.</p>
-                        <button onClick={() => { setSearch(''); setCategory('All Events'); setDateFilter('Any Date'); }} className="mt-5 inline-block text-sm font-bold text-muted-teal hover:underline underline-offset-4 pointer-events-auto">Clear all filters</button>
+                        <button onClick={() => { setSearch(''); setCategory('All Events'); setActiveTag(''); setDateFilter('Any Date'); }} className="mt-5 inline-block text-sm font-bold text-muted-teal hover:underline underline-offset-4 pointer-events-auto">Clear all filters</button>
                     </div>
                 )}
             </div>

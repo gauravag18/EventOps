@@ -6,9 +6,10 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const q = searchParams.get('q')?.toLowerCase() || '';
     const category = searchParams.get('category') || '';
+    const tag = searchParams.get('tag') || '';
 
     // Construct Cache Key
-    const cacheKey = JSON.stringify({ q, category });
+    const cacheKey = JSON.stringify({ q, category, tag });
 
     // Check Cache
     const cachedEvents = await getCachedEvents(cacheKey);
@@ -26,6 +27,9 @@ export async function GET(request: NextRequest) {
     }
     if (category && category !== 'All Events') {
         where.category = category;
+    }
+    if (tag) {
+        where.tags = { has: tag };
     }
 
     try {

@@ -34,6 +34,7 @@ export async function POST(req: Request) {
                 capacity: parseInt(data.capacity) || 0,
                 price: data.price,
                 isFree: data.isFree,
+                tags: Array.isArray(data.tags) ? data.tags : [],
                 // Connect the creator as an organizer
                 organizers: {
                     connect: {

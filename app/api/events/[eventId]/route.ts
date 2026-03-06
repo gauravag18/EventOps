@@ -82,6 +82,7 @@ export async function PUT(
                 capacity: data.capacity !== undefined ? parseInt(data.capacity) : undefined,
                 price: data.price,
                 isFree: data.isFree,
+                tags: Array.isArray(data.tags) ? data.tags : undefined,
             }
         });
 

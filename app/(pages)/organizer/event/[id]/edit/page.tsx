@@ -46,6 +46,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
         capacity: event.capacity,
         price: event.price || '',
         isFree: event.isFree,
+        tags: event.tags ?? [],
         policies: unpacked.policies || '',
         agenda: unpacked.agenda ?? [],
         speakers: unpacked.speakers ?? [],

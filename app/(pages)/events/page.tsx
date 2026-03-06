@@ -17,6 +17,7 @@ export default async function EventsListPage() {
         title: event.title,
         description: event.description || '',
         category: event.category,
+        tags: event.tags ?? [],
         date: event.date,
         image: event.image || '/placeholder-1.jpg',
         price: event.price,

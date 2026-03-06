@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CATEGORIES } from '@/lib/data';
+import { CATEGORIES, POPULAR_TAGS } from '@/lib/data';
 import Link from 'next/link';
 
 import dynamic from 'next/dynamic';
@@ -14,7 +14,19 @@ const LocationPicker = dynamic(() => import('./LocationPicker'), {
 });
 
 import EventCard from './EventCard';
-import { packEventDescription, unpackEventDescription, AgendaItem, Speaker } from '@/lib/event-details';
+import { packEventDescription, unpackEventDescription, AgendaItem, Speaker, FormatMeta } from '@/lib/event-details';
+
+// Which lineup sections each format should show by default
+const FORMAT_CONFIG: Record<string, { showAgenda: boolean; showSpeakers: boolean; lineupLabel: string }> = {
+    Conference: { showAgenda: true, showSpeakers: true, lineupLabel: 'Agenda & Speakers' },
+    Hackathon: { showAgenda: true, showSpeakers: false, lineupLabel: 'Schedule' },
+    Workshop: { showAgenda: false, showSpeakers: false, lineupLabel: 'Lineup' },
+    Meetup: { showAgenda: false, showSpeakers: false, lineupLabel: 'Lineup' },
+    Webinar: { showAgenda: false, showSpeakers: true, lineupLabel: 'Presenters' },
+    Competition: { showAgenda: true, showSpeakers: false, lineupLabel: 'Schedule' },
+    Expo: { showAgenda: false, showSpeakers: true, lineupLabel: 'Exhibitors & Speakers' },
+    Bootcamp: { showAgenda: true, showSpeakers: false, lineupLabel: 'Curriculum' },
+};
 
 // Detailed steps for the form wizard
 const STEPS = [
@@ -29,23 +41,25 @@ interface EventFormData {
     title: string;
     tagline: string;
     category: string;
+    tags: string[];
     date: string;
     time: string;
     location: string;
-    coordinates?: string; // New field for lat,lng
-    description: string; // This will hold the "Overview" text in the form state
+    coordinates?: string;
+    description: string;
     image: string;
     capacity: number;
     price: string;
     isFree: boolean;
-    // New fields for form state (packed into description on submit)
     policies: string;
     agenda: AgendaItem[];
     speakers: Speaker[];
+    // Format-specific extra fields
+    formatMeta: FormatMeta;
 }
 
 interface CreateEventFormProps {
-    initialData?: EventFormData;
+    initialData?: Partial<EventFormData>;
     isEditMode?: boolean;
     eventId?: string;
 }
@@ -55,7 +69,8 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
     const defaultFormData: EventFormData = {
         title: '',
         tagline: '',
-        category: CATEGORIES[0] || 'Technology',
+        category: 'Conference',
+        tags: [],
         date: '',
         time: '',
         location: '',
@@ -67,14 +82,16 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
         policies: '',
         agenda: [],
         speakers: [],
+        formatMeta: {},
     };
 
     const [formData, setFormData] = useState<EventFormData>({
         ...defaultFormData,
         ...initialData,
-        // Always guarantee arrays are never undefined even if initialData omits them
         agenda: initialData?.agenda ?? [],
         speakers: initialData?.speakers ?? [],
+        tags: initialData?.tags ?? [],
+        formatMeta: initialData?.formatMeta ?? {},
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -85,6 +102,13 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
     const handleToggle = (field: string) => {
         setFormData(prev => ({ ...prev, [field]: !prev[field as keyof typeof prev] }));
     };
+
+    const handleMetaChange = (key: keyof FormatMeta, value: string | boolean) => {
+        setFormData(prev => ({ ...prev, formatMeta: { ...prev.formatMeta, [key]: value } }));
+    };
+
+    // Derived format config (falls back to conference defaults)
+    const fmtConfig = FORMAT_CONFIG[formData.category] ?? FORMAT_CONFIG['Conference'];
 
     const nextStep = () => setStep(prev => Math.min(prev + 1, STEPS.length));
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
@@ -131,7 +155,8 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
                 overview: formData.description,
                 agenda: formData.agenda,
                 speakers: formData.speakers,
-                policies: formData.policies
+                policies: formData.policies,
+                formatMeta: formData.formatMeta,
             });
 
             // Prepare payload - if coordinates exist, append them to location string using a delimiter
@@ -306,21 +331,61 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
                                         </div>
 
                                         <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-4">
-                                            <label className="block text-sm font-bold text-charcoal-blue  tracking-wider">Category</label>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                                {CATEGORIES.filter(c => c !== "All Events").map(c => (
-                                                    <div
-                                                        key={c}
-                                                        onClick={() => setFormData(prev => ({ ...prev, category: c }))}
-                                                        className={`cursor-pointer px-4 py-3 border-2 text-sm font-bold  tracking-wider transition-all text-center
-                                                            ${formData.category === c
-                                                                ? 'border-charcoal-blue bg-charcoal-blue text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)]'
-                                                                : 'border-soft-slate text-steel-gray hover:border-charcoal-blue hover:text-charcoal-blue'
-                                                            }`}
-                                                    >
-                                                        {c}
-                                                    </div>
-                                                ))}
+                                            <div>
+                                                <label className="block text-sm font-bold text-charcoal-blue tracking-wider mb-3">Event Format</label>
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                                    {CATEGORIES.filter(c => c !== "All Events").map(c => (
+                                                        <div
+                                                            key={c}
+                                                            onClick={() => setFormData(prev => ({ ...prev, category: c }))}
+                                                            className={`cursor-pointer px-4 py-3 border-2 text-sm font-bold tracking-wider transition-all text-center
+                                                                ${formData.category === c
+                                                                    ? 'border-charcoal-blue bg-charcoal-blue text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)]'
+                                                                    : 'border-soft-slate text-steel-gray hover:border-charcoal-blue hover:text-charcoal-blue'
+                                                                }`}
+                                                        >
+                                                            {c}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-2 border-t-2 border-soft-slate">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Tags <span className="text-steel-gray font-normal normal-case tracking-normal">(pick all that apply)</span></label>
+                                                    {formData.tags.length > 0 && (
+                                                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, tags: [] }))} className="text-xs text-steel-gray hover:text-signal-orange font-bold transition-colors">
+                                                            Clear all
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {POPULAR_TAGS.map(tag => {
+                                                        const isSelected = formData.tags.includes(tag);
+                                                        return (
+                                                            <button
+                                                                key={tag}
+                                                                type="button"
+                                                                onClick={() => setFormData(prev => ({
+                                                                    ...prev,
+                                                                    tags: isSelected
+                                                                        ? prev.tags.filter(t => t !== tag)
+                                                                        : [...prev.tags, tag]
+                                                                }))}
+                                                                className={`px-3 py-1.5 text-xs font-bold tracking-wide border-2 transition-all
+                                                                    ${isSelected
+                                                                        ? 'bg-muted-teal border-muted-teal text-white shadow-[2px_2px_0px_0px_rgba(15,118,110,0.4)]'
+                                                                        : 'border-soft-slate text-steel-gray hover:border-muted-teal hover:text-muted-teal bg-white'
+                                                                    }`}
+                                                            >
+                                                                {isSelected ? '✓ ' : ''}{tag}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                                {formData.tags.length > 0 && (
+                                                    <p className="mt-2 text-xs text-muted-teal font-bold">{formData.tags.length} tag{formData.tags.length > 1 ? 's' : ''} selected</p>
+                                                )}
                                             </div>
                                         </div>
                                     </>
@@ -536,6 +601,135 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
                                                 className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none transition-all bg-white text-charcoal-blue"
                                             />
                                         </div>
+
+                                        {/* FORMAT-SPECIFIC FIELDS */}
+                                        {(['Hackathon', 'Competition'].includes(formData.category)) && (
+                                            <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-5">
+                                                <div className="border-b-2 border-soft-slate pb-4 flex items-center gap-3">
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-3 py-1.5">{formData.category} Details</span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Min Team Size</label>
+                                                        <input type="number" min={1} value={formData.formatMeta.teamSizeMin || ''} onChange={e => handleMetaChange('teamSizeMin', e.target.value)} placeholder="1" className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none bg-white text-charcoal-blue" />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Max Team Size</label>
+                                                        <input type="number" min={1} value={formData.formatMeta.teamSizeMax || ''} onChange={e => handleMetaChange('teamSizeMax', e.target.value)} placeholder="5" className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none bg-white text-charcoal-blue" />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Prize Pool</label>
+                                                    <input type="text" value={formData.formatMeta.prizePool || ''} onChange={e => handleMetaChange('prizePool', e.target.value)} placeholder="e.g. $10,000 in prizes — 1st: $5k, 2nd: $3k, 3rd: $2k" className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none bg-white text-charcoal-blue placeholder:text-steel-gray/50" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Submission Deadline</label>
+                                                    <input type="datetime-local" value={formData.formatMeta.submissionDeadline || ''} onChange={e => handleMetaChange('submissionDeadline', e.target.value)} className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none bg-white text-charcoal-blue" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Judging Criteria</label>
+                                                    <textarea rows={3} value={formData.formatMeta.judgingCriteria || ''} onChange={e => handleMetaChange('judgingCriteria', e.target.value)} placeholder="e.g. Innovation (30%), Technical execution (40%), Presentation (30%)" className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none resize-none bg-white text-charcoal-blue placeholder:text-steel-gray/50" />
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {(['Workshop', 'Bootcamp'].includes(formData.category)) && (
+                                            <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-5">
+                                                <div className="border-b-2 border-soft-slate pb-4">
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-3 py-1.5">{formData.category} Details</span>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Skill Level</label>
+                                                    <div className="flex gap-3">
+                                                        {['Beginner', 'Intermediate', 'Advanced'].map(level => (
+                                                            <button key={level} type="button" onClick={() => handleMetaChange('skillLevel', level)}
+                                                                className={`flex-1 py-3 text-sm font-bold border-2 tracking-wide transition-all ${formData.formatMeta.skillLevel === level
+                                                                    ? 'bg-charcoal-blue border-charcoal-blue text-white'
+                                                                    : 'border-soft-slate text-steel-gray hover:border-charcoal-blue'
+                                                                    }`}>
+                                                                {level}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Prerequisites</label>
+                                                    <textarea rows={3} value={formData.formatMeta.prerequisites || ''} onChange={e => handleMetaChange('prerequisites', e.target.value)} placeholder="e.g. Basic knowledge of Python, GitHub account" className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none resize-none bg-white text-charcoal-blue placeholder:text-steel-gray/50" />
+                                                </div>
+                                                {formData.category === 'Bootcamp' && (
+                                                    <div className="space-y-2">
+                                                        <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Duration (weeks)</label>
+                                                        <input type="number" min={1} value={formData.formatMeta.durationWeeks || ''} onChange={e => handleMetaChange('durationWeeks', e.target.value)} placeholder="8" className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none bg-white text-charcoal-blue" />
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center justify-between py-3 border-t-2 border-soft-slate">
+                                                    <div>
+                                                        <span className="block text-sm font-bold text-charcoal-blue">Materials Provided</span>
+                                                        <span className="text-xs text-steel-gray">Slides, worksheets, or kits included</span>
+                                                    </div>
+                                                    <div onClick={() => handleMetaChange('materialsProvided', !formData.formatMeta.materialsProvided)} className={`w-14 h-8 flex items-center p-1 cursor-pointer transition-colors border-2 ${formData.formatMeta.materialsProvided ? 'bg-signal-orange border-signal-orange' : 'bg-transparent border-soft-slate'}`}>
+                                                        <div className={`w-5 h-5 shadow-sm transform transition-transform ${formData.formatMeta.materialsProvided ? 'translate-x-6 bg-white' : 'translate-x-0 bg-charcoal-blue'}`} />
+                                                    </div>
+                                                </div>
+                                                {formData.category === 'Bootcamp' && (
+                                                    <div className="flex items-center justify-between py-3 border-t-2 border-soft-slate">
+                                                        <div>
+                                                            <span className="block text-sm font-bold text-charcoal-blue">Certificate of Completion</span>
+                                                            <span className="text-xs text-steel-gray">Participants receive a certificate</span>
+                                                        </div>
+                                                        <div onClick={() => handleMetaChange('hasCertificate', !formData.formatMeta.hasCertificate)} className={`w-14 h-8 flex items-center p-1 cursor-pointer transition-colors border-2 ${formData.formatMeta.hasCertificate ? 'bg-signal-orange border-signal-orange' : 'bg-transparent border-soft-slate'}`}>
+                                                            <div className={`w-5 h-5 shadow-sm transform transition-transform ${formData.formatMeta.hasCertificate ? 'translate-x-6 bg-white' : 'translate-x-0 bg-charcoal-blue'}`} />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {formData.category === 'Webinar' && (
+                                            <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-5">
+                                                <div className="border-b-2 border-soft-slate pb-4">
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-3 py-1.5">Webinar Details</span>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Meeting / Stream Link</label>
+                                                    <input type="url" value={formData.formatMeta.meetingLink || ''} onChange={e => handleMetaChange('meetingLink', e.target.value)} placeholder="https://zoom.us/j/... or https://meet.google.com/..." className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none bg-white text-charcoal-blue placeholder:text-steel-gray/50" />
+                                                    <p className="text-xs text-steel-gray">Shared with registered attendees only.</p>
+                                                </div>
+                                                <div className="flex items-center justify-between py-3 border-t-2 border-soft-slate">
+                                                    <div>
+                                                        <span className="block text-sm font-bold text-charcoal-blue">Recording Available</span>
+                                                        <span className="text-xs text-steel-gray">Attendees can watch back after the session</span>
+                                                    </div>
+                                                    <div onClick={() => handleMetaChange('recordingAvailable', !formData.formatMeta.recordingAvailable)} className={`w-14 h-8 flex items-center p-1 cursor-pointer transition-colors border-2 ${formData.formatMeta.recordingAvailable ? 'bg-signal-orange border-signal-orange' : 'bg-transparent border-soft-slate'}`}>
+                                                        <div className={`w-5 h-5 shadow-sm transform transition-transform ${formData.formatMeta.recordingAvailable ? 'translate-x-6 bg-white' : 'translate-x-0 bg-charcoal-blue'}`} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {formData.category === 'Meetup' && (
+                                            <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-5">
+                                                <div className="border-b-2 border-soft-slate pb-4">
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-3 py-1.5">Meetup Details</span>
+                                                </div>
+                                                <div className="flex items-center justify-between py-3">
+                                                    <div>
+                                                        <span className="block text-sm font-bold text-charcoal-blue">Recurring Meetup</span>
+                                                        <span className="text-xs text-steel-gray">This meetup repeats on a schedule</span>
+                                                    </div>
+                                                    <div onClick={() => handleMetaChange('isRecurring', !formData.formatMeta.isRecurring)} className={`w-14 h-8 flex items-center p-1 cursor-pointer transition-colors border-2 ${formData.formatMeta.isRecurring ? 'bg-signal-orange border-signal-orange' : 'bg-transparent border-soft-slate'}`}>
+                                                        <div className={`w-5 h-5 shadow-sm transform transition-transform ${formData.formatMeta.isRecurring ? 'translate-x-6 bg-white' : 'translate-x-0 bg-charcoal-blue'}`} />
+                                                    </div>
+                                                </div>
+                                                {formData.formatMeta.isRecurring && (
+                                                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                        <label className="block text-sm font-bold text-charcoal-blue tracking-wider">Recurrence Schedule</label>
+                                                        <input type="text" value={formData.formatMeta.recurringSchedule || ''} onChange={e => handleMetaChange('recurringSchedule', e.target.value)} placeholder="e.g. Every 1st Thursday of the month" className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none bg-white text-charcoal-blue placeholder:text-steel-gray/50" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
                                         <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-6">
                                             <div className="space-y-2">
                                                 <label className="block text-sm font-bold text-charcoal-blue  tracking-wider">Event Policies</label>
@@ -552,192 +746,157 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
                                     </div>
                                 )}
 
-                                {/* STEP 4: LINEUP (AGENDA & SPEAKERS) */}
+                                {/* STEP 4: LINEUP — gated by format */}
                                 {step === 4 && (
                                     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
 
-                                        {/* AGENDA SECTION */}
-                                        <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-6">
-                                            <div className="flex items-center justify-between border-b-2 border-soft-slate pb-4">
-                                                <h3 className="text-lg font-bold text-charcoal-blue  tracking-wide">Agenda</h3>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setFormData(prev => ({
-                                                        ...prev,
-                                                        agenda: [...prev.agenda, { time: '', title: '', description: '' }]
-                                                    }))}
-                                                    className="px-4 py-2 bg-charcoal-blue text-white text-xs font-bold  tracking-wider hover:bg-muted-teal transition-colors"
-                                                >
-                                                    + Add Item
-                                                </button>
-                                            </div>
-
-                                            {formData.agenda.length === 0 ? (
-                                                <div className="text-center py-8 text-steel-gray italic">No agenda items added yet.</div>
-                                            ) : (
-                                                <div className="space-y-4">
-                                                    {formData.agenda.map((item, index) => (
-                                                        <div key={index} className="flex gap-4 items-start bg-off-white p-4 border border-soft-slate relative group">
-                                                            <div className="flex-1 space-y-3">
-                                                                <div className="flex gap-4">
-                                                                    <div className="w-1/3">
-                                                                        <label className="text-xs font-bold text-steel-gray ">Time</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={item.time}
-                                                                            onChange={(e) => {
-                                                                                const newAgenda = [...formData.agenda];
-                                                                                newAgenda[index].time = e.target.value;
-                                                                                setFormData(prev => ({ ...prev, agenda: newAgenda }));
-                                                                            }}
-                                                                            placeholder="10:00 AM"
-                                                                            className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="w-2/3">
-                                                                        <label className="text-xs font-bold text-steel-gray ">Session Title</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={item.title}
-                                                                            onChange={(e) => {
-                                                                                const newAgenda = [...formData.agenda];
-                                                                                newAgenda[index].title = e.target.value;
-                                                                                setFormData(prev => ({ ...prev, agenda: newAgenda }));
-                                                                            }}
-                                                                            placeholder="Opening Keynote"
-                                                                            className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm font-bold text-charcoal-blue"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div>
-                                                                    <label className="text-xs font-bold text-steel-gray ">Description (Optional)</label>
-                                                                    <input
-                                                                        type="text"
-                                                                        value={item.description}
-                                                                        onChange={(e) => {
-                                                                            const newAgenda = [...formData.agenda];
-                                                                            newAgenda[index].description = e.target.value;
-                                                                            setFormData(prev => ({ ...prev, agenda: newAgenda }));
-                                                                        }}
-                                                                        placeholder="Brief details..."
-                                                                        className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm"
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    const newAgenda = formData.agenda.filter((_, i) => i !== index);
-                                                                    setFormData(prev => ({ ...prev, agenda: newAgenda }));
-                                                                }}
-                                                                className="text-red-500 hover:text-red-700 font-bold p-1 self-start"
-                                                                title="Remove"
-                                                            >
-                                                                ×
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                        {/* Format context header */}
+                                        <div className="flex items-center gap-3 px-1">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-3 py-1.5">{formData.category}</span>
+                                            <span className="text-sm text-steel-gray font-medium">{fmtConfig.lineupLabel}</span>
                                         </div>
 
-                                        {/* SPEAKERS SECTION */}
-                                        <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-6">
-                                            <div className="flex items-center justify-between border-b-2 border-soft-slate pb-4">
-                                                <h3 className="text-lg font-bold text-charcoal-blue  tracking-wide">Speakers</h3>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setFormData(prev => ({
-                                                        ...prev,
-                                                        speakers: [...prev.speakers, { name: '', role: '', company: '', avatar: '' }]
-                                                    }))}
-                                                    className="px-4 py-2 bg-charcoal-blue text-white text-xs font-bold  tracking-wider hover:bg-muted-teal transition-colors"
-                                                >
-                                                    + Add Speaker
-                                                </button>
-                                            </div>
-
-                                            {formData.speakers.length === 0 ? (
-                                                <div className="text-center py-8 text-steel-gray italic">No speakers added yet.</div>
-                                            ) : (
-                                                <div className="space-y-4">
-                                                    {formData.speakers.map((speaker, index) => (
-                                                        <div key={index} className="flex gap-4 items-start bg-off-white p-4 border border-soft-slate relative">
-                                                            <div className="flex-1 space-y-3">
-                                                                <div className="flex gap-4">
-                                                                    <div className="w-1/2">
-                                                                        <label className="text-xs font-bold text-steel-gray ">Name</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={speaker.name}
-                                                                            onChange={(e) => {
-                                                                                const newSpeakers = [...formData.speakers];
-                                                                                newSpeakers[index].name = e.target.value;
-                                                                                setFormData(prev => ({ ...prev, speakers: newSpeakers }));
-                                                                            }}
-                                                                            className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm font-bold"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="w-1/2">
-                                                                        <label className="text-xs font-bold text-steel-gray ">Company</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={speaker.company}
-                                                                            onChange={(e) => {
-                                                                                const newSpeakers = [...formData.speakers];
-                                                                                newSpeakers[index].company = e.target.value;
-                                                                                setFormData(prev => ({ ...prev, speakers: newSpeakers }));
-                                                                            }}
-                                                                            className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex gap-4">
-                                                                    <div className="w-1/2">
-                                                                        <label className="text-xs font-bold text-steel-gray ">Role</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={speaker.role}
-                                                                            onChange={(e) => {
-                                                                                const newSpeakers = [...formData.speakers];
-                                                                                newSpeakers[index].role = e.target.value;
-                                                                                setFormData(prev => ({ ...prev, speakers: newSpeakers }));
-                                                                            }}
-                                                                            className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="w-1/2">
-                                                                        <label className="text-xs font-bold text-steel-gray ">Photo URL</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            value={speaker.avatar}
-                                                                            onChange={(e) => {
-                                                                                const newSpeakers = [...formData.speakers];
-                                                                                newSpeakers[index].avatar = e.target.value;
-                                                                                setFormData(prev => ({ ...prev, speakers: newSpeakers }));
-                                                                            }}
-                                                                            placeholder="https://..."
-                                                                            className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    const newSpeakers = formData.speakers.filter((_, i) => i !== index);
-                                                                    setFormData(prev => ({ ...prev, speakers: newSpeakers }));
-                                                                }}
-                                                                className="text-red-500 hover:text-red-700 font-bold p-1 self-start"
-                                                                title="Remove"
-                                                            >
-                                                                ×
-                                                            </button>
-                                                        </div>
-                                                    ))}
+                                        {/* AGENDA — shown for Conference, Hackathon, Competition, Bootcamp */}
+                                        {fmtConfig.showAgenda && (
+                                            <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-6">
+                                                <div className="flex items-center justify-between border-b-2 border-soft-slate pb-4">
+                                                    <h3 className="text-lg font-bold text-charcoal-blue tracking-wide">
+                                                        {formData.category === 'Bootcamp' ? 'Curriculum / Schedule' : 'Agenda'}
+                                                    </h3>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData(prev => ({
+                                                            ...prev,
+                                                            agenda: [...prev.agenda, { time: '', title: '', description: '' }]
+                                                        }))}
+                                                        className="px-4 py-2 bg-charcoal-blue text-white text-xs font-bold tracking-wider hover:bg-muted-teal transition-colors"
+                                                    >
+                                                        + Add Item
+                                                    </button>
                                                 </div>
-                                            )}
-                                        </div>
+
+                                                {formData.agenda.length === 0 ? (
+                                                    <div className="text-center py-8 text-steel-gray italic">No items added yet.</div>
+                                                ) : (
+                                                    <div className="space-y-4">
+                                                        {formData.agenda.map((item, index) => (
+                                                            <div key={index} className="flex gap-4 items-start bg-off-white p-4 border border-soft-slate relative group">
+                                                                <div className="flex-1 space-y-3">
+                                                                    <div className="flex gap-4">
+                                                                        <div className="w-1/3">
+                                                                            <label className="text-xs font-bold text-steel-gray">Time / Phase</label>
+                                                                            <input
+                                                                                type="text"
+                                                                                value={item.time}
+                                                                                onChange={(e) => {
+                                                                                    const n = [...formData.agenda]; n[index].time = e.target.value;
+                                                                                    setFormData(prev => ({ ...prev, agenda: n }));
+                                                                                }}
+                                                                                placeholder="10:00 AM"
+                                                                                className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="w-2/3">
+                                                                            <label className="text-xs font-bold text-steel-gray">Title</label>
+                                                                            <input
+                                                                                type="text"
+                                                                                value={item.title}
+                                                                                onChange={(e) => {
+                                                                                    const n = [...formData.agenda]; n[index].title = e.target.value;
+                                                                                    setFormData(prev => ({ ...prev, agenda: n }));
+                                                                                }}
+                                                                                placeholder="Opening Keynote"
+                                                                                className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm font-bold text-charcoal-blue"
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label className="text-xs font-bold text-steel-gray">Description (Optional)</label>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={item.description}
+                                                                            onChange={(e) => {
+                                                                                const n = [...formData.agenda]; n[index].description = e.target.value;
+                                                                                setFormData(prev => ({ ...prev, agenda: n }));
+                                                                            }}
+                                                                            placeholder="Brief details..."
+                                                                            className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" onClick={() => setFormData(prev => ({ ...prev, agenda: prev.agenda.filter((_, i) => i !== index) }))} className="text-red-500 hover:text-red-700 font-bold p-1 self-start">×</button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* SPEAKERS — shown for Conference, Webinar, Expo */}
+                                        {fmtConfig.showSpeakers && (
+                                            <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate space-y-6">
+                                                <div className="flex items-center justify-between border-b-2 border-soft-slate pb-4">
+                                                    <h3 className="text-lg font-bold text-charcoal-blue tracking-wide">
+                                                        {formData.category === 'Webinar' ? 'Presenters' : formData.category === 'Expo' ? 'Featured Speakers' : 'Speakers'}
+                                                    </h3>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setFormData(prev => ({
+                                                            ...prev,
+                                                            speakers: [...prev.speakers, { name: '', role: '', company: '', avatar: '' }]
+                                                        }))}
+                                                        className="px-4 py-2 bg-charcoal-blue text-white text-xs font-bold tracking-wider hover:bg-muted-teal transition-colors"
+                                                    >
+                                                        + Add Speaker
+                                                    </button>
+                                                </div>
+
+                                                {formData.speakers.length === 0 ? (
+                                                    <div className="text-center py-8 text-steel-gray italic">No speakers added yet.</div>
+                                                ) : (
+                                                    <div className="space-y-4">
+                                                        {formData.speakers.map((speaker, index) => (
+                                                            <div key={index} className="flex gap-4 items-start bg-off-white p-4 border border-soft-slate relative">
+                                                                <div className="flex-1 space-y-3">
+                                                                    <div className="flex gap-4">
+                                                                        <div className="w-1/2">
+                                                                            <label className="text-xs font-bold text-steel-gray">Name</label>
+                                                                            <input type="text" value={speaker.name} onChange={(e) => { const n = [...formData.speakers]; n[index].name = e.target.value; setFormData(prev => ({ ...prev, speakers: n })); }} className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm font-bold" />
+                                                                        </div>
+                                                                        <div className="w-1/2">
+                                                                            <label className="text-xs font-bold text-steel-gray">Company</label>
+                                                                            <input type="text" value={speaker.company} onChange={(e) => { const n = [...formData.speakers]; n[index].company = e.target.value; setFormData(prev => ({ ...prev, speakers: n })); }} className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex gap-4">
+                                                                        <div className="w-1/2">
+                                                                            <label className="text-xs font-bold text-steel-gray">Role / Title</label>
+                                                                            <input type="text" value={speaker.role} onChange={(e) => { const n = [...formData.speakers]; n[index].role = e.target.value; setFormData(prev => ({ ...prev, speakers: n })); }} className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm" />
+                                                                        </div>
+                                                                        <div className="w-1/2">
+                                                                            <label className="text-xs font-bold text-steel-gray">Photo URL</label>
+                                                                            <input type="text" value={speaker.avatar} onChange={(e) => { const n = [...formData.speakers]; n[index].avatar = e.target.value; setFormData(prev => ({ ...prev, speakers: n })); }} placeholder="https://..." className="w-full mt-1 px-3 py-2 border border-soft-slate text-sm" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" onClick={() => setFormData(prev => ({ ...prev, speakers: prev.speakers.filter((_, i) => i !== index) }))} className="text-red-500 hover:text-red-700 font-bold p-1 self-start">×</button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Formats with no agenda or speakers — Meetup, Workshop */}
+                                        {!fmtConfig.showAgenda && !fmtConfig.showSpeakers && (
+                                            <div className="bg-white p-6 lg:p-8 shadow-sm border-2 border-soft-slate">
+                                                <div className="flex items-center gap-3 text-steel-gray py-8 justify-center">
+                                                    <svg className="h-8 w-8 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                                    <p className="text-sm font-medium italic">No schedule or speakers needed for a {formData.category}. Move on to ticketing!</p>
+                                                </div>
+                                            </div>
+                                        )}
+
                                     </div>
                                 )}
 
@@ -838,7 +997,7 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
