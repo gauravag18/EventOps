@@ -6,7 +6,8 @@ import { getAuthOptions } from "@/lib/auth";
 import RegistrationModal from '@/components/RegistrationModal';
 import TeamCodeDisplay from '@/components/TeamCodeDisplay';
 import EventMap from '@/components/EventMap';
-import { fetchFromApi } from '@/lib/api-client';
+import { prisma } from '@/lib/prisma';
+import { getCachedEvent, cacheEvent } from '@/lib/event-cache';
 import { unpackEventDescription } from '@/lib/event-details';
 
 export default async function EventDetailPage({
@@ -17,7 +18,16 @@ export default async function EventDetailPage({
     const { eventId } = await params;
     const session = await getServerSession(getAuthOptions());
 
-    const event = await fetchFromApi(`/api/events/${eventId}`);
+    let event = await getCachedEvent(eventId);
+    if (!event) {
+        event = await prisma.event.findUnique({
+            where: { id: eventId },
+            include: { organizers: true, participants: true }
+        });
+        if (event) {
+            await cacheEvent(eventId, event);
+        }
+    }
 
     if (!event) {
         notFound();

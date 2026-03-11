@@ -20,8 +20,7 @@ export default async function LandingPage() {
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section className="relative flex flex-col lg:block overflow-hidden border-b-2 border-charcoal-blue bg-attendee-surface">
 
-        {/* Attendee Side (Primary Focus - 2/3 Width) */}
-        <div className="w-full min-h-[60vh] lg:min-h-[90vh] bg-attendee-surface text-charcoal-blue flex flex-col justify-center px-8 py-20 lg:py-32 lg:pl-20 lg:pr-[45%] relative group cursor-default">
+        <div className="w-full min-h-[60vh] lg:min-h-[90vh] bg-attendee-surface text-charcoal-blue flex flex-col justify-center px-8 pt-32 pb-20 lg:pt-40 lg:pb-32 lg:pl-20 lg:pr-[45%] relative group cursor-default">
           {/* Subtle pattern for texture */}
           <div className="absolute inset-0 opacity-[0.03] transition-transform duration-1000 group-hover:scale-105" style={{ backgroundImage: `radial-gradient(circle, #0F766E 2px, transparent 2px)`, backgroundSize: '32px 32px' }} />
 
@@ -65,8 +64,7 @@ export default async function LandingPage() {
           </div>
         </div>
 
-        {/* Organizer Side (Secondary Focus - 1/3 Width) */}
-        <div className="w-full lg:absolute lg:top-0 lg:right-0 lg:w-[45%] lg:h-full bg-organizer-surface text-charcoal-blue flex flex-col justify-center px-8 py-20 lg:px-12 relative group overflow-hidden cursor-default lg:[clip-path:polygon(15%_0,100%_0,100%_100%,0%_100%)] border-t-2 lg:border-t-0 border-charcoal-blue">
+        <div className="w-full lg:absolute lg:top-0 lg:right-0 lg:w-[45%] lg:h-full bg-organizer-surface text-charcoal-blue flex flex-col justify-center px-8 pt-32 pb-20 lg:pt-40 lg:pb-32 lg:pl-12 lg:pr-20 relative group overflow-hidden cursor-default lg:[clip-path:polygon(15%_0,100%_0,100%_100%,0%_100%)] border-t-2 lg:border-t-0 border-charcoal-blue">
           {/* Intense pattern for contrast */}
           <div className="absolute inset-0 opacity-[0.03] transition-transform duration-700 group-hover:scale-105" style={{ backgroundImage: `repeating-linear-gradient(45deg, #C2410C 0, #C2410C 3px, transparent 0, transparent 50%)`, backgroundSize: '40px 40px' }} />
 
