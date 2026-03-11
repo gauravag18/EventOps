@@ -17,7 +17,7 @@ export default async function LandingPage() {
     <div className="bg-linear-to-b from-[#F4F7F9] to-[#EDF1F5] font-sans text-gray-700">
       <CursorHighlight />
 
-      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      {/*  HERO  */}
       <section className="relative flex flex-col lg:block overflow-hidden border-b-2 border-charcoal-blue bg-attendee-surface">
 
         <div className="w-full min-h-[60vh] lg:min-h-[90vh] bg-attendee-surface text-charcoal-blue flex flex-col justify-center px-8 pt-32 pb-20 lg:pt-40 lg:pb-32 lg:pl-20 lg:pr-[45%] relative group cursor-default">
@@ -92,7 +92,7 @@ export default async function LandingPage() {
 
       </section>
 
-      {/* ── FEATURES ─────────────────────────────────────────────────── */}
+      {/*  FEATURES*/}
       <section className="min-h-screen bg-gray-900 text-white flex items-center">
         <div className="mx-auto max-w-7xl px-6 py-24 w-full">
           <div className="mb-20 text-center">
@@ -132,7 +132,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── TRENDING & FEATURED ──────────────────────────────────────── */}
+      {/*  TRENDING & FEATURED  */}
       <section className="min-h-screen flex items-center">
         <div className="mx-auto max-w-7xl px-6 py-24 w-full">
           <div className="mb-16 text-center">
@@ -229,7 +229,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── FOOTER ───────────────────────────────────────────────────── */}
+      {/* FOOTER */}
       <footer className="border-t-2 border-gray-200 bg-white py-12">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
