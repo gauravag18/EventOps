@@ -37,7 +37,7 @@ export default async function LandingPage() {
 
             <Link
               href="/events"
-              className="inline-flex items-center gap-4 border-2 border-charcoal-blue bg-muted-teal text-white px-10 py-5 text-base font-bold tracking-widest uppercase hover:bg-charcoal-blue hover:text-white transition-all shadow-[8px_8px_0px_0px_rgba(31,42,55,1)] hover:shadow-none hover:translate-x-[8px] hover:translate-y-[8px] group/btn"
+              className="inline-flex items-center gap-4 border-2 border-charcoal-blue bg-muted-teal text-white px-10 py-5 text-base font-bold tracking-widest uppercase hover:bg-charcoal-blue hover:text-white transition-all shadow-[8px_8px_0px_0px_rgba(31,42,55,1)] hover:shadow-none hover:translate-x-2 hover:translate-y-2 group/btn"
             >
               Browse Events
               <svg className="h-5 w-5 transition-transform group-hover/btn:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -80,7 +80,7 @@ export default async function LandingPage() {
 
             <Link
               href="/organizer/create-event"
-              className="inline-flex items-center gap-3 border-2 border-charcoal-blue bg-signal-orange text-white px-6 py-4 text-xs font-bold tracking-widest uppercase hover:bg-charcoal-blue hover:text-white transition-all shadow-[6px_6px_0px_0px_rgba(31,42,55,1)] hover:shadow-none hover:translate-x-[6px] hover:translate-y-[6px]"
+              className="inline-flex items-center gap-3 border-2 border-charcoal-blue bg-signal-orange text-white px-6 py-4 text-xs font-bold tracking-widest uppercase hover:bg-charcoal-blue hover:text-white transition-all shadow-[6px_6px_0px_0px_rgba(31,42,55,1)] hover:shadow-none hover:translate-x-1.5 hover:translate-y-1.5"
             >
               Start Creating
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -242,7 +242,7 @@ export default async function LandingPage() {
       >
 
         {/* IMAGE */}
-        <div className={`relative overflow-hidden ${isFeatured ? 'aspect-[16/10]' : 'aspect-video'}`}>
+        <div className={`relative overflow-hidden ${isFeatured ? 'aspect-16/10' : 'aspect-video'}`}>
 
           {event.image && (
             <img
@@ -253,7 +253,7 @@ export default async function LandingPage() {
           )}
 
           {/* OVERLAY */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
           {/* TOP BADGE */}
           <div className="absolute top-4 left-4 flex gap-2">
