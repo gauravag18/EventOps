@@ -109,6 +109,20 @@ export default function RegistrationModal({
     const hasFields = fields.length > 0;
     const requiresPayment = !isFree && !!price;
 
+    useEffect(() => {
+    if (open) {
+        // Disable background scroll
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+
+    return () => {
+        document.body.style.overflow = '';
+    };
+}, [open]);
+
+
     const setField = (key: keyof RegistrationMeta, value: string | boolean) =>
         setMeta(prev => ({ ...prev, [key]: value }));
 
@@ -326,8 +340,8 @@ export default function RegistrationModal({
     // Derive modal title based on step
     const modalTitle = (() => {
         if (step === 'done') {
-            if (isTeamFormat) return teamResult ? (teamResult.leaderId === session?.user?.id ? "Team Created! 🎉" : "Joined Team! 🎉") : "You're registered! 🎉";
-            return "You're in! 🎉";
+            if (isTeamFormat) return teamResult ? (teamResult.leaderId === session?.user?.id ? "Team Created! " : "Joined Team! ") : "You're registered! ";
+            return "You're in! ";
         }
         if (step === 'payment') return 'Secure Checkout';
         if (step === 'team-choice') return 'Set Up Your Team';
@@ -450,7 +464,7 @@ export default function RegistrationModal({
                                     {isTeamFormat && teamResult ? (teamResult.leaderId === session?.user?.id ? 'Team created!' : 'Joined team!') : 'Registration confirmed!'}
                                 </p>
                                 {requiresPayment && (
-                                    <p className="text-xs text-muted-teal font-bold mt-1">Payment successful ✓</p>
+                                    <p className="text-xs text-muted-teal font-bold mt-1">Payment successful </p>
                                 )}
 
                                 {/* Team Code Display for leader */}
