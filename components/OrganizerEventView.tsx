@@ -6,6 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useOptimistic, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import InviteOrganizerPanel from './InviteOrganizerPanel';
+import OrganizerQueriesPanel from './OrganizerQueriesPanel';
 import { addManualAttendee, removeAttendee, markTicketUsed } from '@/app/actions/ticket';
 import { useToast } from './ToastProvider';
 
@@ -52,6 +53,7 @@ interface OrganizerEventViewProps {
   stats: EventStats;
   salesByMonth: SaleMonth[];
   recentActivity: ActivityItem[];
+  queries: any[];
 }
 
 // Dropdown menu for attendee row actions
@@ -152,6 +154,7 @@ export default function OrganizerEventView({
   stats,
   salesByMonth,
   recentActivity,
+  queries,
 }: OrganizerEventViewProps) {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState("Overview");
@@ -185,7 +188,7 @@ export default function OrganizerEventView({
     (state: Attendee[], newAttendee: Attendee) => [newAttendee, ...state]
   );
 
-  const TABS = ["Overview", "Attendees", "Marketing", "Settings"];
+  const TABS = ["Overview", "Attendees", "Marketing", "Queries", "Settings"];
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-US", {
@@ -710,6 +713,13 @@ export default function OrganizerEventView({
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* QUERIES TAB */}
+        {activeTab === "Queries" && (
+          <div className="space-y-4">
+             <OrganizerQueriesPanel queries={queries} />
           </div>
         )}
 

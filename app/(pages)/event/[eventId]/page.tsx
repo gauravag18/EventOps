@@ -9,6 +9,7 @@ import EventMap from '@/components/EventMap';
 import { prisma } from '@/lib/prisma';
 import { getCachedEvent, cacheEvent } from '@/lib/event-cache';
 import { unpackEventDescription } from '@/lib/event-details';
+import ContactOrganizerButton from '@/components/ContactOrganizerButton';
 
 export default async function EventDetailPage({
     params,
@@ -72,6 +73,15 @@ export default async function EventDetailPage({
             userTeam = (ticket as any)?.teamMembership ?? null;
         } catch { /* ignore if model not yet available */ }
     }
+
+    let userQuery = null;
+    if (session?.user?.id) {
+        userQuery = await prisma.eventQuery.findFirst({
+            where: { eventId: event.id, userId: session.user.id },
+            include: { messages: { orderBy: { createdAt: 'asc' }, include: { sender: { select: { name: true, id: true, image: true } } } } }
+        });
+    }
+
 
     const eventDate = new Date(event.date);
     const dateStr = eventDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -473,7 +483,7 @@ export default async function EventDetailPage({
                     </div>
 
                     {/* SIDEBAR */}
-                    <div className="lg:sticky lg:top-24 space-y-6 self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:pr-2 pb-8 custom-scrollbar">
+                    <div className="lg:sticky lg:top-24 space-y-6 self-start lg:pr-2 pb-8">
 
                         {/* REGISTRATION CARD */}
                         <div className="border-2 border-gray-200 bg-white relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[6px_6px_0px_0px_rgba(31,42,55,1)]">
@@ -541,7 +551,7 @@ export default async function EventDetailPage({
                                     <div>
                                         <h4 className="text-sm font-bold text-charcoal-blue">Organizer</h4>
                                         <p className="text-sm text-steel-gray mt-1">{organizerName}</p>
-                                        <a href="#" className="mt-1.5 block text-sm font-semibold text-muted-teal hover:text-charcoal-blue transition-colors">Contact</a>
+                                        <ContactOrganizerButton eventId={event.id} query={userQuery} />
                                     </div>
                                 </div>
 
@@ -560,6 +570,43 @@ export default async function EventDetailPage({
                                 )}
                             </div>
                         </div>
+
+                        {/* TEAM CARD — surfaced immediately after registration, visible above the fold */}
+                        {userTeam && (
+                            <div className="border-2 border-charcoal-blue bg-charcoal-blue relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,0.25)]">
+                                <div className="absolute top-0 left-0 right-0 h-[3px] bg-signal-orange" />
+                                <div className="px-5 py-3.5 border-b-2 border-white/10 mt-[3px] flex items-center justify-between">
+                                    <h4 className="text-xs font-bold uppercase tracking-widest text-white/70">Your Team</h4>
+                                    <span className="text-[10px] font-bold text-signal-orange bg-signal-orange/10 px-2 py-0.5 border border-signal-orange/30 uppercase tracking-wider">{userTeam.members.length}{teamSizeMax ? `/${teamSizeMax}` : ''} members</span>
+                                </div>
+                                <div className="px-5 py-4 space-y-3">
+                                    <div>
+                                        <p className="text-[11px] text-white/50 mb-0.5">Team Name</p>
+                                        <p className="text-base font-black text-white">{userTeam.name}</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-1.5">
+                                        {userTeam.members.map((m: any) => (
+                                            <div key={m.user.id} className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 border ${m.user.id === userTeam.leaderId ? 'border-signal-orange/30 bg-signal-orange/10 text-white' : 'border-white/10 bg-white/5 text-white/70'}`}>
+                                                <span className={`h-1.5 w-1.5 shrink-0 ${m.user.id === userTeam.leaderId ? 'bg-signal-orange' : 'bg-muted-teal'}`} />
+                                                <span className="truncate">{m.user.name || 'Anonymous'}</span>
+                                                {m.user.id === userTeam.leaderId && <span className="text-[8px] font-bold text-signal-orange ml-auto shrink-0">★</span>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {session?.user?.id === userTeam.leaderId && (
+                                        <div className="bg-white/5 border-2 border-white/10 px-4 py-3">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1.5">Invite Code</p>
+                                            <TeamCodeDisplay code={userTeam.code} />
+                                        </div>
+                                    )}
+                                    {session?.user?.id !== userTeam.leaderId && (
+                                        <p className="text-xs text-white/50 bg-white/5 border border-white/10 px-3 py-2">
+                                            Ask your team leader for the join code.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* FORMAT-SPECIFIC QUICK FACTS in sidebar */}
                         {(fm.skillLevel || fm.prizePool || fm.teamSizeMin || fm.meetingLink || fm.isRecurring || fm.hasCertificate) && (
@@ -613,45 +660,6 @@ export default async function EventDetailPage({
                                             <svg className="h-4 w-4 shrink-0 text-steel-gray" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                                             Recurring Event
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* TEAM CODE CARD — shown to leader at all times */}
-                        {userTeam && (
-                            <div className="border-2 border-charcoal-blue bg-charcoal-blue relative overflow-hidden">
-                                <div className="absolute top-0 left-0 right-0 h-[3px] bg-signal-orange" />
-                                <div className="px-5 py-3.5 border-b-2 border-white/10 mt-[3px]">
-                                    <h4 className="text-xs font-bold uppercase tracking-widest text-white/70">Your Team</h4>
-                                </div>
-                                <div className="px-5 py-4 space-y-3">
-                                    <div>
-                                        <p className="text-[11px] text-white/50 mb-0.5">Team Name</p>
-                                        <p className="text-base font-black text-white">{userTeam.name}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-[11px] text-white/50 mb-1">Members ({userTeam.members.length}{teamSizeMax ? `/${teamSizeMax}` : ''})</p>
-                                        <div className="space-y-1">
-                                            {userTeam.members.map((m: any) => (
-                                                <div key={m.user.id} className="flex items-center gap-2 text-xs text-white/80">
-                                                    <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${m.user.id === userTeam.leaderId ? 'bg-signal-orange' : 'bg-muted-teal'}`} />
-                                                    {m.user.name || 'Anonymous'}
-                                                    {m.user.id === userTeam.leaderId && <span className="text-[9px] font-bold text-signal-orange ml-1">LEADER</span>}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    {session?.user?.id === userTeam.leaderId && (
-                                        <div className="bg-white/5 border-2 border-white/10 px-4 py-3">
-                                            <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1.5">Team Code — Share to invite</p>
-                                            <TeamCodeDisplay code={userTeam.code} />
-                                        </div>
-                                    )}
-                                    {session?.user?.id !== userTeam.leaderId && (
-                                        <p className="text-xs text-white/50 bg-white/5 border border-white/10 px-3 py-2">
-                                            Ask your team leader for the join code.
-                                        </p>
                                     )}
                                 </div>
                             </div>

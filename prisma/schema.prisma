@@ -18,8 +18,10 @@ model User {
   image               String?
   ledTeams            EventTeam[] @relation("TeamLeaders")
   tickets             Ticket[]
-  organizedEvents     Event[]     @relation("EventOrganizers")
-  participatingEvents Event[]     @relation("EventParticipants")
+  organizedEvents     Event[]        @relation("EventOrganizers")
+  participatingEvents Event[]        @relation("EventParticipants")
+  queries             EventQuery[]   @relation("UserQueries")
+  queryMessages       QueryMessage[] @relation("UserQueryMessages")
 }
 
 model Event {
@@ -40,8 +42,9 @@ model Event {
   tags         String[]
   teams        EventTeam[]
   tickets      Ticket[]
-  organizers   User[]      @relation("EventOrganizers")
-  participants User[]      @relation("EventParticipants")
+  organizers   User[]       @relation("EventOrganizers")
+  participants User[]       @relation("EventParticipants")
+  queries      EventQuery[]
 }
 
 model Ticket {
@@ -78,4 +81,32 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model EventQuery {
+  id        String   @id @default(cuid())
+  subject   String?
+  status    String   @default("OPEN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  userId    String
+  user      User     @relation("UserQueries", fields: [userId], references: [id], onDelete: Cascade)
+  
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  messages  QueryMessage[]
+}
+
+model QueryMessage {
+  id        String     @id @default(cuid())
+  content   String
+  createdAt DateTime   @default(now())
+  
+  queryId   String
+  query     EventQuery @relation(fields: [queryId], references: [id], onDelete: Cascade)
+  
+  senderId  String
+  sender    User       @relation("UserQueryMessages", fields: [senderId], references: [id], onDelete: Cascade)
 }

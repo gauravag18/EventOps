@@ -93,7 +93,7 @@ export default async function LandingPage() {
       </section>
 
       {/*  FEATURES */}
-      <section className="relative bg-gray-950 text-white py-28 overflow-hidden">
+      <section className="relative bg-gray-950 text-white lg:min-h-[90vh] flex flex-col justify-center py-20 lg:py-20 overflow-hidden">
 
         {/* Background accents */}
         <div className="absolute inset-0 opacity-[0.03]"
@@ -214,9 +214,9 @@ export default async function LandingPage() {
       </section>
 
       {/*  TRENDING & FEATURED  */}
-      <section className="min-h-screen flex items-center">
-        <div className="mx-auto max-w-7xl px-6 py-24 w-full">
-          <div className="mb-16 text-center">
+      <section className="lg:min-h-[90vh] flex flex-col justify-center py-20 lg:py-20 border-t-2 border-gray-900">
+        <div className="mx-auto max-w-7xl px-6 w-full">
+          <div className="mb-10 text-center">
             <h2 className="mb-4 text-4xl font-bold tracking-tight text-black md:text-5xl">
               Trending &amp; Featured Events
             </h2>
@@ -310,7 +310,7 @@ export default async function LandingPage() {
     );
   })}
 </div>
-          <div className="mt-16 text-center">
+          <div className="mt-10 text-center">
             <Link
               href="/events"
               className="group inline-flex items-center gap-2 border-b-2 border-teal-600 pb-1 font-sans text-lg font-bold text-teal-700 tracking-widest transition-all hover:bg-teal-50 hover:px-4"

@@ -42,6 +42,16 @@ export default async function OrganizerEventPage({ params }: { params: Promise<{
     const priceVal = event.isFree ? 0 : parseFloat(event.price || "0");
     const revenue = isNaN(priceVal) ? 0 : sold * priceVal;
 
+    const queries = await prisma.eventQuery.findMany({
+        where: { eventId: id },
+        include: { 
+            user: { select: { name: true, email: true } },
+            messages: { orderBy: { createdAt: 'asc' }, include: { sender: { select: { name: true, id: true, image: true } } } } 
+        },
+        orderBy: { updatedAt: 'desc' }
+    });
+
+
     const stats = {
         revenue,
         sold,
@@ -93,6 +103,7 @@ export default async function OrganizerEventPage({ params }: { params: Promise<{
             stats={stats}
             salesByMonth={salesByMonth}
             recentActivity={recentActivity}
+            queries={queries}
         />
     );
 }

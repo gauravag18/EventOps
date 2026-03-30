@@ -1,45 +1,51 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import EventsBrowser from '@/components/EventsBrowser';
+import { getCachedEvents, cacheEvents } from '@/lib/event-cache';
 
-export const dynamic = 'force-dynamic';
+// Revalidate the page every 2 minutes — gives fresh data without hitting DB on every request
+export const revalidate = 120;
 
 export default async function EventsListPage() {
-    // Fetch all events via Prisma directly
-    // This allows us to handle client-side filtering completely without API calls per filter change
-    const allEventsRaw = await prisma.event.findMany({
-        include: { participants: true },
-        orderBy: { createdAt: 'desc' }
-    });
+    const cacheKey = 'list:all';
+    let allEvents = await getCachedEvents(cacheKey);
 
-    const allEvents = allEventsRaw.map(event => {
-        let isRemote = false;
-        if (event.description) {
-            try {
-                const parsed = JSON.parse(event.description);
-                if (parsed && typeof parsed === 'object' && parsed.formatMeta) {
-                    isRemote = !!parsed.formatMeta.isRemote;
-                }
-            } catch { }
-        }
+    if (!allEvents) {
+        const allEventsRaw = await prisma.event.findMany({
+            include: { participants: true },
+            orderBy: { createdAt: 'desc' }
+        });
 
-        return {
-            id: event.id,
-            title: event.title,
-            description: event.description || '',
-            category: event.category,
-            tags: event.tags ?? [],
-            date: event.date,
-            image: event.image || '/placeholder-1.jpg',
-            price: event.price,
-            isFree: event.isFree,
-            capacity: event.capacity,
-            displayLocation: event.location ? event.location.split('|')[0] : 'TBD',
-            spotsLeft: event.capacity - event.participants.length,
-            attendeesCount: event.participants.length,
-            isRemote,
-        };
-    });
+        allEvents = allEventsRaw.map((event: any) => {
+            let isRemote = false;
+            if (event.description) {
+                try {
+                    const parsed = JSON.parse(event.description);
+                    if (parsed && typeof parsed === 'object' && parsed.formatMeta) {
+                        isRemote = !!parsed.formatMeta.isRemote;
+                    }
+                } catch { }
+            }
+            return {
+                id: event.id,
+                title: event.title,
+                description: event.description || '',
+                category: event.category,
+                tags: event.tags ?? [],
+                date: event.date,
+                image: event.image || '/placeholder-1.jpg',
+                price: event.price,
+                isFree: event.isFree,
+                capacity: event.capacity,
+                displayLocation: event.location ? event.location.split('|')[0] : 'TBD',
+                spotsLeft: event.capacity - event.participants.length,
+                attendeesCount: event.participants.length,
+                isRemote,
+            };
+        });
+
+        await cacheEvents(cacheKey, allEvents);
+    }
 
     // Calculate Trending (Top 5 by participants)
     const trendingEvents = [...allEvents]
