@@ -92,43 +92,124 @@ export default async function LandingPage() {
 
       </section>
 
-      {/*  FEATURES*/}
-      <section className="min-h-screen bg-gray-900 text-white flex items-center">
-        <div className="mx-auto max-w-7xl px-6 py-24 w-full">
-          <div className="mb-20 text-center">
-            <h2 className="mb-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
-              Built for Organizers &amp; Attendees
+      {/*  FEATURES */}
+      <section className="relative bg-gray-950 text-white py-28 overflow-hidden">
+
+        {/* Background accents */}
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `radial-gradient(circle, #fff 1px, transparent 1px)`,
+            backgroundSize: '28px 28px'
+          }}
+        />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+
+          {/* Heading */}
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-black tracking-tight mb-4">
+              Built for Both Sides of the Experience
             </h2>
-            <p className="mx-auto max-w-2xl text-xl text-gray-300">
-              One platform. End-to-end event management.
+            <p className="text-gray-400 text-lg">
+              Whether you're attending or hosting — we've got you covered.
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            {[
-              {
-                title: 'Easy Ticketing',
-                description: 'Sell tickets, generate QR codes, simulate payments — all in one place.'
-              },
-              {
-                title: 'Real-time Analytics',
-                description: 'Live dashboard with attendee count, revenue, and check-in stats via WebSockets.'
-              },
-              {
-                title: 'Secure Check-in',
-                description: 'Mobile-friendly QR scanner for staff. Instant validation & entry updates.'
-              }
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className="group relative overflow-hidden border-l-4 border-signal-orange bg-white/5 p-8 transition-all hover:border-signal-orange hover:bg-white/10"
-              >
-                <div className="absolute top-0 right-0 h-4 w-4 border-t border-r border-white/20" />
-                <h3 className="mb-4 font-sans text-2xl font-bold tracking-tight text-signal-orange">{feature.title}</h3>
-                <p className="text-gray-300 font-sans border-l border-white/10 pl-4">{feature.description}</p>
+          {/* Split Layout */}
+          <div className="grid lg:grid-cols-2 gap-10">
+
+            {/* ATTENDEES */}
+            <div className="group relative border border-teal-500/30 bg-teal-500/5 p-10 hover:bg-teal-500/10 transition-all">
+
+              <h3 className="text-3xl font-black text-teal-400 mb-8">
+                For Attendees
+              </h3>
+
+              <div className="space-y-8">
+
+                {[
+                  {
+                    title: "Discover Events",
+                    desc: "Find curated meetups, concerts, and experiences near you."
+                  },
+                  {
+                    title: "Instant Booking",
+                    desc: "Book tickets in seconds with seamless checkout."
+                  },
+                  {
+                    title: "Smart Entry",
+                    desc: "QR-based tickets for fast and secure check-ins."
+                  }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 group/item">
+
+                    <div className="w-10 h-10 flex items-center justify-center border border-teal-400 text-teal-400 font-bold">
+                      {i + 1}
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-lg group-hover/item:text-teal-300">
+                        {item.title}
+                      </h4>
+                      <p className="text-gray-400 text-sm">
+                        {item.desc}
+                      </p>
+                    </div>
+
+                  </div>
+                ))}
+
               </div>
-            ))}
+
+            </div>
+
+            {/* ORGANIZERS */}
+            <div className="group relative border border-orange-500/30 bg-orange-500/5 p-10 hover:bg-orange-500/10 transition-all">
+
+              <h3 className="text-3xl font-black text-orange-400 mb-8">
+                For Organizers
+              </h3>
+
+              <div className="space-y-8">
+
+                {[
+                  {
+                    title: "Launch in Minutes",
+                    desc: "Create and publish events with zero friction."
+                  },
+                  {
+                    title: "Live Analytics",
+                    desc: "Track sales, attendees, and performance in real-time."
+                  },
+                  {
+                    title: "Effortless Check-ins",
+                    desc: "Scan QR codes and manage entries seamlessly."
+                  }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 group/item">
+
+                    <div className="w-10 h-10 flex items-center justify-center border border-orange-400 text-orange-400 font-bold">
+                      {i + 1}
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-lg group-hover/item:text-orange-300">
+                        {item.title}
+                      </h4>
+                      <p className="text-gray-400 text-sm">
+                        {item.desc}
+                      </p>
+                    </div>
+
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
           </div>
+
         </div>
       </section>
 
@@ -144,77 +225,91 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredEvents.map((event, index) => {
-              const locationParts = event.location ? event.location.split('|') : ['TBD'];
-              const displayLocation = locationParts[0];
+          <div className="grid gap-10 lg:grid-cols-3">
 
-              return (
-                <div
-                  key={event.id}
-                  className="group relative border-2 border-gray-200 bg-white transition-all duration-300 hover:border-gray-900 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className="relative aspect-video overflow-hidden bg-linear-to-br from-gray-100 to-gray-200">
-                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent" />
-                    {event.image && event.image !== '/placeholder-1.jpg' && (
-                      <img src={event.image} alt={event.title} className="absolute inset-0 h-full w-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
-                    )}
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex items-center gap-2 text-white/90">
-                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                        </svg>
-                        <span className="text-sm font-medium truncate">{displayLocation}</span>
-                      </div>
-                    </div>
-                  </div>
+  {featuredEvents.map((event, index) => {
+    const locationParts = event.location ? event.location.split('|') : ['TBD'];
+    const displayLocation = locationParts[0];
 
-                  <div className="p-6">
-                    <div className="mb-3 flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1.5 border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-bold tracking-wider text-teal-900">
-                        {event.category}
-                      </span>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                        </svg>
-                        {event.participants.length}
-                      </div>
-                    </div>
+    const isFeatured = index === 0;
 
-                    <h3 className="mb-3 text-xl font-bold text-gray-900 transition group-hover:text-teal-700 line-clamp-1">
-                      {event.title}
-                    </h3>
+    return (
+      <div
+        key={event.id}
+        className={`group relative overflow-hidden border-2 border-gray-200 bg-white transition-all duration-500 
+        ${isFeatured ? 'lg:col-span-2 lg:row-span-2' : ''}
+        hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1`}
+      >
 
-                    <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span>{new Date(event.date).toLocaleDateString()}</span>
-                    </div>
+        {/* IMAGE */}
+        <div className={`relative overflow-hidden ${isFeatured ? 'aspect-[16/10]' : 'aspect-video'}`}>
 
-                    <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-                      <div>
-                        <div className="text-xs text-gray-500">Starting from</div>
-                        <div className="text-2xl font-bold text-gray-900">{event.isFree ? 'Free' : `$${event.price}`}</div>
-                      </div>
-                      <Link
-                        href={`/event/${event.id}`}
-                        className="inline-flex items-center gap-1 border-2 border-gray-900 bg-gray-900 px-4 py-2 text-sm font-bold tracking-wider text-white transition hover:bg-white hover:text-gray-900"
-                      >
-                        View Details
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+          {event.image && (
+            <img
+              src={event.image}
+              alt={event.title}
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+          )}
+
+          {/* OVERLAY */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+          {/* TOP BADGE */}
+          <div className="absolute top-4 left-4 flex gap-2">
+            <span className="bg-red-500 text-white text-xs px-3 py-1 font-bold tracking-wider">
+              TRENDING
+            </span>
+            {isFeatured && (
+              <span className="bg-yellow-400 text-black text-xs px-3 py-1 font-bold tracking-wider">
+                FEATURED
+              </span>
+            )}
           </div>
 
+          {/* LOCATION */}
+          <div className="absolute bottom-4 left-4 text-white text-sm flex items-center gap-2">
+            <span>📍</span>
+            <span>{displayLocation}</span>
+          </div>
+
+        </div>
+
+        {/* CONTENT */}
+        <div className="p-6">
+
+          <div className="mb-2 text-xs text-gray-500 uppercase tracking-wider">
+            {event.category}
+          </div>
+
+          <h3 className="text-xl font-bold text-gray-900 group-hover:text-teal-700 transition">
+            {event.title}
+          </h3>
+
+          <div className="mt-3 flex items-center justify-between">
+
+            <div>
+              <div className="text-xs text-gray-500">Starting from</div>
+              <div className="text-lg font-bold">
+                {event.isFree ? 'Free' : `$${event.price}`}
+              </div>
+            </div>
+
+            <Link
+              href={`/event/${event.id}`}
+              className="opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 text-sm font-bold border-b-2 border-black"
+            >
+              View →
+            </Link>
+
+          </div>
+
+        </div>
+
+      </div>
+    );
+  })}
+</div>
           <div className="mt-16 text-center">
             <Link
               href="/events"
