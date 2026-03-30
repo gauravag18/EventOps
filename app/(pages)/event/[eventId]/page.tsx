@@ -182,8 +182,8 @@ export default async function EventDetailPage({
                             {/* OVERVIEW — always shown; placeholder if organiser left it blank */}
                             <section id="overview" className="scroll-mt-36">
                                 <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
-                                    <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
-                                    <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
+                                    <div className="absolute top-0 left-0 right-0 h-0.75 bg-muted-teal" />
+                                    <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-0.75">
                                         <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">About this Event</h3>
                                     </div>
                                     <div className="px-6 py-6">
@@ -200,8 +200,8 @@ export default async function EventDetailPage({
                             {hasFormatDetails && (
                                 <section id="format-details" className="scroll-mt-36">
                                     <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
-                                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-signal-orange" />
-                                        <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px] flex items-center gap-3">
+                                        <div className="absolute top-0 left-0 right-0 h-0.75 bg-signal-orange" />
+                                        <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-0.75 flex items-center gap-3">
                                             <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">{event.category} Details</h3>
                                             <span className="text-[10px] font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-2.5 py-1">{event.category}</span>
                                         </div>
@@ -359,8 +359,8 @@ export default async function EventDetailPage({
                             {details.agenda.length > 0 && (
                                 <section id="agenda" className="scroll-mt-36">
                                     <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
-                                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
-                                        <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
+                                        <div className="absolute top-0 left-0 right-0 h-0.75 bg-muted-teal" />
+                                        <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-0.75">
                                             <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">{agendaLabel}</h3>
                                         </div>
                                         <div className="divide-y divide-gray-100">

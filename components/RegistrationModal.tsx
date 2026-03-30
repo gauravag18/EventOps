@@ -1,9 +1,15 @@
 'use client';
 
 import { useSession } from "next-auth/react";
-import { useState, useOptimistic, startTransition } from "react";
+import { useState, useOptimistic, startTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 import { registerForEvent, RegistrationMeta } from "@/app/actions/event";
+import StripePaymentStep from "@/components/StripePaymentStep";
+
+// Stripe promise — created once outside component to avoid re-init
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface RegistrationModalProps {
     eventId: string;
@@ -23,8 +29,8 @@ const TEAM_FORMATS = ['Hackathon', 'Competition'];
 
 // Which formats need extra registration fields
 const FORMAT_FIELDS: Record<string, string[]> = {
-    Hackathon: [],       // team flow handled separately
-    Competition: [],     // team flow handled separately
+    Hackathon: [],
+    Competition: [],
     Workshop: ['experienceLevel', 'expectations', 'dietaryRestrictions'],
     Bootcamp: ['experienceLevel', 'expectations', 'dietaryRestrictions'],
     Webinar: ['timezone', 'notifyOnRecording'],
@@ -47,7 +53,11 @@ type TeamInfo = {
     members: { user: { id: string; name: string | null } }[];
 };
 
-type ModalStep = 'form' | 'team-choice' | 'team-create' | 'team-join' | 'confirm' | 'done';
+// payment step added between team/form step and confirm
+type ModalStep = 'form' | 'team-choice' | 'team-create' | 'team-join' | 'payment' | 'confirm' | 'done';
+
+// Stores the pending team action so payment step can complete it afterward
+type PendingTeamAction = 'create' | 'join' | 'solo' | null;
 
 export default function RegistrationModal({
     eventId, isFull, isRegistered, hasTeam, eventCategory, eventTitle, isFree, price, teamSizeMax, allowSolo
@@ -79,6 +89,11 @@ export default function RegistrationModal({
     const [teamLoading, setTeamLoading] = useState(false);
     const [copiedCode, setCopiedCode] = useState(false);
 
+    // Payment state
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [pendingTeamAction, setPendingTeamAction] = useState<PendingTeamAction>(null);
+    const [paymentLoading, setPaymentLoading] = useState(false);
+
     const [optRegistered, addOptRegistered] = useOptimistic(
         isRegistered,
         (_: boolean, next: boolean) => next
@@ -92,6 +107,7 @@ export default function RegistrationModal({
     const isTeamFormat = TEAM_FORMATS.includes(eventCategory);
     const fields = FORMAT_FIELDS[eventCategory] ?? [];
     const hasFields = fields.length > 0;
+    const requiresPayment = !isFree && !!price;
 
     const setField = (key: keyof RegistrationMeta, value: string | boolean) =>
         setMeta(prev => ({ ...prev, [key]: value }));
@@ -111,23 +127,48 @@ export default function RegistrationModal({
         if (isTeamFormat) {
             setStep('team-choice');
         } else {
-            setStep(hasFields ? 'form' : 'confirm');
+            setStep(hasFields ? 'form' : (requiresPayment ? 'confirm' : 'confirm'));
         }
         setOpen(true);
     };
 
-    // Helper to abstract creation/join API calls
-    const checkTeamResult = async (res: Response, resultOrErrorMsg: string) => {
-        const data = await res.json();
-        if (!res.ok) {
-            setTeamError(data.error || resultOrErrorMsg);
-            return false;
-        } else {
-            setTeamResult(data.team);
+    // Fetch Stripe PaymentIntent client secret
+    const fetchClientSecret = async (): Promise<boolean> => {
+        setPaymentLoading(true);
+        try {
+            const res = await fetch('/api/payments/create-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ eventId }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.clientSecret) {
+                setTeamError(data.error || 'Failed to initialize payment.');
+                return false;
+            }
+            setClientSecret(data.clientSecret);
             return true;
+        } catch {
+            setTeamError('Payment initialization failed. Please try again.');
+            return false;
+        } finally {
+            setPaymentLoading(false);
         }
     };
 
+    // Helper to do team API calls
+    const checkTeamResult = async (res: Response, fallbackMsg: string) => {
+        const data = await res.json();
+        if (!res.ok) {
+            setTeamError(data.error || fallbackMsg);
+            return false;
+        }
+        setTeamResult(data.team);
+        return true;
+    };
+
+    // Called when user clicks "Register & Create", "Register & Join", or "Register solo"
+    // For paid events, this goes to payment first then completes registration
     const handleRegistrationAndTeam = async (teamAction: 'create' | 'join' | 'solo') => {
         if (teamAction === 'create' && !teamName.trim()) {
             setTeamError('Team name is required.');
@@ -138,11 +179,30 @@ export default function RegistrationModal({
             return;
         }
 
+        setTeamError('');
+
+        // If paid and not yet registered → go to payment step first
+        if (requiresPayment && !optRegistered) {
+            setTeamLoading(true);
+            const ok = await fetchClientSecret();
+            setTeamLoading(false);
+            if (!ok) return;
+            setPendingTeamAction(teamAction);
+            setStep('payment');
+            return;
+        }
+
+        // Free or already registered → proceed directly
+        await executeRegistrationAndTeam(teamAction);
+    };
+
+    // The actual registration + team logic (called after payment or directly for free events)
+    const executeRegistrationAndTeam = async (teamAction: 'create' | 'join' | 'solo') => {
         setTeamLoading(true);
         setTeamError('');
 
         try {
-            // STEP 1: Registration (if not registered)
+            // STEP 1: Registration (if not registered yet)
             if (!optRegistered) {
                 const regRes = await registerForEvent(eventId, meta);
                 if (!regRes.success) {
@@ -153,7 +213,7 @@ export default function RegistrationModal({
                 startTransition(() => addOptRegistered(true));
             }
 
-            // STEP 2: Team Action (if not solo)
+            // STEP 2: Team action
             if (teamAction === 'create') {
                 const res = await fetch('/api/teams', {
                     method: 'POST',
@@ -176,7 +236,6 @@ export default function RegistrationModal({
 
             setStep('done');
             router.refresh();
-
         } catch {
             setTeamError('Something went wrong. Please try again.');
         } finally {
@@ -184,7 +243,43 @@ export default function RegistrationModal({
         }
     };
 
+    // Called by StripePaymentStep on successful payment
+    const handlePaymentSuccess = async () => {
+        if (isTeamFormat && pendingTeamAction) {
+            await executeRegistrationAndTeam(pendingTeamAction);
+        } else {
+            // Non-team paid event
+            setLoading(true);
+            startTransition(() => addOptRegistered(true));
+            try {
+                const res = await registerForEvent(eventId, meta);
+                if (res.success) {
+                    setStep('done');
+                    router.refresh();
+                } else {
+                    setTeamError(res.message);
+                    setStep('confirm'); // fall back
+                }
+            } catch {
+                setTeamError('Registration failed after payment. Please contact support.');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    // For non-team formats
     const handleSubmit = async () => {
+        // Paid event → show payment step first
+        if (requiresPayment) {
+            setLoading(true);
+            const ok = await fetchClientSecret();
+            setLoading(false);
+            if (!ok) return;
+            setStep('payment');
+            return;
+        }
+
         setLoading(true);
         startTransition(() => addOptRegistered(true));
         try {
@@ -228,6 +323,19 @@ export default function RegistrationModal({
         );
     }
 
+    // Derive modal title based on step
+    const modalTitle = (() => {
+        if (step === 'done') {
+            if (isTeamFormat) return teamResult ? (teamResult.leaderId === session?.user?.id ? "Team Created! 🎉" : "Joined Team! 🎉") : "You're registered! 🎉";
+            return "You're in! 🎉";
+        }
+        if (step === 'payment') return 'Secure Checkout';
+        if (step === 'team-choice') return 'Set Up Your Team';
+        if (step === 'team-create') return 'Create a Team';
+        if (step === 'team-join') return 'Join a Team';
+        return 'Complete Registration';
+    })();
+
     return (
         <>
             {/* Trigger Button */}
@@ -244,33 +352,93 @@ export default function RegistrationModal({
                     {/* Backdrop */}
                     <div
                         className="absolute inset-0 bg-charcoal-blue/60 backdrop-blur-sm"
-                        onClick={() => !loading && !teamLoading && setOpen(false)}
+                        onClick={() => !loading && !teamLoading && !paymentLoading && setOpen(false)}
                     />
 
                     {/* Panel */}
                     <div className="relative z-10 w-full max-w-lg bg-white shadow-2xl border-2 border-charcoal-blue mx-4 mb-0 sm:mb-4 animate-in slide-in-from-bottom-4 duration-300">
 
                         {/* Top accent */}
-                        <div className="h-[4px] bg-muted-teal w-full" />
+                        <div className={`h-[4px] w-full ${step === 'payment' ? 'bg-signal-orange' : 'bg-muted-teal'}`} />
 
                         {/* Header */}
                         <div className="flex items-start justify-between px-7 py-5 border-b-2 border-soft-slate">
                             <div>
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-muted-teal">{eventCategory}</span>
-                                <h2 className="text-lg font-bold text-charcoal-blue mt-0.5 leading-tight">
-                                    {step === 'done'
-                                        ? isTeamFormat ? (teamResult ? (teamResult.leaderId === session?.user?.id ? "Team Created! 🎉" : "Joined Team! 🎉") : "You're registered! 🎉") : "You're in! 🎉"
-                                        : step === 'team-choice' ? 'Set Up Your Team'
-                                            : step === 'team-create' ? 'Create a Team'
-                                                : step === 'team-join' ? 'Join a Team'
-                                                    : 'Complete Registration'}
-                                </h2>
+                                <h2 className="text-lg font-bold text-charcoal-blue mt-0.5 leading-tight">{modalTitle}</h2>
                                 <p className="text-xs text-steel-gray mt-1 truncate max-w-[280px]">{eventTitle}</p>
                             </div>
-                            <button onClick={() => !loading && !teamLoading && setOpen(false)} className="text-steel-gray hover:text-charcoal-blue transition-colors ml-4 p-1 shrink-0">
+                            <button onClick={() => !loading && !teamLoading && !paymentLoading && setOpen(false)} className="text-steel-gray hover:text-charcoal-blue transition-colors ml-4 p-1 shrink-0">
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
+
+                        {/* --- PAYMENT STEP --- */}
+                        {step === 'payment' && clientSecret && (
+                            <Elements
+                                stripe={stripePromise}
+                                options={{
+                                    clientSecret,
+                                    appearance: {
+                                        theme: 'stripe',
+                                        variables: {
+                                            colorPrimary: '#2A9D8F',
+                                            colorDanger: '#E76F51',
+                                            fontFamily: 'inherit',
+                                            borderRadius: '0px',
+                                            spacingUnit: '4px',
+                                        },
+                                        rules: {
+                                            '.Input': {
+                                                border: '2px solid #E2E8F0',
+                                                boxShadow: 'none',
+                                            },
+                                            '.Input:focus': {
+                                                border: '2px solid #1F2A37',
+                                                boxShadow: 'none',
+                                                outline: 'none',
+                                            },
+                                            '.Label': {
+                                                fontWeight: '700',
+                                                fontSize: '11px',
+                                                letterSpacing: '0.08em',
+                                                textTransform: 'uppercase',
+                                                color: '#1F2A37',
+                                            },
+                                        },
+                                    },
+                                }}
+                            >
+                                <StripePaymentStep
+                                    price={price!}
+                                    eventTitle={eventTitle}
+                                    onSuccess={handlePaymentSuccess}
+                                    onBack={() => {
+                                        // Go back to the right step
+                                        if (isTeamFormat) {
+                                            if (pendingTeamAction === 'create') setStep('team-create');
+                                            else if (pendingTeamAction === 'join') setStep('team-join');
+                                            else setStep('team-choice');
+                                        } else {
+                                            setStep(hasFields ? 'form' : 'confirm');
+                                        }
+                                        setClientSecret(null);
+                                        setPendingTeamAction(null);
+                                    }}
+                                />
+                            </Elements>
+                        )}
+
+                        {/* Loading state while fetching client secret */}
+                        {step === 'payment' && !clientSecret && (
+                            <div className="px-7 py-10 flex flex-col items-center gap-3 text-steel-gray">
+                                <svg className="h-7 w-7 animate-spin text-muted-teal" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                                <p className="text-sm font-medium">Preparing payment...</p>
+                            </div>
+                        )}
 
                         {/* --- DONE STATE --- */}
                         {step === 'done' && (
@@ -281,6 +449,9 @@ export default function RegistrationModal({
                                 <p className="text-charcoal-blue font-bold text-lg">
                                     {isTeamFormat && teamResult ? (teamResult.leaderId === session?.user?.id ? 'Team created!' : 'Joined team!') : 'Registration confirmed!'}
                                 </p>
+                                {requiresPayment && (
+                                    <p className="text-xs text-muted-teal font-bold mt-1">Payment successful ✓</p>
+                                )}
 
                                 {/* Team Code Display for leader */}
                                 {teamResult && teamResult.leaderId === session?.user?.id && (
@@ -316,7 +487,6 @@ export default function RegistrationModal({
                                     </div>
                                 )}
 
-                                {/* No team chosen */}
                                 {!teamResult && (
                                     <p className="text-steel-gray text-sm mt-2">Check your dashboard for your ticket.</p>
                                 )}
@@ -373,12 +543,13 @@ export default function RegistrationModal({
                                 {!optRegistered && (
                                     <button
                                         onClick={() => handleRegistrationAndTeam('solo')}
-                                        disabled={teamLoading}
+                                        disabled={teamLoading || paymentLoading}
                                         className="w-full border-2 border-soft-slate py-2.5 text-xs font-bold text-steel-gray hover:text-charcoal-blue transition-all disabled:opacity-50"
                                     >
-                                        {teamLoading ? 'Registering...' : (allowSolo ? "Register solo — No team needed" : "Register solo — I'll decide later")}
+                                        {teamLoading || paymentLoading ? 'Loading...' : (allowSolo ? "Register solo — No team needed" : "Register solo — I'll decide later")}
                                     </button>
                                 )}
+                                {teamError && <p className="text-xs font-bold text-signal-orange">{teamError}</p>}
                             </div>
                         )}
 
@@ -406,20 +577,27 @@ export default function RegistrationModal({
                                         <span className="text-xs text-steel-gray">Max <span className="font-bold text-charcoal-blue">{teamSizeMax}</span> members per team</span>
                                     </div>
                                 )}
-                                {teamError && (
-                                    <p className="text-xs font-bold text-signal-orange">{teamError}</p>
-                                )}
-                                <p className="text-xs text-steel-gray">A unique 6-character code will be generated for your team. Share it with teammates so they can join.</p>
+                                {teamError && <p className="text-xs font-bold text-signal-orange">{teamError}</p>}
+                                <p className="text-xs text-steel-gray">A unique 6-character code will be generated for your team.</p>
                                 <div className="flex gap-3 mt-4">
                                     <button onClick={() => setStep('team-choice')} className="flex-1 border-2 border-soft-slate py-3 text-sm font-bold text-steel-gray hover:border-charcoal-blue hover:text-charcoal-blue transition-all">
                                         Cancel
                                     </button>
-                                    <button onClick={() => handleRegistrationAndTeam('create')} disabled={teamLoading}
+                                    <button onClick={() => handleRegistrationAndTeam('create')} disabled={teamLoading || paymentLoading}
                                         className="flex-1 bg-signal-orange border-2 border-signal-orange text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-signal-orange transition-all disabled:opacity-50">
-                                        {teamLoading ? (!optRegistered ? 'Registering...' : 'Creating...') : (!optRegistered ? 'Register & Create →' : 'Create Team →')}
+                                        {teamLoading || paymentLoading
+                                            ? 'Loading...'
+                                            : requiresPayment && !optRegistered
+                                                ? `Pay $${price} & Create →`
+                                                : !optRegistered
+                                                    ? 'Register & Create →'
+                                                    : 'Create Team →'}
                                     </button>
                                 </div>
-                                {!optRegistered && (
+                                {requiresPayment && !optRegistered && (
+                                    <p className="text-center text-[11px] text-steel-gray">You'll complete payment on the next step.</p>
+                                )}
+                                {!requiresPayment && !optRegistered && (
                                     <p className="text-center text-[11px] text-steel-gray">By confirming, you will also be registered for this event.</p>
                                 )}
                             </div>
@@ -451,25 +629,32 @@ export default function RegistrationModal({
                                         <span className="text-xs text-steel-gray">Max <span className="font-bold text-charcoal-blue">{teamSizeMax}</span> members per team</span>
                                     </div>
                                 )}
-                                {teamError && (
-                                    <p className="text-xs font-bold text-signal-orange">{teamError}</p>
-                                )}
+                                {teamError && <p className="text-xs font-bold text-signal-orange">{teamError}</p>}
                                 <div className="flex gap-3 mt-4">
                                     <button onClick={() => setStep('team-choice')} className="flex-1 border-2 border-soft-slate py-3 text-sm font-bold text-steel-gray hover:border-charcoal-blue hover:text-charcoal-blue transition-all">
                                         Cancel
                                     </button>
-                                    <button onClick={() => handleRegistrationAndTeam('join')} disabled={teamLoading || joinCode.length < 6}
+                                    <button onClick={() => handleRegistrationAndTeam('join')} disabled={teamLoading || paymentLoading || joinCode.length < 6}
                                         className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50">
-                                        {teamLoading ? (!optRegistered ? 'Registering...' : 'Joining...') : (!optRegistered ? 'Register & Join →' : 'Join Team →')}
+                                        {teamLoading || paymentLoading
+                                            ? 'Loading...'
+                                            : requiresPayment && !optRegistered
+                                                ? `Pay $${price} & Join →`
+                                                : !optRegistered
+                                                    ? 'Register & Join →'
+                                                    : 'Join Team →'}
                                     </button>
                                 </div>
-                                {!optRegistered && (
+                                {requiresPayment && !optRegistered && (
+                                    <p className="text-center text-[11px] text-steel-gray">You'll complete payment on the next step.</p>
+                                )}
+                                {!requiresPayment && !optRegistered && (
                                     <p className="text-center text-[11px] text-steel-gray">By confirming, you will also be registered for this event.</p>
                                 )}
                             </div>
                         )}
 
-                        {/* --- CONFIRM STATE (for non-team formats) --- */}
+                        {/* --- CONFIRM STATE (non-team formats) --- */}
                         {step === 'confirm' && (
                             <div className="px-7 py-6 space-y-5">
                                 <div className="bg-soft-slate/30 border-2 border-soft-slate p-4 space-y-2">
@@ -487,19 +672,22 @@ export default function RegistrationModal({
                                     <button onClick={() => setOpen(false)} className="flex-1 border-2 border-soft-slate py-3 text-sm font-bold text-steel-gray hover:border-charcoal-blue hover:text-charcoal-blue transition-all">
                                         Cancel
                                     </button>
-                                    <button onClick={handleSubmit} disabled={loading}
+                                    <button onClick={handleSubmit} disabled={loading || paymentLoading}
                                         className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50">
-                                        {loading ? 'Confirming...' : 'Confirm →'}
+                                        {loading || paymentLoading
+                                            ? 'Loading...'
+                                            : requiresPayment
+                                                ? `Pay $${price} →`
+                                                : 'Confirm →'}
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        {/* --- FORM STATE (format-specific fields, non-team formats) --- */}
+                        {/* --- FORM STATE (format-specific fields) --- */}
                         {step === 'form' && (
                             <div className="px-7 py-6 space-y-5 max-h-[70vh] overflow-y-auto">
 
-                                {/* Workshop / Bootcamp */}
                                 {fields.includes('experienceLevel') && (
                                     <div className="space-y-4">
                                         <span className="text-xs font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-2.5 py-1 inline-block">Skill & Preferences</span>
@@ -517,13 +705,12 @@ export default function RegistrationModal({
                                         <div>
                                             <label className="block text-xs font-bold text-charcoal-blue tracking-wider mb-1.5">What do you hope to learn?</label>
                                             <textarea rows={2} value={meta.expectations || ''} onChange={e => setField('expectations', e.target.value)}
-                                                placeholder="Share your goals or what you're hoping to get out of this..."
+                                                placeholder="Share your goals..."
                                                 className="w-full px-4 py-3 border-2 border-soft-slate focus:border-charcoal-blue focus:ring-0 outline-none resize-none bg-white text-charcoal-blue text-sm placeholder:text-steel-gray/50" />
                                         </div>
                                     </div>
                                 )}
 
-                                {/* Webinar */}
                                 {fields.includes('timezone') && (
                                     <div className="space-y-4">
                                         <span className="text-xs font-bold uppercase tracking-widest text-signal-orange bg-signal-orange/10 px-2.5 py-1 inline-block">Webinar Preferences</span>
@@ -547,7 +734,6 @@ export default function RegistrationModal({
                                     </div>
                                 )}
 
-                                {/* Dietary */}
                                 {fields.includes('dietaryRestrictions') && (
                                     <div>
                                         <label className="block text-xs font-bold text-charcoal-blue tracking-wider mb-1.5">Dietary Restrictions / Allergies</label>
@@ -557,7 +743,6 @@ export default function RegistrationModal({
                                     </div>
                                 )}
 
-                                {/* Heard about us */}
                                 {fields.includes('heardAboutUs') && (
                                     <div>
                                         <label className="block text-xs font-bold text-charcoal-blue tracking-wider mb-1.5">How did you hear about this event?</label>
@@ -573,7 +758,6 @@ export default function RegistrationModal({
                                     </div>
                                 )}
 
-                                {/* Special requirements */}
                                 {fields.includes('specialRequirements') && (
                                     <div>
                                         <label className="block text-xs font-bold text-charcoal-blue tracking-wider mb-1.5">Special Requirements</label>
@@ -583,7 +767,6 @@ export default function RegistrationModal({
                                     </div>
                                 )}
 
-                                {/* Summary row */}
                                 <div className="bg-soft-slate/30 border-2 border-soft-slate p-3 flex justify-between text-sm">
                                     <span className="font-bold text-charcoal-blue">Registration fee</span>
                                     <span className="font-black text-charcoal-blue">{isFree ? 'Free' : `$${price}`}</span>
@@ -593,9 +776,13 @@ export default function RegistrationModal({
                                     <button onClick={() => setOpen(false)} className="flex-1 border-2 border-soft-slate py-3 text-sm font-bold text-steel-gray hover:border-charcoal-blue hover:text-charcoal-blue transition-all">
                                         Cancel
                                     </button>
-                                    <button onClick={handleSubmit} disabled={loading}
+                                    <button onClick={handleSubmit} disabled={loading || paymentLoading}
                                         className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50">
-                                        {loading ? 'Confirming...' : 'Confirm Registration →'}
+                                        {loading || paymentLoading
+                                            ? 'Loading...'
+                                            : requiresPayment
+                                                ? `Pay $${price} →`
+                                                : 'Confirm Registration →'}
                                     </button>
                                 </div>
                             </div>
