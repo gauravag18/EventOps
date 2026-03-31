@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma';
 import EventsBrowser from '@/components/EventsBrowser';
 import { getCachedEvents, cacheEvents } from '@/lib/event-cache';
 
-// Revalidate the page every 2 minutes — gives fresh data without hitting DB on every request
 export const revalidate = 120;
 
 export default async function EventsListPage() {
@@ -47,7 +46,6 @@ export default async function EventsListPage() {
         await cacheEvents(cacheKey, allEvents);
     }
 
-    // Calculate Trending (Top 5 by participants)
     const trendingEvents = [...allEvents]
         .sort((a, b) => b.attendeesCount - a.attendeesCount)
         .slice(0, 5)
@@ -59,17 +57,32 @@ export default async function EventsListPage() {
 
     return (
         <div className="min-h-screen bg-[#E8F8F5] font-sans text-steel-gray pt-16">
-            {/* Subtle page header */}
-            <div className="bg-white/70 backdrop-blur-sm border-b border-[#ccf0ea]">
-                <main className="mx-auto max-w-400 px-6 py-8">
-                    <p className="text-xs font-semibold tracking-widest uppercase text-muted-teal mb-1.5">Discover</p>
-                    <h1 className="text-3xl font-bold text-charcoal-blue">Explore Events</h1>
-                    <p className="mt-1.5 text-[15px] text-steel-gray">Conferences, workshops, and meetups tailored for you.</p>
-                </main>
-            </div>
 
-            <main className="mx-auto max-w-400 px-6 py-8">
-                <EventsBrowser initialEvents={allEvents} trendingEvents={trendingEvents} />
+            {/* Header */}
+            <header className="bg-white/80 backdrop-blur-md border-b border-[#ccf0ea] shadow-sm">
+                <div className="mx-auto max-w-400 px-6 md:px-10 py-8 md:py-10">
+                    <div className="max-w-2xl">
+                        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-muted-teal mb-3">
+                            Discover
+                        </p>
+                        <h1 className="text-3xl md:text-[2.6rem] font-bold text-charcoal-blue leading-[1.15] tracking-tight">
+                            Explore Events
+                        </h1>
+                        <p className="mt-3 text-[15px] text-steel-gray/75 leading-relaxed max-w-lg">
+                            Conferences, workshops, and meetups tailored for you.
+                        </p>
+                    </div>
+                </div>
+            </header>
+
+            {/* Content */}
+            <main className="mx-auto max-w-400 px-6 md:px-10 py-8 md:py-10">
+                <div className="bg-white/60 backdrop-blur-sm border border-[#d7f3ef] rounded-2xl p-4 md:p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
+                    <EventsBrowser
+                        initialEvents={allEvents}
+                        trendingEvents={trendingEvents}
+                    />
+                </div>
             </main>
         </div>
     );

@@ -375,7 +375,7 @@ export default async function EventDetailPage({
                                         </div>
                                         <div className="divide-y divide-gray-100">
                                             {details.agenda.map((item, idx) => (
-                                                <div key={idx} className="group flex gap-5 p-5 hover:bg-muted-teal/[0.03] transition-colors">
+                                                <div key={idx} className="group flex gap-5 p-5 hover:bg-muted-teal/3 transition-colors">
                                                     <div className="w-1 shrink-0 bg-muted-teal" />
                                                     <div className="w-20 shrink-0 pt-0.5">
                                                         <span className="text-xs font-bold text-muted-teal">{item.time}</span>
@@ -395,13 +395,13 @@ export default async function EventDetailPage({
                             {details.speakers.length > 0 && (
                                 <section id="speakers" className="scroll-mt-36">
                                     <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
-                                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
-                                        <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
+                                        <div className="absolute top-0 left-0 right-0 h-0.75 bg-muted-teal" />
+                                        <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-0.75">
                                             <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">{speakersLabel}</h3>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
                                             {details.speakers.map((speaker, idx) => (
-                                                <div key={idx} className="flex items-center gap-4 p-5 hover:bg-muted-teal/[0.03] transition-colors">
+                                                <div key={idx} className="flex items-center gap-4 p-5 hover:bg-muted-teal/3 transition-colors">
                                                     <div className="w-14 h-14 bg-soft-slate border-2 border-gray-200 overflow-hidden shrink-0">
                                                         {speaker.avatar ? (
                                                             <img src={speaker.avatar} alt={speaker.name} className="w-full h-full object-cover" />
@@ -429,8 +429,8 @@ export default async function EventDetailPage({
                                     Venue & Location
                                 </h3>
                                 <div className="bg-white border-2 border-gray-200 relative overflow-hidden mb-6 transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
-                                    <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
-                                    <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
+                                    <div className="absolute top-0 left-0 right-0 h-0.75 bg-muted-teal" />
+                                    <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-0.75">
                                         <h3 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">Venue & Location</h3>
                                     </div>
                                     <div className="w-full bg-soft-slate/50 border-b-2 border-gray-100">
@@ -487,9 +487,9 @@ export default async function EventDetailPage({
 
                         {/* REGISTRATION CARD */}
                         <div className="border-2 border-gray-200 bg-white relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[6px_6px_0px_0px_rgba(31,42,55,1)]">
-                            <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
+                            <div className="absolute top-0 left-0 right-0 h-0.75 bg-muted-teal" />
 
-                            <div className="border-b-2 border-gray-100 bg-gray-50 px-7 py-6 mt-[3px]">
+                            <div className="border-b-2 border-gray-100 bg-gray-50 px-7 py-6 mt-0.75">
                                 <div className="flex items-baseline justify-between">
                                     <span className="text-4xl font-black text-charcoal-blue">{priceDisplay}</span>
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-steel-gray">per attendee</span>
@@ -574,8 +574,8 @@ export default async function EventDetailPage({
                         {/* TEAM CARD — surfaced immediately after registration, visible above the fold */}
                         {userTeam && (
                             <div className="border-2 border-charcoal-blue bg-charcoal-blue relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,0.25)]">
-                                <div className="absolute top-0 left-0 right-0 h-[3px] bg-signal-orange" />
-                                <div className="px-5 py-3.5 border-b-2 border-white/10 mt-[3px] flex items-center justify-between">
+                                <div className="absolute top-0 left-0 right-0 h-0.75 bg-signal-orange" />
+                                <div className="px-5 py-3.5 border-b-2 border-white/10 mt-0.75 flex items-center justify-between">
                                     <h4 className="text-xs font-bold uppercase tracking-widest text-white/70">Your Team</h4>
                                     <span className="text-[10px] font-bold text-signal-orange bg-signal-orange/10 px-2 py-0.5 border border-signal-orange/30 uppercase tracking-wider">{userTeam.members.length}{teamSizeMax ? `/${teamSizeMax}` : ''} members</span>
                                 </div>
@@ -611,8 +611,8 @@ export default async function EventDetailPage({
                         {/* FORMAT-SPECIFIC QUICK FACTS in sidebar */}
                         {(fm.skillLevel || fm.prizePool || fm.teamSizeMin || fm.meetingLink || fm.isRecurring || fm.hasCertificate) && (
                             <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
-                                <div className="absolute top-0 left-0 right-0 h-[3px] bg-signal-orange" />
-                                <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
+                                <div className="absolute top-0 left-0 right-0 h-0.75 bg-signal-orange" />
+                                <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-0.75">
                                     <h4 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">Quick Facts</h4>
                                 </div>
                                 <div className="px-5 py-4 space-y-3">
@@ -667,8 +667,8 @@ export default async function EventDetailPage({
 
                         {/* POLICIES CARD */}
                         <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
-                            <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
-                            <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
+                            <div className="absolute top-0 left-0 right-0 h-0.75 bg-muted-teal" />
+                            <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-0.75">
                                 <h4 className="text-xs font-bold uppercase tracking-widest text-charcoal-blue">Event Policies</h4>
                             </div>
                             <ul className="space-y-2.5 px-6 py-5">

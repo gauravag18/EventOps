@@ -373,14 +373,14 @@ export default function RegistrationModal({
                     <div className="relative z-10 w-full max-w-lg bg-white shadow-2xl border-2 border-charcoal-blue mx-4 mb-0 sm:mb-4 animate-in slide-in-from-bottom-4 duration-300">
 
                         {/* Top accent */}
-                        <div className={`h-[4px] w-full ${step === 'payment' ? 'bg-signal-orange' : 'bg-muted-teal'}`} />
+                        <div className={`h-1 w-full ${step === 'payment' ? 'bg-signal-orange' : 'bg-muted-teal'}`} />
 
                         {/* Header */}
                         <div className="flex items-start justify-between px-7 py-5 border-b-2 border-soft-slate">
                             <div>
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-muted-teal">{eventCategory}</span>
                                 <h2 className="text-lg font-bold text-charcoal-blue mt-0.5 leading-tight">{modalTitle}</h2>
-                                <p className="text-xs text-steel-gray mt-1 truncate max-w-[280px]">{eventTitle}</p>
+                                <p className="text-xs text-steel-gray mt-1 truncate max-w-70">{eventTitle}</p>
                             </div>
                             <button onClick={() => !loading && !teamLoading && !paymentLoading && setOpen(false)} className="text-steel-gray hover:text-charcoal-blue transition-colors ml-4 p-1 shrink-0">
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -668,7 +668,7 @@ export default function RegistrationModal({
                             </div>
                         )}
 
-                        {/* --- CONFIRM STATE (non-team formats) --- */}
+                        {/* CONFIRM STATE (non-team formats) */}
                         {step === 'confirm' && (
                             <div className="px-7 py-6 space-y-5">
                                 <div className="bg-soft-slate/30 border-2 border-soft-slate p-4 space-y-2">
@@ -698,7 +698,7 @@ export default function RegistrationModal({
                             </div>
                         )}
 
-                        {/* --- FORM STATE (format-specific fields) --- */}
+                        {/* FORM STATE  */}
                         {step === 'form' && (
                             <div className="px-7 py-6 space-y-5 max-h-[70vh] overflow-y-auto">
 
