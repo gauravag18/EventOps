@@ -7,9 +7,13 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { registerForEvent, RegistrationMeta } from "@/app/actions/event";
 import StripePaymentStep from "@/components/StripePaymentStep";
+import { SharpSpinner, SharpDots } from "@/components/Loaders";
+import { useToast } from "./ToastProvider";
 
 // Stripe promise — created once outside component to avoid re-init
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
+    ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+    : null;
 
 interface RegistrationModalProps {
     eventId: string;
@@ -66,6 +70,7 @@ export default function RegistrationModal({
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const { showToast } = useToast();
     const [step, setStep] = useState<ModalStep>('form');
 
     const [meta, setMeta] = useState<RegistrationMeta>({
@@ -302,11 +307,11 @@ export default function RegistrationModal({
                 setStep('done');
                 router.refresh();
             } else {
-                alert(res.message);
+                showToast(res.message, "error");
                 setOpen(false);
             }
         } catch {
-            alert("An error occurred. Please try again.");
+            showToast("An error occurred. Please try again.", "error");
             setOpen(false);
         } finally {
             setLoading(false);
@@ -355,8 +360,10 @@ export default function RegistrationModal({
             {/* Trigger Button */}
             <button
                 onClick={handleOpen}
-                className="w-full border-2 border-muted-teal bg-muted-teal px-8 py-4 text-sm font-bold tracking-widest text-white transition hover:bg-white hover:text-muted-teal"
+                disabled={loading || teamLoading || paymentLoading}
+                className="w-full border-2 border-muted-teal bg-muted-teal px-8 py-4 text-sm font-bold tracking-widest text-white transition hover:bg-white hover:text-muted-teal disabled:opacity-75 disabled:cursor-wait flex items-center justify-center gap-3"
             >
+                {(loading || teamLoading || paymentLoading) && <SharpSpinner className="w-4 h-4" />}
                 {optRegistered && !optHasTeam ? 'Set up a Team' : 'Register Now'}
             </button>
 
@@ -506,7 +513,7 @@ export default function RegistrationModal({
                                 )}
 
                                 <button onClick={() => { setOpen(false); router.push('/attendee/dashboard'); }}
-                                    className="mt-6 w-full bg-muted-teal border-2 border-muted-teal text-white font-bold tracking-widest py-3 text-sm hover:bg-white hover:text-muted-teal transition-all">
+                                    className="mt-6 w-full bg-muted-teal border-2 border-muted-teal text-white font-bold tracking-widest py-3 text-sm hover:bg-white hover:text-muted-teal transition-all flex items-center justify-center gap-2">
                                     View My Ticket
                                 </button>
                             </div>
@@ -558,9 +565,13 @@ export default function RegistrationModal({
                                     <button
                                         onClick={() => handleRegistrationAndTeam('solo')}
                                         disabled={teamLoading || paymentLoading}
-                                        className="w-full border-2 border-soft-slate py-2.5 text-xs font-bold text-steel-gray hover:text-charcoal-blue transition-all disabled:opacity-50"
+                                        className="w-full border-2 border-soft-slate py-2.5 text-xs font-bold text-steel-gray hover:text-charcoal-blue transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                                     >
-                                        {teamLoading || paymentLoading ? 'Loading...' : (allowSolo ? "Register solo — No team needed" : "Register solo — I'll decide later")}
+                                        {(teamLoading || paymentLoading) ? (
+                                            <><SharpDots className="text-muted-teal" /> Processing...</>
+                                        ) : (
+                                            allowSolo ? "Register solo — No team needed" : "Register solo — I'll decide later"
+                                        )}
                                     </button>
                                 )}
                                 {teamError && <p className="text-xs font-bold text-signal-orange">{teamError}</p>}
@@ -598,14 +609,16 @@ export default function RegistrationModal({
                                         Cancel
                                     </button>
                                     <button onClick={() => handleRegistrationAndTeam('create')} disabled={teamLoading || paymentLoading}
-                                        className="flex-1 bg-signal-orange border-2 border-signal-orange text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-signal-orange transition-all disabled:opacity-50">
-                                        {teamLoading || paymentLoading
-                                            ? 'Loading...'
-                                            : requiresPayment && !optRegistered
+                                        className="flex-1 bg-signal-orange border-2 border-signal-orange text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-signal-orange transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                                        {(teamLoading || paymentLoading) ? (
+                                            <><SharpSpinner className="w-4 h-4" /> Processing...</>
+                                        ) : (
+                                            requiresPayment && !optRegistered
                                                 ? `Pay $${price} & Create →`
                                                 : !optRegistered
                                                     ? 'Register & Create →'
-                                                    : 'Create Team →'}
+                                                    : 'Create Team →'
+                                        )}
                                     </button>
                                 </div>
                                 {requiresPayment && !optRegistered && (
@@ -649,14 +662,16 @@ export default function RegistrationModal({
                                         Cancel
                                     </button>
                                     <button onClick={() => handleRegistrationAndTeam('join')} disabled={teamLoading || paymentLoading || joinCode.length < 6}
-                                        className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50">
-                                        {teamLoading || paymentLoading
-                                            ? 'Loading...'
-                                            : requiresPayment && !optRegistered
+                                        className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                                        {(teamLoading || paymentLoading) ? (
+                                            <><SharpSpinner className="w-4 h-4" /> Processing...</>
+                                        ) : (
+                                            requiresPayment && !optRegistered
                                                 ? `Pay $${price} & Join →`
                                                 : !optRegistered
                                                     ? 'Register & Join →'
-                                                    : 'Join Team →'}
+                                                    : 'Join Team →'
+                                        )}
                                     </button>
                                 </div>
                                 {requiresPayment && !optRegistered && (
@@ -687,12 +702,14 @@ export default function RegistrationModal({
                                         Cancel
                                     </button>
                                     <button onClick={handleSubmit} disabled={loading || paymentLoading}
-                                        className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50">
-                                        {loading || paymentLoading
-                                            ? 'Loading...'
-                                            : requiresPayment
+                                        className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                                        {(loading || paymentLoading) ? (
+                                            <><SharpSpinner className="w-4 h-4" /> Processing...</>
+                                        ) : (
+                                            requiresPayment
                                                 ? `Pay $${price} →`
-                                                : 'Confirm →'}
+                                                : 'Confirm →'
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -791,12 +808,14 @@ export default function RegistrationModal({
                                         Cancel
                                     </button>
                                     <button onClick={handleSubmit} disabled={loading || paymentLoading}
-                                        className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50">
-                                        {loading || paymentLoading
-                                            ? 'Loading...'
-                                            : requiresPayment
+                                        className="flex-1 bg-muted-teal border-2 border-muted-teal text-white py-3 text-sm font-bold tracking-wider hover:bg-white hover:text-muted-teal transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                                        {(loading || paymentLoading) ? (
+                                            <><SharpSpinner className="w-4 h-4" /> Processing...</>
+                                        ) : (
+                                            requiresPayment
                                                 ? `Pay $${price} →`
-                                                : 'Confirm Registration →'}
+                                                : 'Confirm Registration →'
+                                        )}
                                     </button>
                                 </div>
                             </div>

@@ -7,8 +7,9 @@ import { useOptimistic, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import InviteOrganizerPanel from './InviteOrganizerPanel';
 import OrganizerQueriesPanel from './OrganizerQueriesPanel';
-import { addManualAttendee, removeAttendee, markTicketUsed } from '@/app/actions/ticket';
+import { markTicketUsed, removeAttendee, addManualAttendee } from '@/app/actions/ticket';
 import { useToast } from './ToastProvider';
+import { SharpSpinner } from './Loaders';
 
 interface Attendee {
   id: string;
@@ -345,12 +346,12 @@ export default function OrganizerEventView({
             </div>
           </div>
 
-          <nav className="flex gap-0 mt-8 border-b-2 border-soft-slate -mb-px">
+          <nav className="flex gap-0 mt-8 border-b-2 border-soft-slate -mb-px overflow-x-auto scrollbar-hide">
             {TABS.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-1 mr-8 pb-3.5 text-xs font-bold tracking-widest uppercase border-b-2 transition-colors ${activeTab === tab ? 'border-signal-orange text-signal-orange' : 'border-transparent text-steel-gray hover:text-charcoal-blue'}`}
+                className={`px-1 mr-8 pb-3.5 text-xs font-bold tracking-widest uppercase border-b-2 transition-colors shrink-0 ${activeTab === tab ? 'border-signal-orange text-signal-orange' : 'border-transparent text-steel-gray hover:text-charcoal-blue'}`}
               >
                 {tab}
               </button>
@@ -524,7 +525,7 @@ export default function OrganizerEventView({
                     setSubmitMessage(null);
                     setShowAddModal(true);
                   }}
-                  className="px-4 py-2 border-2 border-charcoal-blue bg-charcoal-blue text-[12px] font-bold tracking-widest text-white hover:bg-white hover:text-charcoal-blue transition"
+                  className="px-4 py-2 border-2 border-charcoal-blue bg-charcoal-blue text-[12px] font-bold tracking-widest text-white hover:bg-white hover:text-charcoal-blue transition flex items-center justify-center gap-2"
                 >
                   + Add Attendee
                 </button>
@@ -755,22 +756,23 @@ export default function OrganizerEventView({
                       try {
                         const res = await fetch(`/api/events/${event.id}`, { method: 'DELETE' });
                         if (res.ok) {
+                          showToast("Event deleted successfully", "success");
                           window.location.href = "/organizer/dashboard";
                         } else {
                           setIsDeleting(false);
-                          alert("Failed to delete event");
+                          showToast("Failed to delete event", "error");
                         }
                       } catch (e) {
                         console.error(e);
                         setIsDeleting(false);
-                        alert("An error occurred");
+                        showToast("An error occurred", "error");
                       }
                     }
                   }}
                   disabled={isDeleting}
                   className="inline-flex items-center gap-2 border-2 border-red-500 bg-red-500 px-5 py-2.5 text-[12px] font-bold tracking-widest text-white hover:bg-white hover:text-red-500 transition disabled:opacity-50"
                 >
-                  {isDeleting ? "Deleted! Redirecting..." : "Delete Event"}
+                  {isDeleting ? <><SharpSpinner className="w-4 h-4 text-white" /> Deleting...</> : "Delete Event"}
                 </button>
               </div>
             </div>
@@ -833,9 +835,7 @@ export default function OrganizerEventView({
                 >
                   {isSubmitting ? (
                     <>
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray="30 60" />
-                      </svg>
+                      <SharpSpinner className="h-4 w-4" />
                       Adding...
                     </>
                   ) : (

@@ -4,13 +4,17 @@ import { getServerSession } from 'next-auth';
 import { getAuthOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(getAuthOptions());
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!stripe) {
+      return NextResponse.json({ error: 'Stripe is not configured' }, { status: 500 });
     }
 
     const { eventId } = await req.json();

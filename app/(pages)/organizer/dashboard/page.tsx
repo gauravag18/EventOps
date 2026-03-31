@@ -4,8 +4,11 @@ import { getServerSession } from "next-auth";
 import { getAuthOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import OrganizerFilterBar from "@/components/OrganizerFilterBar";
 
-export default async function OrganizerDashboard() {
+export default async function OrganizerDashboard({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+    const { status } = await searchParams;
+    const filter = status || "all";
     const session = await getServerSession(getAuthOptions());
 
     if (!session?.user?.id) {
@@ -46,10 +49,15 @@ export default async function OrganizerDashboard() {
         };
     });
 
-    // Stats calculation
+    // Stats calculation (always from ALL events)
     const totalEvents = organizedEvents.length;
     const totalRevenue = organizedEvents.reduce((acc, curr) => acc + curr.revenue, 0);
     const totalTicketsSold = organizedEvents.reduce((acc, curr) => acc + curr.sold, 0);
+
+    // Filtered list for display
+    const displayedEvents = filter === "all"
+        ? organizedEvents
+        : organizedEvents.filter(e => e.status === filter);
 
     // Format currency
     const formatCurrency = (amount: number) => {
@@ -62,7 +70,7 @@ export default async function OrganizerDashboard() {
 
     return (
         <div className="min-h-screen bg-[#FFF4E8] font-sans text-steel-gray pt-16">
-            <main className="mx-auto max-w-7xl px-6 py-14">
+            <main className="mx-auto max-w-7xl px-6 py-14 flex flex-col">
 
                 {/* HEADER */}
                 <div className="mb-16">
@@ -88,8 +96,8 @@ export default async function OrganizerDashboard() {
                     </div>
                 </div>
 
-                {/* STATS GRID */}
-                <section className="mb-20">
+                {/* STATS GRID - SECONDARY ON MOBILE */}
+                <section className="mb-20 order-2 lg:order-none">
                     <div className="grid gap-6 lg:grid-cols-3">
 
                         {/* TOTAL REVENUE - FEATURED */}
@@ -153,23 +161,34 @@ export default async function OrganizerDashboard() {
                     </div>
                 </section>
 
-                {/* EVENTS LIST */}
-                <section>
+                {/* EVENTS LIST - PRIMARY ON MOBILE */}
+                <section className="order-1 lg:order-none mb-16 lg:mb-0">
                     <div className="mb-5 flex items-center justify-between">
-                        <h2 className="text-2xl font-bold tracking-tight text-charcoal-blue">My Events</h2>
-                        <select className="border-b-2 border-gray-200 bg-transparent py-1 pl-3 pr-8 text-sm font-bold tracking-wide text-charcoal-blue focus:border-charcoal-blue focus:ring-0">
-                            <option>All Events</option>
-                            <option>Published</option>
-                            <option>Ended</option>
-                        </select>
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-2xl font-bold tracking-tight text-charcoal-blue">My Events</h2>
+                            {filter !== "all" && (
+                                <span className="text-[10px] font-bold px-2 py-1 bg-signal-orange/10 text-signal-orange border border-signal-orange/30 uppercase tracking-widest">
+                                    {filter}
+                                </span>
+                            )}
+                        </div>
+                        <OrganizerFilterBar current={filter} />
                     </div>
 
-                    {organizedEvents.length === 0 ? (
+                    {displayedEvents.length === 0 ? (
                         <div className="text-center py-20 border-2 border-dashed border-gray-300">
-                            <p className="text-lg text-steel-gray mb-4">You haven't created any events yet.</p>
-                            <Link href="/organizer/create-event" className="text-signal-orange font-bold hover:underline">
-                                Create your first event
-                            </Link>
+                            <p className="text-lg text-steel-gray mb-4">
+                                {filter === "all" ? "You haven't created any events yet." : `No ${filter.toLowerCase()} events found.`}
+                            </p>
+                            {filter === "all" ? (
+                                <Link href="/organizer/create-event" className="text-signal-orange font-bold hover:underline">
+                                    Create your first event
+                                </Link>
+                            ) : (
+                                <Link href="?status=all" className="text-steel-gray font-bold hover:underline">
+                                    View all events
+                                </Link>
+                            )}
                         </div>
                     ) : (
                         <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.07)]">
@@ -189,7 +208,7 @@ export default async function OrganizerDashboard() {
                             </div>
 
                             <div className="divide-y divide-gray-100">
-                                {organizedEvents.map((event) => {
+                                {displayedEvents.map((event) => {
                                     const isPublished = event.status === "PUBLISHED";
                                     const percentSold = event.capacity > 0 ? Math.round((event.sold / event.capacity) * 100) : 0;
                                     const eventDate = new Date(event.date);

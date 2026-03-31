@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { SharpSpinner } from './Loaders';
 
 interface InviteOrganizerPanelProps {
     eventId: string;
@@ -15,13 +16,11 @@ export default function InviteOrganizerPanel({ eventId }: InviteOrganizerPanelPr
 
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email.trim()) return;
+        if (!email.trim() || status === 'loading') return;
 
         const currentEmail = email.trim().toLowerCase();
-
-        // Optimistic UI update
-        setStatus('success');
-        setMessage(`Invitation sent to ${currentEmail}`);
+        
+        setStatus('loading');
         setEmail('');
 
         try {
@@ -34,6 +33,7 @@ export default function InviteOrganizerPanel({ eventId }: InviteOrganizerPanelPr
             const data = await res.json();
 
             if (res.ok) {
+                setStatus('success');
                 setMessage(data.message || `Invitation sent to ${currentEmail}`);
             } else {
                 setStatus('error');
@@ -125,14 +125,11 @@ export default function InviteOrganizerPanel({ eventId }: InviteOrganizerPanelPr
                     <button
                         type="submit"
                         disabled={status === 'loading' || !email.trim()}
-                        className="px-5 py-2.5 border-2 border-signal-orange bg-signal-orange text-[12px] font-bold tracking-widest text-white hover:bg-white hover:text-signal-orange transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
+                        className="px-5 py-2.5 border-2 border-signal-orange bg-signal-orange text-[12px] font-bold tracking-widest text-white hover:bg-white hover:text-signal-orange transition disabled:opacity-50 disabled:cursor-wait flex items-center justify-center gap-2 shrink-0 min-w-[120px]"
                     >
                         {status === 'loading' ? (
                             <>
-                                <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                </svg>
+                                <SharpSpinner className="w-3.5 h-3.5 text-white" />
                                 Sending…
                             </>
                         ) : (

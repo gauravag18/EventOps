@@ -11,28 +11,31 @@ export async function GET(
     const { eventId } = await context.params;
 
     try {
-        // Check Redis Cache
+        // Check Redis Cache First
         const cachedEvent = await getCachedEvent(eventId);
         if (cachedEvent) {
             return NextResponse.json(cachedEvent);
         }
 
-        const event = await prisma.event.findUnique({
-            where: { id: eventId },
-            include: {
-                organizers: true,
-                participants: true
-            }
-        });
+        const [event, soldCount] = await Promise.all([
+            prisma.event.findUnique({
+                where: { id: eventId },
+                include: {
+                    organizers: true,
+                    participants: true
+                }
+            }),
+            prisma.user.count({ where: { participatingEvents: { some: { id: eventId } } } })
+        ]);
 
         if (!event) {
             return NextResponse.json({ error: 'Event not found' }, { status: 404 });
         }
 
-        // Cache the result
-        await cacheEvent(eventId, event);
+        // Cache the result (including soldCount)
+        await cacheEvent(eventId, event, soldCount);
 
-        return NextResponse.json(event);
+        return NextResponse.json({ ...event, soldCount });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch event' }, { status: 500 });
     }

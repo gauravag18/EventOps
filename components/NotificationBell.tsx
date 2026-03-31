@@ -5,7 +5,8 @@ import Link from 'next/link';
 export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'attendee'|'organizer'>('attendee');
-    const [notifications, setNotifications] = useState({ attendee: [], organizer: [] });
+    const [notifications, setNotifications] = useState<{ attendee: any[], organizer: any[] }>({ attendee: [], organizer: [] });
+    const [isLoading, setIsLoading] = useState(true);
     const [hasUnread, setHasUnread] = useState(false);
     const [lastReadTime, setLastReadTime] = useState<number>(0);
     const ref = useRef<HTMLDivElement>(null);
@@ -17,7 +18,8 @@ export default function NotificationBell() {
         }
     }, []);
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = async (isFirst = false) => {
+        if (isFirst) setIsLoading(true);
         try {
             const res = await fetch('/api/notifications');
             if (res.ok) {
@@ -30,7 +32,6 @@ export default function NotificationBell() {
                 data.attendee = data.attendee.filter(filterNew);
                 data.organizer = data.organizer.filter(filterNew);
                 
-                // Set unread true if new notifications differ from currently viewed
                 const prevTotal = notifications.attendee.length + notifications.organizer.length;
                 const newTotal = data.attendee.length + data.organizer.length;
                 
@@ -42,14 +43,16 @@ export default function NotificationBell() {
 
                 setNotifications(data);
             }
-        } catch (error) {}
+        } catch (error) {} finally {
+            if (isFirst) setIsLoading(false);
+        }
     };
 
     useEffect(() => {
-        fetchNotifications();
-        const interval = setInterval(fetchNotifications, 10000);
+        fetchNotifications(true);
+        const interval = setInterval(() => fetchNotifications(false), 10000);
         return () => clearInterval(interval);
-    }, [notifications]);
+    }, []);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -99,18 +102,28 @@ export default function NotificationBell() {
                             onClick={() => setActiveTab('attendee')}
                             className={`flex-1 py-3 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === 'attendee' ? 'text-charcoal-blue bg-white border-b-2 border-b-muted-teal' : 'text-steel-gray hover:bg-white hover:text-charcoal-blue'}`}
                         >
-                            Attendee ({notifications.attendee.length})
+                            Attendee ({isLoading ? '...' : notifications.attendee.length})
                         </button>
                         <button 
                             onClick={() => setActiveTab('organizer')}
                             className={`flex-1 py-3 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === 'organizer' ? 'text-charcoal-blue bg-white border-b-2 border-b-signal-orange' : 'text-steel-gray hover:bg-white hover:text-charcoal-blue'}`}
                         >
-                            Organizer ({notifications.organizer.length})
+                            Organizer ({isLoading ? '...' : notifications.organizer.length})
                         </button>
                     </div>
 
                     <div className="max-h-80 overflow-y-auto">
-                        {activeTab === 'attendee' && (
+                        {isLoading ? (
+                            <div className="p-4 space-y-4">
+                                {[...Array(3)].map((_, i) => (
+                                    <div key={i} className="space-y-2">
+                                        <div className="h-3 w-20 bg-gray-100 animate-pulse" />
+                                        <div className="h-4 w-full bg-gray-100 animate-pulse" />
+                                        <div className="h-3 w-3/4 bg-gray-50 animate-pulse" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : activeTab === 'attendee' ? (
                             <div className="divide-y divide-gray-100">
                                 {notifications.attendee.length > 0 ? (
                                     notifications.attendee.map((n: any) => (
@@ -124,9 +137,7 @@ export default function NotificationBell() {
                                     <div className="p-6 text-center text-xs text-steel-gray">No new attendee notifications.</div>
                                 )}
                             </div>
-                        )}
-
-                        {activeTab === 'organizer' && (
+                        ) : (
                             <div className="divide-y divide-gray-100">
                                 {notifications.organizer.length > 0 ? (
                                     notifications.organizer.map((n: any) => (

@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useState, useOptimistic, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import { registerForEvent } from "@/app/actions/event";
+import { SharpSpinner } from "./Loaders";
+import { useToast } from "./ToastProvider";
 
 interface RegisterButtonProps {
     eventId: string;
@@ -14,6 +16,7 @@ interface RegisterButtonProps {
 export default function RegisterButton({ eventId, isFull, isRegistered }: RegisterButtonProps) {
     const { data: session } = useSession();
     const [loading, setLoading] = useState(false);
+    const { showToast } = useToast();
     const router = useRouter();
 
     const [optRegistered, addOptRegistered] = useOptimistic(
@@ -35,13 +38,14 @@ export default function RegisterButton({ eventId, isFull, isRegistered }: Regist
         try {
             const res = await registerForEvent(eventId);
             if (res.success) {
+                showToast("Registration successful!", "success");
                 router.refresh();
             } else {
-                alert(res.message);
+                showToast(res.message, "error");
                 // The optimistic state will reset when the component is re-rendered with new props
             }
         } catch (e) {
-            alert("An error occurred. Please try again.");
+            showToast("An error occurred. Please try again.", "error");
         } finally {
             setLoading(false);
             router.refresh();
@@ -68,9 +72,16 @@ export default function RegisterButton({ eventId, isFull, isRegistered }: Regist
         <button
             onClick={handleRegister}
             disabled={loading}
-            className="w-full border-2 border-muted-teal bg-muted-teal px-8 py-4 text-sm font-bold  tracking-widest text-white transition hover:bg-white hover:text-muted-teal disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full border-2 border-muted-teal bg-muted-teal px-8 py-4 text-sm font-bold  tracking-widest text-white transition hover:bg-white hover:text-muted-teal disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-            {loading ? 'Processing...' : 'Register Now'}
+            {loading ? (
+                <>
+                    <SharpSpinner className="w-4 h-4" />
+                    Processing...
+                </>
+            ) : (
+                'Register Now'
+            )}
         </button>
     );
 }

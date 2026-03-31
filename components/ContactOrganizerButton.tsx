@@ -3,6 +3,7 @@ import React, { useState, useOptimistic, startTransition } from 'react';
 import { sendMessageToOrganizer } from '@/app/actions/query';
 import { useRouter } from 'next/navigation';
 import { SharpSpinner } from './Loaders';
+import { useToast } from './ToastProvider';
 
 export default function ContactOrganizerButton({ eventId, query }: { eventId: string, query: any }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +11,7 @@ export default function ContactOrganizerButton({ eventId, query }: { eventId: st
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+    const { showToast } = useToast();
 
     const [optimisticMessages, addOptimisticMessage] = useOptimistic(
         query?.messages || [],
@@ -41,6 +43,7 @@ export default function ContactOrganizerButton({ eventId, query }: { eventId: st
         setIsSubmitting(true);
         const res = await sendMessageToOrganizer(eventId, messageContent);
         if (res.success) {
+            showToast("Message sent!", "success");
             router.refresh();
         } else {
             setError(res.message || 'Failed to send message');
@@ -88,7 +91,7 @@ export default function ContactOrganizerButton({ eventId, query }: { eventId: st
                                         <span className={`text-[10px] text-gray-400 mt-1 ${isUser ? 'pr-1' : 'pl-1'}`}>
                                             {msg.isOptimistic ? (
                                                 <span className="flex items-center justify-end gap-1 font-medium tracking-wider text-muted-teal">
-                                                    <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 
+                                                    <SharpSpinner className="h-3 w-3" /> 
                                                     Sending...
                                                 </span>
                                             ) : isUser ? (

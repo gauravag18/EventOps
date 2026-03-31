@@ -60,7 +60,7 @@ export default async function EventsListPage() {
 
             {/* Header */}
             <header className="bg-white/80 backdrop-blur-md border-b border-[#ccf0ea] shadow-sm">
-                <div className="mx-auto max-w-400 px-6 md:px-10 py-8 md:py-10">
+                <div className="mx-auto max-w-7xl px-6 md:px-10 py-8 md:py-10">
                     <div className="max-w-2xl">
                         <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-muted-teal mb-3">
                             Discover
@@ -76,7 +76,7 @@ export default async function EventsListPage() {
             </header>
 
             {/* Content */}
-            <main className="mx-auto max-w-400 px-6 md:px-10 py-8 md:py-10">
+            <main className="mx-auto max-w-7xl px-6 md:px-10 py-8 md:py-10 text-left">
                 <div className="bg-white/60 backdrop-blur-sm border border-[#d7f3ef] rounded-2xl p-4 md:p-6 shadow-[0_2px_16px_rgba(0,0,0,0.04)]">
                     <EventsBrowser
                         initialEvents={allEvents}

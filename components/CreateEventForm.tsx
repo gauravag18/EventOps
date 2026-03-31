@@ -14,6 +14,8 @@ const LocationPicker = dynamic(() => import('./LocationPicker'), {
 });
 
 import EventCard from './EventCard';
+import { SharpSpinner, SharpDots } from './Loaders';
+import { useToast } from './ToastProvider';
 import { packEventDescription, unpackEventDescription, AgendaItem, Speaker, FormatMeta } from '@/lib/event-details';
 
 // Which lineup sections each format should show by default
@@ -139,6 +141,7 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
     const router = useRouter();
+    const { showToast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [imageUploading, setImageUploading] = useState(false);
@@ -223,7 +226,7 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
         } catch (error) {
             setIsSuccess(false);
             console.error("Submission error:", error);
-            alert(error instanceof Error ? error.message : "Failed to create event");
+            showToast(error instanceof Error ? error.message : "Failed to create event", "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -511,16 +514,16 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
                                                                 const coords = `${data[0].lat},${data[0].lon}`;
                                                                 setFormData(prev => ({ ...prev, coordinates: coords }));
                                                             } else {
-                                                                alert('Location not found');
+                                                                showToast('Location not found', "info");
                                                             }
                                                         } catch (e) {
                                                             console.error(e);
-                                                            alert('Failed to fetch coordinates');
+                                                            showToast('Failed to fetch coordinates', "error");
                                                         }
                                                     }}
-                                                    className="px-6 py-3 bg-charcoal-blue text-white font-bold tracking-wider text-sm border-2 border-charcoal-blue hover:bg-white hover:text-charcoal-blue transition-colors"
+                                                    className="px-6 py-3 bg-charcoal-blue text-white font-bold tracking-wider text-sm border-2 border-charcoal-blue hover:bg-white hover:text-charcoal-blue transition-colors flex items-center gap-2"
                                                 >
-                                                    Find Coordinates on Map
+                                                    {imageUploading ? <SharpDots className="text-white" /> : 'Find Coordinates on Map'}
                                                 </button>
                                             </div>
                                         )}
@@ -601,10 +604,7 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
                                                     />
                                                     {imageUploading ? (
                                                         <>
-                                                            <svg className="animate-spin h-8 w-8 text-signal-orange mb-3" fill="none" viewBox="0 0 24 24">
-                                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                                            </svg>
+                                                            <SharpSpinner className="w-8 h-8 text-signal-orange mb-3" />
                                                             <p className="text-sm font-bold text-signal-orange tracking-wide">Uploading...</p>
                                                         </>
                                                     ) : (
@@ -1066,8 +1066,10 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
                                 <button
                                     type="button"
                                     onClick={handleSubmit}
-                                    className="bg-signal-orange hover:bg-signal-orange/90 text-white px-8 py-3 font-bold  tracking-wider transition-all border-2 border-signal-orange hover:shadow-[4px_4px_0px_0px_rgba(194,65,12,0.5)]"
+                                    disabled={isSubmitting || imageUploading}
+                                    className="bg-signal-orange hover:bg-signal-orange/90 text-white px-8 py-3 font-bold  tracking-wider transition-all border-2 border-signal-orange hover:shadow-[4px_4px_0px_0px_rgba(194,65,12,0.5)] flex items-center justify-center gap-2"
                                 >
+                                    {(isSubmitting || imageUploading) && <SharpSpinner className="w-4 h-4 text-white" />}
                                     {isSuccess ? (isEditMode ? 'Saved! Redirecting...' : 'Published! Redirecting...') : (isSubmitting ? 'Creating...' : (isEditMode ? 'Save Changes' : 'Publish Event'))}
                                 </button>
                             )}

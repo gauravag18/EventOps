@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import NotificationBell from './NotificationBell';
+import { LoadingLink } from './Loaders';
 
 export default function Navbar() {
     const { data: session } = useSession();
@@ -26,9 +27,9 @@ export default function Navbar() {
                         EventOps
                     </Link>
                     <div className="flex items-center gap-8">
-                        <Link href="/events" className="hidden md:block text-xs font-bold tracking-wider text-[#8896AD] transition hover:text-white hover:underline decoration-2 underline-offset-4">
+                        <LoadingLink href="/events" className="hidden md:block text-xs font-bold tracking-wider text-[#8896AD] transition hover:text-white hover:underline decoration-2 underline-offset-4 cursor-pointer">
                             Browse Events
-                        </Link>
+                        </LoadingLink>
                         {session && <NotificationBell />}
 
                         {/* Profile Trigger */}
@@ -58,7 +59,7 @@ export default function Navbar() {
 
             {/* Right Sidebar */}
             <div
-                className={`fixed top-0 right-0 h-full w-[24rem] bg-[#13151C] z-[70] shadow-2xl transform transition-transform duration-300 ease-out border-l border-white/[0.08] ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                className={`fixed top-0 right-0 h-full w-[24rem] max-w-[90vw] bg-[#13151C] z-[70] shadow-2xl transform transition-transform duration-300 ease-out border-l border-white/[0.08] ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
             >
                 <div className="flex flex-col h-full">
                     {/* Header */}
@@ -95,28 +96,28 @@ export default function Navbar() {
                                 <div className="space-y-6">
                                     {/* General Links */}
                                     <div className="space-y-1">
-                                        <Link href="/profile" onClick={() => setIsSidebarOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group">
+                                        <LoadingLink href="/profile" onClick={() => setIsSidebarOpen(false)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group cursor-pointer">
                                             <svg className="w-5 h-5 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
-                                            <span className="font-medium">Profile</span>
-                                        </Link>
-                                        <Link href="/messages" onClick={() => setIsSidebarOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group">
+                                            <span className="font-medium flex-1">Profile</span>
+                                        </LoadingLink>
+                                        <LoadingLink href="/messages" onClick={() => setIsSidebarOpen(false)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group cursor-pointer">
                                             <svg className="w-5 h-5 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                                             </svg>
-                                            <span className="font-medium">Messages</span>
-                                        </Link>
-                                        <Link href="/settings" onClick={() => setIsSidebarOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group">
+                                            <span className="font-medium flex-1">Messages</span>
+                                        </LoadingLink>
+                                        <LoadingLink href="/settings" onClick={() => setIsSidebarOpen(false)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group cursor-pointer">
                                             <svg className="w-5 h-5 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
-                                            <span className="font-medium">Settings</span>
-                                        </Link>
+                                            <span className="font-medium flex-1">Settings</span>
+                                        </LoadingLink>
                                     </div>
 
                                     {/* ATTENDEE SECTION */}
@@ -124,20 +125,20 @@ export default function Navbar() {
                                         <div className="px-3 pb-2">
                                             <h4 className="text-xs font-bold tracking-widest text-muted-teal">Attendee</h4>
                                         </div>
-                                        <Link href="/attendee/dashboard" onClick={() => setIsSidebarOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group">
+                                        <LoadingLink href="/attendee/dashboard" onClick={() => setIsSidebarOpen(false)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group cursor-pointer">
                                             <svg className="w-5 h-5 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                             </svg>
-                                            <span className="font-medium">My Tickets</span>
-                                        </Link>
-                                        <Link href="/favorites" onClick={() => setIsSidebarOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group">
+                                            <span className="font-medium flex-1">My Tickets</span>
+                                        </LoadingLink>
+                                        <LoadingLink href="/favorites" onClick={() => setIsSidebarOpen(false)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group cursor-pointer">
                                             <svg className="w-5 h-5 group-hover:text-muted-teal transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                             </svg>
-                                            <span className="font-medium">Favorites</span>
-                                        </Link>
+                                            <span className="font-medium flex-1">Favorites</span>
+                                        </LoadingLink>
                                     </div>
 
                                     {/* ORGANIZER SECTION */}
@@ -145,20 +146,20 @@ export default function Navbar() {
                                         <div className="px-3 pb-2">
                                             <h4 className="text-xs font-bold tracking-widest text-signal-orange">Organizer</h4>
                                         </div>
-                                        <Link href="/organizer/dashboard" onClick={() => setIsSidebarOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group">
+                                        <LoadingLink href="/organizer/dashboard" onClick={() => setIsSidebarOpen(false)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group cursor-pointer">
                                             <svg className="w-5 h-5 group-hover:text-signal-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                             </svg>
-                                            <span className="font-medium">Dashboard</span>
-                                        </Link>
-                                        <Link href="/organizer/create-event" onClick={() => setIsSidebarOpen(false)}
-                                            className="flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group">
+                                            <span className="font-medium flex-1">Dashboard</span>
+                                        </LoadingLink>
+                                        <LoadingLink href="/organizer/create-event" onClick={() => setIsSidebarOpen(false)}
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-[#8896AD] hover:text-white hover:bg-white/5 transition-all group cursor-pointer">
                                             <svg className="w-5 h-5 group-hover:text-signal-orange transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                             </svg>
-                                            <span className="font-medium">Create Event</span>
-                                        </Link>
+                                            <span className="font-medium flex-1">Create Event</span>
+                                        </LoadingLink>
                                     </div>
                                 </div>
                             </div>
@@ -169,14 +170,14 @@ export default function Navbar() {
                                     <p className="text-sm text-[#8896AD]">Sign in to manage your tickets and events.</p>
                                 </div>
                                 <div className="space-y-3">
-                                    <Link href="/login" onClick={() => setIsSidebarOpen(false)}
-                                        className="block w-full py-3 bg-muted-teal text-sm font-bold text-[#0D0F14] hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.15)] transition-all">
+                                    <LoadingLink href="/login" onClick={() => setIsSidebarOpen(false)}
+                                        className="w-full py-3 bg-muted-teal text-sm font-bold text-[#0D0F14] hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.15)] transition-all cursor-pointer">
                                         Log In
-                                    </Link>
-                                    <Link href="/signup" onClick={() => setIsSidebarOpen(false)}
-                                        className="block w-full py-3 border border-white/10 bg-transparent text-sm font-bold text-[#8896AD] hover:border-white/30 hover:text-white transition-all">
+                                    </LoadingLink>
+                                    <LoadingLink href="/signup" onClick={() => setIsSidebarOpen(false)}
+                                        className="w-full py-3 border border-white/10 bg-transparent text-sm font-bold text-[#8896AD] hover:border-white/30 hover:text-white transition-all cursor-pointer">
                                         Sign Up
-                                    </Link>
+                                    </LoadingLink>
                                 </div>
                             </div>
                         )}

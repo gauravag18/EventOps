@@ -6,6 +6,7 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
+import { SharpSpinner } from "@/components/Loaders";
 
 export default function StripePaymentStep({
   price,
@@ -93,9 +94,13 @@ export default function StripePaymentStep({
         <button
           onClick={handlePay}
           disabled={paying || !stripe}
-          className="flex-1 bg-muted-teal text-white py-3"
+          className="flex-1 bg-muted-teal text-white py-3 font-bold flex items-center justify-center gap-2"
         >
-          {paying ? 'Processing...' : `Pay $${price}`}
+          {paying ? (
+            <><SharpSpinner className="w-4 h-4" /> Processing...</>
+          ) : (
+            `Pay $${price}`
+          )}
         </button>
       </div>
     </div>

@@ -57,7 +57,7 @@ export default function ProfileClient({ user }: { user: UserData }) {
 
     return (
         <div className="min-h-screen bg-[#FFF4E8] font-sans text-steel-gray pt-16">
-            <main className="mx-auto max-w-5xl px-6 py-14">
+            <main className="mx-auto max-w-[1880px] px-6 md:px-10 py-14">
 
                 {/* HEADER */}
                 <div className="mb-12">

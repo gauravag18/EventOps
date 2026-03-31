@@ -36,9 +36,9 @@ export default function OrganizerQueriesPanel({ queries }: { queries: any[] }) {
     }
 
     return (
-        <div className="flex bg-white border-2 border-soft-slate h-[600px] overflow-hidden">
+        <div className="flex flex-col lg:flex-row bg-white border-2 border-soft-slate min-h-[650px] lg:h-[650px] overflow-hidden">
             {/* Sidebar List */}
-            <div className="w-1/3 border-r-2 border-soft-slate overflow-y-auto bg-gray-50 flex flex-col">
+            <div className="w-full lg:w-1/3 border-b-2 lg:border-b-0 lg:border-r-2 border-soft-slate overflow-y-auto bg-gray-50 flex flex-col h-[280px] lg:h-auto">
                 <div className="p-4 border-b-2 border-soft-slate bg-off-white font-bold text-[11px] tracking-widest uppercase text-charcoal-blue">
                     Inbox ({queries.filter(q => q.status === 'OPEN').length} pending)
                 </div>
@@ -64,7 +64,7 @@ export default function OrganizerQueriesPanel({ queries }: { queries: any[] }) {
 
             {/* Chat Area */}
             {activeQuery ? (
-                <div className="w-2/3 flex flex-col bg-white">
+                <div className="w-full lg:w-2/3 flex flex-col bg-white h-[450px] lg:h-auto">
                     <div className="p-5 border-b-2 border-soft-slate bg-off-white shrink-0 flex items-center justify-between">
                         <div>
                             <h3 className="font-bold text-charcoal-blue">{activeQuery.user.name || 'Attendee'}</h3>
@@ -109,7 +109,7 @@ export default function OrganizerQueriesPanel({ queries }: { queries: any[] }) {
                     </div>
                 </div>
             ) : (
-                <div className="w-2/3 flex items-center justify-center bg-gray-50 text-steel-gray text-sm">
+                <div className="w-full lg:w-2/3 flex items-center justify-center bg-gray-50 text-steel-gray text-sm py-16">
                     Select a conversation to reply
                 </div>
             )}
