@@ -1,4 +1,4 @@
-# EventOps (Command Center)
+# EventOps (Command Center) 🏗️
 
 **The high-performance event orchestration platform built for the modern editorial web.**
 
@@ -6,44 +6,71 @@ EventOps is an end-to-end ticketing and event management ecosystem designed with
 
 ---
 
-## Performance Architecture (Zero-Latency Shell)
+## ⚡ Performance Architecture (Zero-Latency Shell)
 
 Unlike traditional event platforms that suffer from database-induced latency, EventOps utilizes a **Parallel SSR/CSR Decoupling** strategy to achieve sub-second page loads:
 
-- **Redis-Backed SSR Shell:** Event metadata, capacity stats, and structural layouts are served instantly from an O(1) Redis cache.
-- **Asynchronous Hydration:** Personalized user state (registration status, team membership, messaging) is fetched in parallel after the initial shell render, ensuring the UI is never blocked by authentication or slow database queries.
-- **Notification Shielding:** Critical high-frequency endpoints (like notification polling) are protected by a 30-second Redis grace-cache to prevent database connection exhaustion.
+| Feature | Strategy | Benefit |
+| :--- | :--- | :--- |
+| **Initial Load** | Redis-Backed SSR Shell | O(1) retrieval for metadata and capacity stats |
+| **User State** | Asynchronous Hydration | Parallel fetching for registration and team status |
+| **Connectivity** | Notification Shielding | 30s grace-cache to prevent DB connection exhaustion |
+| **Discovery** | Multi-Tag Filtering | Optimized client-side filtering with server-side caching |
 
-## Core Pillars
+### 🛠️ System Flow
+```mermaid
+graph TD
+    A[Client Browser] --> B[Next.js App Router]
+    B --> C{Hydration Strategy}
+    C -->|SSR Shell| D[Upstash Redis Cache]
+    C -->|Dynamic Data| E[Prisma ORM]
+    E --> F[Neon PostgreSQL]
+    B --> G[NextAuth.js]
+    G --> H[Session Management]
+    D --> I[Instant UI Response]
+    E --> J[Persistent Storage]
+```
+
+---
+
+## 🎨 Core Pillars
 
 ### Editorial Manga Aesthetic
 A distinctive design language featuring high-contrast monochrome accents, conic wisp gradients, and "Action Line" hero sections. The UI feels alive, responsive, and premium.
 
-### Organizer Command Center
-- **Dynamic Event Creation:** Multi-step forms with integrated location pinning.
-- **Team Management:** Invite collaborators and manage permissions with real-time sync.
-- **Unified Messaging:** A centralized hub for organizer-to-attendee communication with instant status updates.
+### 🛡️ Organizer Command Center
+*   **Dynamic Event Creation:** Multi-step forms with integrated location pinning.
+*   **Team Management:** Invite collaborators and manage permissions with real-time sync.
+*   **Unified Messaging:** A centralized hub for organizer-to-attendee communication with instant status updates.
+*   **Mobile Dashboard:** Optimized management view with "Events-First" priority and real-time stats.
 
-### Attendee Experience
-- **Fluid Event Discovery:** Advanced filtering by category, date, and venue type.
-- **Instant Registration:** QR-coded digital wallet with seamless checkout flows.
-- **Team Dashboards:** Built-in support for Hackathons and Competitions with collaborative team management features.
+### 📦 Attendee Experience
+*   **Fluid Event Discovery:** Advanced filtering with mobile-responsive dropdowns.
+*   **Instant Registration:** QR-coded digital tickets with seamless checkout flows.
+*   **Favorites System:** Localized persistence for quick access to upcoming vibes.
+*   **Team Dashboards:** Built-in support for Hackathons/Competitions with collaborative team management.
 
-## The Stack
+---
 
-- **Framework:** Next.js (App Router) + TypeScript
-- **Styling:** Vanilla CSS + Tailwind (Sharp-Editorial Theme)
-- **Database:** Prisma ORM + Neon (PostgreSQL)
-- **Caching:** Upstash Redis (Global Event & User State)
-- **Auth:** NextAuth.js (Session-based security)
-- **Messaging:** Integrated Internal Query System
+## 🚦 The Tech Stack
 
-## Local Development
+| Layer | Technology | Primary Role |
+| :--- | :--- | :--- |
+| **Framework** | Next.js 15+ (App Router) | Full-stack orchestration & SEO |
+| **Language** | TypeScript | Type-safe development |
+| **Styling** | Tailwind CSS 4.0 | Sharp-Editorial theme & responsiveness |
+| **Database** | Prisma + Neon (PostgreSQL) | Reliable relational persistent storage |
+| **Caching** | Upstash Redis | Low-latency state & list caching |
+| **Auth** | NextAuth.js | Secure session-based authentication |
+
+---
+
+## 🏗️ Local Development
 
 ### 1. Requirements
-- Node.js (Latest LTS)
-- A PostgreSQL instance (Neon recommended)
-- A Redis instance (Upstash recommended)
+*   Node.js (Latest LTS)
+*   A PostgreSQL instance (Neon recommended)
+*   A Redis instance (Upstash recommended)
 
 ### 2. Setup
 ```bash
@@ -57,23 +84,18 @@ npx prisma generate
 npx prisma db push
 ```
 
-### 3. Environment Variables
-Create a `.env` in the root directory:
-```env
-# Database & Redis
-DATABASE_URL="your-postgresql-url"
-REDIS_URL="your-redis-url"
+### 3. Environment Configuration 🔑
+Create a `.env` in the root directory with the following keys:
 
-# Authentication
-NEXTAUTH_SECRET="your-secret"
-NEXTAUTH_URL="http://localhost:3000"
-
-# Media & Email
-CLOUDINARY_URL="your-cloudinary-url"
-SMTP_HOST="your-smtp"
-SMTP_USER="your-email"
-SMTP_PASS="your-password"
-```
+| Key | Description | Required |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | Connection string for Neon/PostgreSQL | Yes |
+| `REDIS_URL` | Upstash Redis connection URL | Yes |
+| `NEXTAUTH_SECRET` | Secret key for session encryption | Yes |
+| `STRIPE_SECRET_KEY` | Secret key for payment processing | Yes |
+| `SMTP_HOST` | Host for outgoing notification emails | Yes |
+| `SMTP_USER` | Email user for SMTP | Yes |
+| `SMTP_PASS` | Email password for SMTP | Yes |
 
 ### 4. Run
 ```bash
@@ -82,5 +104,33 @@ npm run dev
 
 ---
 
+## 🛤️ Application Workflow
+
+### Event Discovery & Registration
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant API
+    participant Cache
+    participant DB
+
+    User->>Browser: Opens /events
+    Browser->>Cache: Request list:all
+    Cache-->>Browser: Return Cached Events (Instant)
+    User->>Browser: Selects Event
+    Browser->>API: Fetch event:detail + user:state
+    API->>DB: Pull updated registration count
+    DB-->>API: Registration Count
+    API-->>Browser: Render Event View
+    User->>Browser: Clicks "Register"
+    Browser->>API: POST /api/register
+    API->>DB: Create Ticket Record
+    DB-->>API: Success
+    API-->>Browser: Trigger Toast & Redirect
+```
+
+---
+
 ## 📝 License
-Licensed under the Apache License 2.0. Built with precision by the EventOps Team.
+Licensed under the Apache License 2.0. Built with precision by the EventOps Team. 🏁
