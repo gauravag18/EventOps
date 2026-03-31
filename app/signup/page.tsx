@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SharpSpinner } from "@/components/Loaders";
 import { signIn } from "next-auth/react";
+import { useToast } from "@/components/ToastProvider";
 
 export default function SignupPage() {
+    const { showToast } = useToast();
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
@@ -49,7 +51,8 @@ export default function SignupPage() {
                 throw new Error(data.message || "Something went wrong");
             }
 
-            setSuccess("Account created! Please check your email to verify.");
+            showToast("Account created successfully!", "success");
+            setSuccess("Account created! Please scroll down to sign in.");
             setFormData({ name: "", email: "", password: "", confirmPassword: "" });
 
         } catch (err) {

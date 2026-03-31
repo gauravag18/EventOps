@@ -253,6 +253,7 @@ export default function RegistrationModal({
                 startTransition(() => addOptHasTeam(true));
             }
 
+            showToast("Registration confirmed!", "success");
             setStep('done');
             router.refresh();
         } catch {
@@ -273,6 +274,7 @@ export default function RegistrationModal({
             try {
                 const res = await registerForEvent(eventId, meta);
                 if (res.success) {
+                    showToast("Registration confirmed!", "success");
                     setStep('done');
                     router.refresh();
                 } else {
@@ -304,6 +306,7 @@ export default function RegistrationModal({
         try {
             const res = await registerForEvent(eventId, meta);
             if (res.success) {
+                showToast("Registration confirmed!", "success");
                 setStep('done');
                 router.refresh();
             } else {

@@ -5,16 +5,19 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import NotificationBell from './NotificationBell';
 import { LoadingLink } from './Loaders';
+import { useToast } from './ToastProvider';
 
 export default function Navbar() {
     const { data: session } = useSession();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { showToast } = useToast();
     const router = useRouter();
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     const handleSignOut = async () => {
         await signOut({ redirect: false });
+        showToast("Signed out successfully", "success");
         router.push('/');
         setIsSidebarOpen(false);
     };
@@ -170,12 +173,12 @@ export default function Navbar() {
                                     <p className="text-sm text-[#8896AD]">Sign in to manage your tickets and events.</p>
                                 </div>
                                 <div className="space-y-3">
-                                    <LoadingLink href="/login" onClick={() => setIsSidebarOpen(false)}
-                                        className="w-full py-3 bg-muted-teal text-sm font-bold text-[#0D0F14] hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.15)] transition-all cursor-pointer">
+                                    <LoadingLink href="/login" onClick={() => setIsSidebarOpen(false)} center={true}
+                                        className="w-full py-3 bg-muted-teal text-sm font-bold text-[#0D0F14] justify-center hover:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.15)] transition-all cursor-pointer">
                                         Log In
                                     </LoadingLink>
-                                    <LoadingLink href="/signup" onClick={() => setIsSidebarOpen(false)}
-                                        className="w-full py-3 border border-white/10 bg-transparent text-sm font-bold text-[#8896AD] hover:border-white/30 hover:text-white transition-all cursor-pointer">
+                                    <LoadingLink href="/signup" onClick={() => setIsSidebarOpen(false)} center={true}
+                                        className="w-full py-3 border border-white/10 bg-transparent text-sm font-bold text-[#8896AD] justify-center hover:border-white/30 hover:text-white transition-all cursor-pointer">
                                         Sign Up
                                     </LoadingLink>
                                 </div>

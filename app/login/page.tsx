@@ -5,9 +5,11 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SharpSpinner } from "@/components/Loaders";
+import { useToast } from "@/components/ToastProvider";
 
 export default function LoginPage() {
     const router = useRouter();
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +28,7 @@ export default function LoginPage() {
                 setError(result.error);
                 setIsLoading(false);
             } else {
+                showToast("Welcome back!", "success");
                 router.push("/");
                 router.refresh();
             }

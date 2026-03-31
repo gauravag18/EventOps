@@ -220,6 +220,7 @@ export default function CreateEventForm({ initialData, isEditMode = false, event
             }
 
             // Redirect to the new event page or dashboard
+            showToast(isEditMode ? "Event updated successfully!" : "Event created successfully!", "success");
             router.push(`/organizer/dashboard`); // Or `/events/${data.eventId}`
             router.refresh();
 
