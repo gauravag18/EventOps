@@ -74,7 +74,7 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
     return (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-5 items-start">
             <div className="lg:col-span-1">
-                <div className="sticky top-24 border-2 border-gray-200 bg-white relative overflow-y-auto max-h-[calc(100vh-8rem)] custom-scrollbar transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
+                <div className="sticky top-24 border-2 border-gray-200 bg-white relative overflow-y-auto  transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
                     <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
                     <div className="px-5 py-3.5 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
                         <p className="text-[11px] font-bold tracking-widest uppercase text-charcoal-blue">Filters</p>
@@ -271,7 +271,7 @@ export default function EventsBrowser({ initialEvents, trendingEvents }: EventsB
             </div>
 
             <div className="lg:col-span-1">
-                <div className="sticky top-24 space-y-6 max-h-[calc(100vh-8rem)] overflow-y-auto pb-8 pr-2 custom-scrollbar">
+                <div className="sticky top-24 space-y-6 pb-8 pr-2 ">
                     <div className="bg-white border-2 border-gray-200 relative overflow-hidden transition hover:border-charcoal-blue hover:shadow-[4px_4px_0px_0px_rgba(31,42,55,1)]">
                         <div className="absolute top-0 left-0 right-0 h-[3px] bg-muted-teal" />
                         <div className="px-5 py-4 border-b-2 border-gray-100 bg-gray-50 mt-[3px]">
