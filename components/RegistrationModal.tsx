@@ -372,7 +372,7 @@ export default function RegistrationModal({
 
             {/* Modal Overlay */}
             {open && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+                <div className="fixed inset-0 z-50 mt-10 flex items-end sm:items-center justify-center">
                     {/* Backdrop */}
                     <div
                         className="absolute inset-0 bg-charcoal-blue/60 backdrop-blur-sm"
